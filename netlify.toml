@@ -1,0 +1,4 @@
+# Serve only the built site; scripts, models and state stay out of the published output.
+[build]
+  publish = "docs"
+  command = ""
