@@ -1,0 +1,141 @@
+{
+  "selected": {
+    "name": "football_adjusted_no_margin_10",
+    "fields": [
+      "diff_ppa",
+      "diff_successRate",
+      "diff_explosiveness",
+      "diff_pointsPerOpportunity",
+      "diff_havoc_total",
+      "diff_turnover_margin",
+      "neutral_site",
+      "rest_difference",
+      "oa_offense_difference",
+      "oa_defense_difference"
+    ],
+    "alpha": 10
+  },
+  "test_2025": [
+    {
+      "model": "football_adjusted_no_margin_10",
+      "selected": true,
+      "season": 2025,
+      "games": 752,
+      "mae": 12.967006324212527,
+      "bets": 752,
+      "wins": 364,
+      "losses": 370,
+      "pushes": 18,
+      "win_rate": 0.49591280653950953,
+      "profit_units": -39.090909090909086,
+      "roi": -0.05198259187620889
+    }
+  ],
+  "market_mae_2025": 11.894281914893616,
+  "buckets": [
+    {
+      "sample": "validation",
+      "difference_bucket": "0\u20132",
+      "games": 510,
+      "mae": 12.092496977989978,
+      "bets": 510,
+      "wins": 245,
+      "losses": 257,
+      "pushes": 8,
+      "win_rate": 0.48804780876494025,
+      "profit_units": -34.27272727272725,
+      "roi": -0.0672014260249554
+    },
+    {
+      "sample": "validation",
+      "difference_bucket": "2\u20134",
+      "games": 349,
+      "mae": 12.649350888737388,
+      "bets": 349,
+      "wins": 174,
+      "losses": 163,
+      "pushes": 12,
+      "win_rate": 0.516320474777448,
+      "profit_units": -4.818181818181804,
+      "roi": -0.013805678562125513
+    },
+    {
+      "sample": "validation",
+      "difference_bucket": "4\u20136",
+      "games": 272,
+      "mae": 11.658556890611804,
+      "bets": 272,
+      "wins": 139,
+      "losses": 128,
+      "pushes": 5,
+      "win_rate": 0.5205992509363296,
+      "profit_units": -1.6363636363636243,
+      "roi": -0.006016042780748619
+    },
+    {
+      "sample": "validation",
+      "difference_bucket": "6\u2013plus",
+      "games": 360,
+      "mae": 15.76214682291408,
+      "bets": 360,
+      "wins": 168,
+      "losses": 184,
+      "pushes": 8,
+      "win_rate": 0.4772727272727273,
+      "profit_units": -31.272727272727256,
+      "roi": -0.08686868686868682
+    },
+    {
+      "sample": "2025",
+      "difference_bucket": "0\u20132",
+      "games": 237,
+      "mae": 12.49802207366263,
+      "bets": 237,
+      "wins": 103,
+      "losses": 130,
+      "pushes": 4,
+      "win_rate": 0.44206008583690987,
+      "profit_units": -36.36363636363636,
+      "roi": -0.15343306482546987
+    },
+    {
+      "sample": "2025",
+      "difference_bucket": "2\u20134",
+      "games": 191,
+      "mae": 11.761071097536668,
+      "bets": 191,
+      "wins": 97,
+      "losses": 90,
+      "pushes": 4,
+      "win_rate": 0.5187165775401069,
+      "profit_units": -1.8181818181818121,
+      "roi": -0.00951927653498331
+    },
+    {
+      "sample": "2025",
+      "difference_bucket": "4\u20136",
+      "games": 125,
+      "mae": 11.505559696025122,
+      "bets": 125,
+      "wins": 61,
+      "losses": 60,
+      "pushes": 4,
+      "win_rate": 0.5041322314049587,
+      "profit_units": -4.5454545454545405,
+      "roi": -0.03636363636363633
+    },
+    {
+      "sample": "2025",
+      "difference_bucket": "6\u2013plus",
+      "games": 199,
+      "mae": 15.600994888025797,
+      "bets": 199,
+      "wins": 103,
+      "losses": 90,
+      "pushes": 6,
+      "win_rate": 0.533678756476684,
+      "profit_units": 3.6363636363636456,
+      "roi": 0.01827318410232988
+    }
+  ]
+}

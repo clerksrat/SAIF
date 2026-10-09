@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+cfb_fullseason_data_*/
+cfb_fullseason_data_*_results.zip
+cfb_expanded_data/
+*.tmp
