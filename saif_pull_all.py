@@ -9,7 +9,7 @@ Put this file in the same folder as cfb_collect_fullseason.py. Standard
 library only (same as the collector), so it also runs on a bare GitHub
 Actions runner.
 
-Keys (environment variables, never saved):
+Keys: put them in a .env file beside this script (see .env.example) or export them.\n  Never saved by this script; .env is gitignored.
   CFBD_API_KEY            required
   SPORTSDATAIO_API_KEY    optional -- injuries step is skipped with a warning if absent
   ODDS_API_KEY            optional -- odds step is skipped with a warning if absent
@@ -39,6 +39,23 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 HERE = Path(__file__).resolve().parent
+
+
+def load_env_file(path=HERE / '.env'):
+    """Read KEY=value lines from .env beside this script (real environment variables win)."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        value = value.strip().strip('"').strip("'")
+        if value:
+            os.environ.setdefault(key.strip(), value)
+
+
+load_env_file()
 sys.path.insert(0, str(HERE))
 import cfb_collect_fullseason as collector  # noqa: E402
 
