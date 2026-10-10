@@ -163,7 +163,7 @@ def load_injuries(data_dir, team_names):
     if unmatched:
         print('Injury crosswalk unmatched (add to ALIASES):', unmatched)
     stamp = datetime.fromisoformat(wrapper['retrieved_at_utc'].replace('Z', '+00:00')).astimezone(ZoneInfo('America/New_York'))
-    return {'players': wrapper['data'], 'cross': cross, 'label': stamp.strftime('%b %d, %Y · %-I:%M %p ET')}
+    return {'players': wrapper['data'], 'cross': cross, 'label': stamp.strftime('%b %d, %Y · ') + str(int(stamp.strftime('%I'))) + stamp.strftime(':%M %p ET')}
 
 
 def injury_block(inj, team):
@@ -254,8 +254,8 @@ def build_page(wk, week, season, inj):
     buckets = ('<table><thead><tr><th>Sample</th><th>Difference &middot; pts</th><th>W&ndash;L&ndash;P</th>'
                '<th>ATS &middot; excludes pushes (Alpha)</th></tr></thead><tbody>' + rows_html + '</tbody></table>')
     et = wk.kickoff_utc.dt.tz_convert('America/New_York')
-    span = f"{et.min().strftime('%B %-d')}&ndash;{et.max().strftime('%-d')}, {season}" if et.min().month == et.max().month \
-        else f"{et.min().strftime('%B %-d')} &ndash; {et.max().strftime('%B %-d')}, {season}"
+    span = f"{et.min().strftime('%B')} {et.min().day}&ndash;{et.max().day}, {season}" if et.min().month == et.max().month \
+        else f"{et.min().strftime('%B')} {et.min().day} &ndash; {et.max().strftime('%B')} {et.max().day}, {season}"
     n_tier = int((wk.tier_gap != 0).sum())
     if inj:
         inj_note = (f'<p class="note"><b>Availability snapshot: {inj["label"]}.</b> Open "Injuries &amp; availability" on each game for player reports. '
