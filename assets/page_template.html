@@ -1,113 +1,170 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAIF · Independent football projections</title><style>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#12241C"><title>SAIF · Week {{WEEK}} board</title><style>
 :root {
   --paper: #12241C; --paper-raised: #1A2E24; --ink: #F7F3E7; --ink-soft: #CBD6CD; --ink-faint: #8FA095;
   --rule: #2C3F35; --rule-strong: #435A4E; --accent: #D4B45C; --accent-soft: #2A2413;
   --win: #6FBF7B; --loss: #E07A70; --away: #6FA0C9; --away-soft: #152430;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:1400px;margin:auto;padding:30px}
-h1{font-family:'Fraunces',serif;font-weight:600;font-size:32px;margin:10px 0;letter-spacing:-0.01em}
-p{line-height:1.6}
-.eyebrow{letter-spacing:2px;font-size:12px;font-weight:700;color:var(--accent)}
-.intro{max-width:1000px;color:var(--ink-soft)}
-.notice{background:var(--accent-soft);padding:16px 20px;border-radius:10px;border-left:4px solid var(--accent);color:var(--ink-soft)}
-.notice b{color:var(--ink)}
-.caution{background:#2E1A18;padding:16px 20px;border-radius:10px;border-left:4px solid var(--loss);margin-top:12px;color:var(--ink-soft)}
-.filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;background:var(--paper-raised);padding:20px;border-radius:12px;margin:20px 0;border:1px solid var(--rule)}
-label{display:block;font-size:12px;color:var(--ink-faint);margin-bottom:6px}
-input,select,button{font:14px 'IBM Plex Sans',sans-serif;padding:12px;border:1px solid var(--rule-strong);border-radius:6px;width:100%;background:var(--paper);color:var(--ink)}
-button{background:var(--accent);color:#14261D;cursor:pointer;font-weight:600;border-color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.game{background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:22px}
-.meta{font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:8px}
-.meta span{background:var(--accent-soft);color:var(--accent);border-radius:12px;padding:3px 8px;white-space:nowrap}
-h2{font-family:'Fraunces',serif;font-size:22px;margin:14px 0 4px;color:var(--ink)}
-h2 small{font-size:13px;font-weight:400;color:var(--ink-faint)}
-.reference{font-size:12px;color:var(--ink-faint);margin-top:4px}
-.tiertag{background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:1px 6px;font-weight:600}
-.modelrow{display:grid;grid-template-columns:1fr 1fr;margin:20px 0;border-bottom:1px solid var(--rule);padding-bottom:16px;gap:16px}
-.modelcol label{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-faint)}
-.pickline{display:flex;align-items:baseline;gap:8px;margin-top:4px}
-.pickteam{font-size:14px;color:var(--ink-soft);font-weight:600}
-.modelcol strong{font-size:34px;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;color:var(--ink);line-height:1}
-.lean-sm{font-size:12px;color:var(--ink-soft);display:inline-block;margin-top:4px}
-.edge-strong{color:var(--accent);font-weight:700}
-.edge-mid{color:var(--ink-soft)}
-.edge-weak{color:var(--ink-faint)}
-.result{font-size:13px;color:var(--ink-faint)}
-details{margin-top:16px}
-summary{cursor:pointer;font-size:13px;font-weight:650;color:var(--accent)}
-details p{font-size:13px;color:var(--ink-soft)}
-.contrib-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:14px 0 6px;font-weight:650}
-.contrib-row{display:grid;grid-template-columns:130px 1fr 110px;align-items:center;gap:10px;margin:6px 0}
-.contrib-label{font-size:12px;color:var(--ink-soft)}
-.contrib-track{position:relative;height:10px;background:var(--rule);border-radius:4px;overflow:hidden}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+main{max-width:1200px;margin:auto;padding:28px 28px calc(28px + env(safe-area-inset-bottom))}
+p{line-height:1.55}
+a{color:var(--accent)}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;gap:16px}
+.top img{width:64px;height:64px;flex:none}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 4px}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;line-height:1.1;margin:0;letter-spacing:-0.01em}
+.sub{font-size:14px;color:var(--ink-soft);margin:4px 0 0}
+.sub a{font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent)}
+.warn{margin:18px 0 0;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
+.warn b{color:var(--ink)}
+
+/* ---------- about (collapsed notes) ---------- */
+details{margin-top:14px}
+summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--accent);padding:4px 0}
+.about{background:var(--paper-raised);border:1px solid var(--rule);border-radius:10px;padding:10px 14px}
+.about p{font-size:13px;color:var(--ink-soft)}
+.about b{color:var(--ink)}
+.about table{border-collapse:collapse;width:100%;margin-top:6px}
+.about td,.about th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--rule)}
+.about th{color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.about td{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink)}
+.tablewrap{overflow-x:auto}
+
+/* ---------- legend + filters ---------- */
+.legend{font-size:12.5px;color:var(--ink-faint);line-height:1.5;margin:18px 0 10px}
+.legend b{color:var(--ink-soft)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;background:var(--paper-raised);padding:14px;border-radius:12px;border:1px solid var(--rule)}
+label{display:block;font-size:11.5px;color:var(--ink-faint);margin-bottom:5px}
+input,select,button{font:16px 'IBM Plex Sans',sans-serif;padding:10px 11px;border:1px solid var(--rule-strong);border-radius:8px;width:100%;background:var(--paper);color:var(--ink);min-height:44px}
+button{background:transparent;color:var(--ink-soft);cursor:pointer;font-weight:600;font-size:14px}
+#count{font-weight:600;color:var(--ink);font-size:13.5px;margin:14px 0 10px}
+#empty{background:var(--paper-raised);padding:24px;border-radius:10px}
+
+/* ---------- cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.game{background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:16px 18px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:12px;color:var(--ink-faint)}
+.finaltag{background:var(--rule);color:var(--ink);border-radius:6px;padding:2px 7px;font-weight:600}
+.tiertag{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 7px;font-weight:600}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px;line-height:1.2;margin:8px 0 6px;color:var(--ink)}
+h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;color:var(--ink-faint)}
+.line{font-size:14px;color:var(--ink-soft);margin:0}
+.line .lbl{color:var(--ink-faint);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.line b{color:var(--ink);font-weight:600;white-space:nowrap}
+.movetag{color:var(--ink-faint);font-size:12.5px;white-space:nowrap}
+.models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.mtile{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;min-width:0}
+.mlabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:6px}
+.pick{display:inline-block;font-weight:700;font-size:15.5px;line-height:1.3;padding:5px 9px;border-radius:7px}
+.pick.edge-strong{background:var(--accent);color:#14261D}
+.pick.edge-mid{border:1.5px solid var(--accent);color:var(--accent)}
+.noplay{display:inline-block;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--rule-strong);border-radius:7px;padding:6px 9px}
+.msub{font-size:12px;color:var(--ink-faint);margin-top:7px;line-height:1.45}
+.msub b{color:var(--ink-soft);font-weight:500;white-space:nowrap}
+.nw{white-space:nowrap}
+.msub .edge{display:inline}
+.game details{margin-top:12px;border-top:1px solid var(--rule);padding-top:8px}
+.game details p{font-size:13px;color:var(--ink-soft)}
+.contrib-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:12px 0 4px;font-weight:600}
+.contrib-row{display:grid;grid-template-columns:130px 1fr 120px;align-items:center;gap:4px 10px;margin:7px 0}
+.contrib-label{font-size:12.5px;color:var(--ink-soft)}
+.contrib-track{position:relative;height:8px;background:var(--rule);border-radius:4px;overflow:hidden}
 .contrib-mid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--rule-strong)}
 .contrib-fill{position:absolute;top:0;bottom:0;border-radius:3px}
 .contrib-fill.home{background:var(--accent)}
 .contrib-fill.away{background:var(--away)}
-.contrib-val{font-size:12px;font-family:'IBM Plex Mono',monospace;white-space:nowrap}
+.contrib-val{font-size:12px;font-family:'IBM Plex Mono',monospace;white-space:nowrap;text-align:right}
 .contrib-val.home{color:var(--accent)}
 .contrib-val.away{color:var(--away)}
-.contrib-note{font-size:11px;color:var(--ink-faint);margin-top:10px}
-#count{font-weight:650;color:var(--ink)}
-#empty{background:var(--paper-raised);padding:30px;border-radius:10px}
-table{border-collapse:collapse;width:100%;max-width:950px}
-td,th{text-align:left;padding:10px;border-bottom:1px solid var(--rule)}
-th{color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.03em}
-td{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink)}
-.note{font-size:13px;color:var(--ink-faint)}
-.note b{color:var(--ink-soft)}
-[hidden]{display:none!important}
-.topbar{display:flex;align-items:center;gap:16px;margin-bottom:6px}
-.topbar img{width:56px;height:56px}
-.topbar .kicker{font-size:13px;color:var(--ink-faint);margin:0 0 4px}
-.navlink{color:var(--accent);font-weight:500;text-decoration:none;border-bottom:1px solid var(--accent)}
-@media(max-width:850px){main{padding:16px}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}h1{font-size:26px}.contrib-row{grid-template-columns:100px 1fr 90px}}
-@media(max-width:360px){.filters{grid-template-columns:1fr}.game{padding:14px}}
-.injuries{border-top:1px solid var(--rule);padding-top:14px;margin-top:16px}
-.injury-team h3{font-size:14px;margin:18px 0 8px;color:var(--ink);font-family:'Fraunces',serif}
-.injury-player{padding:10px 0;border-bottom:1px solid var(--rule);font-size:13px;overflow-wrap:anywhere;color:var(--ink-soft)}
+.contrib-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px}
+.injury-team h3{font-size:14px;margin:14px 0 6px;color:var(--ink);font-family:'Fraunces',serif}
+.injury-player{padding:9px 0;border-bottom:1px solid var(--rule);font-size:13px;overflow-wrap:anywhere;color:var(--ink-soft)}
 .injury-player b{color:var(--ink)}
 .injury-player p{margin:4px 0}
 .injury-status{display:inline-block;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:8px;margin:3px 0;font-weight:600}
 .injury-player .injury-time{font-size:11px;color:var(--ink-faint)}
-.meta .finaltag{background:var(--rule);color:var(--ink);border-radius:8px;padding:1px 6px;font-weight:600;margin-left:6px}
-.movetag{opacity:.7;font-weight:500;margin-left:6px}
+[hidden]{display:none!important}
+
+/* ---------- tablet ---------- */
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .filters{grid-template-columns:1fr 1fr}
+  .filters .f-search{grid-column:1/-1}
+}
+/* ---------- phone ---------- */
+@media(max-width:600px){
+  main{padding:16px 14px calc(24px + env(safe-area-inset-bottom))}
+  .top{gap:12px}
+  .top img{width:48px;height:48px}
+  h1{font-size:22px}
+  .kicker{font-size:11px}
+  .filters{padding:10px;gap:8px}
+  .filters .f-more{display:none}
+  .filters.expanded .f-more{display:block}
+  .filters .f-toggle{display:block}
+  .game{padding:14px;border-radius:12px}
+  h2{font-size:19px}
+  .models{gap:8px}
+  .mtile{padding:9px 10px}
+  .pick{font-size:14.5px}
+  .msub .edge{display:block}
+  .msub .dot{display:none}
+  .contrib-row{grid-template-columns:1fr auto}
+  .contrib-label{grid-row:1;grid-column:1}
+  .contrib-val{grid-row:1;grid-column:2}
+  .contrib-track{grid-row:2;grid-column:1/-1}
+}
+.f-toggle{display:none;grid-column:1/-1}
+@media(max-width:340px){.models{grid-template-columns:1fr}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><main>
-<div class="topbar">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><main>
+
+<header class="top">
   {{LOGO}}
   <div>
-    <p class="kicker">SAIF &middot; Sports Alternative Investment Fund</p>
-    <h1 style="margin:0;">Our numbers first. The market second.</h1>
+    <p class="kicker">SAIF &middot; College Football &middot; Week {{WEEK}}</p>
+    <h1>Our numbers first. The market second.</h1>
+    <p class="sub">{{SPAN}} &middot; <a href="performance.html">Model performance &rarr;</a></p>
   </div>
-</div>
-<p class="eyebrow" style="margin:6px 0 10px;">COLLEGE FOOTBALL RESEARCH</p>
-<p class="intro" style="margin-top:-6px;"><a href="performance.html" class="navlink">Model performance &rarr;</a></p>
-<div class="notice"><b>Injuries are not in either model.</b> Alpha and Beta are built from team-level season stats only &mdash; no player availability data is a model input. Every game below still needs a human gut-check against the injury report before you bet it; a QB listed Out can erase a 10-point model edge.</div>
+</header>
+
+<div class="warn"><b>Research models, not a proven edge.</b> Injuries are not in either model &mdash; open a game&rsquo;s injury list before you bet it.</div>
+
+<details class="about"><summary>About the models, data &amp; caveats</summary>
 {{INJ_NOTE}}
-<p class="note"><b>Alpha &middot; football_adjusted_no_margin_10</b> &mdash; frozen ridge-10 fit, 2022&ndash;2024. Exact reproduction of the live model; coefficients loaded from the saved fitted_model.json, not re-estimated.</p>
-<p class="note"><b>Beta &middot; Alpha + signed tier_gap (strict P4/G5)</b> &mdash; joint refit, ridge-10, same 2022&ndash;2024 window. tier_gap = +1 home P4/away G5, &minus;1 home G5/away P4, 0 otherwise.</p>
-<p class="intro">Week {{WEEK}} &middot; {{SPAN}}. Both models predict home scoring margin from football data alone, with no market inputs. The market spread enters only afterward, to measure the difference. New this week: open "Where the margin comes from" on any card to see each feature's exact point contribution to that model's prediction.</p>
-<div class="notice"><b>Research models, not a proven betting edge.</b> Alpha went 364&ndash;370&ndash;18 ATS (49.6%) in the 2025 retrospective test. Average margin error: 12.97 points versus 11.89 for the market. Live 2026 results are on the Model performance page.</p>
-<p class="note">Opponent-adjusted ratings refit on all completed 2026 FBS-vs-FBS games through Week {{THROUGH_WEEK}}. Only {{N_TIER}} of this week's games carry a nonzero tier_gap (flagged on the card) &mdash; everywhere else Alpha and Beta differ only by ordinary refit noise, not the tier adjustment.</p>
-<p id="preview" class="note">All {{N_GAMES}} games with a posted market spread are included below without scripts. Download and open in a browser to use filters.</p>
-<div class="filters"><div><label for="search">Team search</label><input id="search" placeholder="Cincinnati, Cincy, Purdue&hellip;" type="search"></div>
-<div><label for="day">Game day &middot; Eastern</label><select id="day"><option value="">All days</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
-<div><label for="minimum">Minimum difference (larger of Alpha/Beta)</label><select id="minimum"><option value="0">Any size</option><option value="2">2+ points</option><option value="4">4+ points</option><option value="6">6+ points</option><option value="10">10+ points</option></select></div>
-<div><label for="side">Alpha lean</label><select id="side"><option value="">Either side</option><option value="home">Home team</option><option value="away">Away team</option></select></div>
-<div><label for="sort">Sort</label><select id="sort"><option value="time">Kickoff time</option><option value="edge">Largest difference</option></select></div>
-<button id="reset" type="button">Reset filters</button></div>
-<p id="count" role="status" aria-live="polite">{{N_GAMES}} of {{N_GAMES}} games shown</p><div id="cards" class="grid">{{CARDS}}</div><p id="empty" hidden>No matching games. Lower the minimum or reset filters.</p>
-<details><summary>How Alpha and Beta work</summary><p>Alpha inputs: net PPA, success rate, explosiveness, points per opportunity, havoc, turnover margin, neutral site, rest difference, and two opponent-rating features (offense and defense differences), blended with a four-game prior weight against 2025 team profiles. Beta is a full joint refit of Alpha's 10 features plus one signed tier_gap feature &mdash; not Alpha plus a fixed correction, so even tier_gap=0 games can show small differences between the two.</p>
-<p>"Where the margin comes from" is the exact same linear math the model already uses &mdash; each feature's standardized value times its fitted coefficient &mdash; just broken apart and shown per feature instead of only as the final summed margin. Nothing is estimated or invented for that view.</p>
-<p>Neither model sees market lines, totals, or moneylines as inputs. 2025 has already been examined repeatedly, so it is not a pristine holdout.</p>{{BUCKETS}}
+<p><b>Alpha &middot; football_adjusted_no_margin_10</b> &mdash; frozen ridge-10 fit, 2022&ndash;2024. Exact reproduction of the live model; coefficients loaded from the saved fitted_model.json, not re-estimated.</p>
+<p><b>Beta &middot; Alpha + signed tier_gap (strict P4/G5)</b> &mdash; joint refit, ridge-10, same 2022&ndash;2024 window. tier_gap = +1 home P4/away G5, &minus;1 home G5/away P4, 0 otherwise.</p>
+<p>Both models predict home scoring margin from football data alone, with no market inputs. The market spread enters only afterward, to measure the difference. Opponent-adjusted ratings refit on all completed 2026 FBS-vs-FBS games through Week {{THROUGH_WEEK}}. Only {{N_TIER}} of this week&rsquo;s games carry a nonzero tier_gap (flagged on the card) &mdash; everywhere else Alpha and Beta differ only by ordinary refit noise.</p>
+<p><b>Track record.</b> Alpha went 364&ndash;370&ndash;18 ATS (49.6%) in the 2025 retrospective test. Average margin error: 12.97 points versus 11.89 for the market. Live 2026 results are on the Model performance page.</p>
+<p>Alpha inputs: net PPA, success rate, explosiveness, points per opportunity, havoc, turnover margin, neutral site, rest difference, and two opponent-rating features (offense and defense differences), blended with a four-game prior weight against 2025 team profiles. Beta is a full joint refit of Alpha&rsquo;s 10 features plus one signed tier_gap feature &mdash; not Alpha plus a fixed correction, so even tier_gap=0 games can show small differences.</p>
+<p>&ldquo;Where the margin comes from&rdquo; is the same linear math the model already uses &mdash; each feature&rsquo;s standardized value times its fitted coefficient &mdash; broken apart per feature. Neither model sees market lines, totals, or moneylines. 2025 has been examined repeatedly, so it is not a pristine holdout.</p>
+<div class="tablewrap">{{BUCKETS}}</div>
 </details>
+
+<p class="legend"><b>Line</b> = market spread, favorite shown with &minus;. <b>Pick</b> = the side each model would bet, at that market number (solid = edge 3+ pts, outline = 1.5&ndash;3). Edges under 1.5 pts show as <b>No play</b>.</p>
+<p id="preview" class="legend">All {{N_GAMES}} games with a posted market spread are listed below. Filters need JavaScript.</p>
+
+<div class="filters" id="filters">
+<div class="f-search"><label for="search">Team search</label><input id="search" placeholder="Cincinnati, Cincy, Purdue&hellip;" type="search" autocomplete="off"></div>
+<div class="f-sort"><label for="sort">Sort</label><select id="sort"><option value="time">Kickoff time</option><option value="edge">Largest edge</option></select></div>
+<div class="f-plays"><label for="minimum">Show</label><select id="minimum"><option value="0">All games</option><option value="1.5">Plays only (1.5+)</option><option value="3">Edge 3+</option><option value="6">Edge 6+</option><option value="10">Edge 10+</option></select></div>
+<div class="f-more"><label for="day">Game day &middot; ET</label><select id="day"><option value="">All days</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
+<div class="f-more"><label for="side">Alpha pick</label><select id="side"><option value="">Either side</option><option value="home">Home team</option><option value="away">Away team</option></select></div>
+<div class="f-more"><label>&nbsp;</label><button id="reset" type="button">Reset</button></div>
+<button class="f-toggle" id="ftoggle" type="button" aria-expanded="false">More filters</button>
+</div>
+
+<p id="count" role="status" aria-live="polite">{{N_GAMES}} of {{N_GAMES}} games shown</p>
+<div id="cards" class="grid">{{CARDS}}</div>
+<p id="empty" hidden>No matching games. Lower the minimum or reset filters.</p>
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
 function render(){let query=$('search').value.trim().toLowerCase().replace(/cincy/g,'cincinnati'),n=0;cards.sort((a,b)=>$('sort').value==='edge'?Number(b.dataset.edge)-Number(a.dataset.edge)||Number(a.dataset.time)-Number(b.dataset.time):Number(a.dataset.time)-Number(b.dataset.time));cards.forEach(c=>{let d=c.dataset,show=d.search.includes(query)&&(!$('day').value||d.day===$('day').value)&&Number(d.edge)>=Number($('minimum').value)&&(!$('side').value||d.side===$('side').value);c.hidden=!show;if(show)n++;$('cards').append(c)});$('count').textContent=n+' of '+cards.length+' games shown';$('empty').hidden=n>0}
-const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});render();$('preview').hidden=true;
+const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
+$('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
+render();$('preview').hidden=true;
 </script></html>

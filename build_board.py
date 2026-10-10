@@ -206,18 +206,41 @@ def contrib_rows(contribs, home, away, max_rows=8):
     return ''.join(rows)
 
 
+# Everything a reader sees is written as a bet: team + signed number, favorite with a minus.
+# market_spread / *_fair_spread are HOME-relative sportsbook spreads (negative = home favored);
+# *_edge = model margin + market spread (positive = take the home side at the market number).
+MIN_EDGE = 1.5  # below this a model's side shows as "No play"
+
+
+def sgn(x):
+    return 'PK' if abs(x) < .05 else ('+' if x > 0 else '−') + f'{abs(x):.1f}'
+
+
+def bet_line(spread, home, away):
+    """Home-relative spread -> 'Favorite −3.0' (or Pick'em)."""
+    if pd.isna(spread):
+        return '—'
+    if abs(spread) < .05:
+        return "Pick'em"
+    return f'{e(home)}&nbsp;{sgn(spread)}' if spread < 0 else f'{e(away)}&nbsp;{sgn(-spread)}'
+
+
+def model_tile(name, edge, fair_spread, r):
+    team = r.home_team if edge > 0 else r.away_team
+    num = r.market_spread if edge > 0 else -r.market_spread
+    pick = (f'<span class="pick {edge_class(edge)}">{e(team)}&nbsp;{sgn(num)}</span>' if abs(edge) >= MIN_EDGE
+            else '<span class="noplay">No play</span>')
+    return (f'<div class="mtile"><div class="mlabel">{name}</div>{pick}'
+            f'<div class="msub">Model <b>{bet_line(fair_spread, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(edge):.1f}</span></div></div>')
+
+
 def build_card(r, inj):
     t = pd.Timestamp(r.kickoff_utc).tz_convert('America/New_York')
     day = t.strftime('%A')
     ae, be = r.independent_edge, r.beta_edge
-    a_team = r.home_team if ae > 0 else r.away_team
-    a_line = r.market_spread if ae > 0 else -r.market_spread
-    b_team = r.home_team if be > 0 else r.away_team
-    b_line = r.market_spread if be > 0 else -r.market_spread
-    tg = '' if r.tier_gap == 0 else (' <span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else ' <span class="tiertag">G5 vs P4</span>')
-    winner = lambda n: e(r.home_team if n > 0 else r.away_team) + ' by ' + f'{abs(n):.1f}'
-    a_pick = r.home_team if r.independent_margin > 0 else r.away_team
-    b_pick = r.home_team if r.beta_margin > 0 else r.away_team
+    tg = '' if r.tier_gap == 0 else ('<span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else '<span class="tiertag">G5 vs P4</span>')
+    neutral = bool(getattr(r, 'neutral_site', False))
     inj_html = ''
     if inj:
         hb, hn = injury_block(inj, r.home_team)
@@ -225,19 +248,16 @@ def build_card(r, inj):
         inj_html = f'<details class="injuries"><summary>Injuries &amp; availability ({hn + an} listed)</summary>{hb}{ab}</details>'
     final = ''
     if pd.notna(getattr(r, 'actual_margin', np.nan)):
-        final = f' <span class="finaltag">Final: {e(r.home_team if r.actual_margin > 0 else r.away_team)} by {abs(r.actual_margin):.0f}</span>'
+        final = f'<span class="finaltag">Final: {e(r.home_team if r.actual_margin > 0 else r.away_team)} by {abs(r.actual_margin):.0f}</span>'
     prev = getattr(r, 'prev_spread', np.nan)
-    moved = f' <span class="movetag">Moved from {fmt(prev)}</span>' if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else ''
+    moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
+             if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
+    when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
     return f'''<article class="game" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
- <div class="meta"><div>{day}, {t.strftime('%b %d · %I:%M %p')} ET{final}</div><span>Market {fmt(r.market_spread)}{moved}</span></div>
- <h2>{e(r.home_team)} <small>vs.</small> {e(r.away_team)}</h2><p class="reference">Both spreads below refer to <b>{e(r.home_team)}</b>, the home team.{tg}</p>
- <div class="modelrow">
-  <div class="modelcol"><label>Alpha fair spread</label><div class="pickline"><span class="pickteam">{e(a_pick)}</span><strong>{fmt(r.independent_fair_spread)}</strong></div>
-   <span class="lean-sm {edge_class(ae)}">{'Near market' if abs(ae) <= .25 else e(a_team) + ' ' + fmt(a_line) + ' edge'}</span></div>
-  <div class="modelcol"><label>Beta fair spread</label><div class="pickline"><span class="pickteam">{e(b_pick)}</span><strong>{fmt(r.beta_fair_spread)}</strong></div>
-   <span class="lean-sm {edge_class(be)}">{'Near market' if abs(be) <= .25 else e(b_team) + ' ' + fmt(b_line) + ' edge'}</span></div>
- </div>
- <p class="result">Alpha: {winner(r.independent_margin)} &nbsp;&middot;&nbsp; Beta: {winner(r.beta_margin)}</p>
+ <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
+ <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
+ <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
+ <div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
 <details class="contrib"><summary>Where the margin comes from</summary>
  <p class="contrib-sub">Alpha</p>{contrib_rows(r.alpha_contribs, r.home_team, r.away_team)}
  <p class="contrib-sub">Beta</p>{contrib_rows(r.beta_contribs, r.home_team, r.away_team)}
