@@ -61,6 +61,29 @@ def grade_side(edge, cover_margin):
     return pick, 'P', 0.0
 
 
+P4 = {'ACC', 'Big Ten', 'Big 12', 'SEC'}
+G5 = {'American Athletic', 'Conference USA', 'Mid-American', 'Mountain West', 'Sun Belt'}
+
+
+def conf_map():
+    f = HERE / 'models' / 'cfbd_conferences_2022-2025.csv'
+    if not f.exists():
+        return {}
+    c = pd.read_csv(f)
+    return c[c.season == 2025].set_index('team')['conference'].to_dict()
+
+
+def tier_of(conf):
+    return 'P4' if conf in P4 else 'G5' if conf in G5 else 'other'
+
+
+def matchup_tier(hc, ac):
+    h, a = tier_of(hc), tier_of(ac)
+    if h == 'other' or a == 'other':
+        return 'OTHER'
+    return 'P4vP4' if h == a == 'P4' else 'G5vG5' if h == a == 'G5' else 'CROSS'
+
+
 def bucket(e):
     a = abs(e)
     return '<2' if a < 2 else '2-4' if a < 4 else '4-7' if a < 7 else '7+'
@@ -100,6 +123,7 @@ def main():
         if g.get('completed') is True and g.get('homePoints') is not None and g.get('awayPoints') is not None:
             fin[g['id']] = (g['homePoints'], g['awayPoints'])
 
+    cmap = conf_map()
     rows = []
     for _, r in board.iterrows():
         gid = int(r['game_id'])
@@ -114,6 +138,8 @@ def main():
         row = {
             'game_id': gid, 'away': r['away_team'], 'home': r['home_team'],
             'home_pts': hp, 'away_pts': ap_, 'actual_margin': actual,
+            'home_conf': cmap.get(r['home_team']), 'away_conf': cmap.get(r['away_team']),
+            'tier': matchup_tier(cmap.get(r['home_team']), cmap.get(r['away_team'])),
             'market_spread_home': spread, 'home_cover_margin': round(cover, 1),
             'alpha_margin': r['independent_margin'], 'beta_margin': r['beta_margin'],
             'alpha_edge': round(r['independent_edge'], 2), 'beta_edge': round(r['beta_edge'], 2),
