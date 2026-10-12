@@ -30,7 +30,6 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import Ridge
 
 HERE = Path(__file__).resolve().parent
 RATING_ALPHA = 8.0
@@ -69,6 +68,15 @@ def eligible_games(schedule, week):
     return out
 
 
+def ridge_coef(X, y, alpha):
+    """Ridge with an unpenalised intercept, closed form (same result as sklearn's
+    Ridge(alpha, fit_intercept=True, solver='cholesky'); avoids the sklearn dependency,
+    whose compiled DLLs some Windows application-control policies block)."""
+    Xc = X - X.mean(axis=0)
+    yc = y - y.mean()
+    return np.linalg.solve(Xc.T @ Xc + alpha * np.eye(X.shape[1]), Xc.T @ yc)
+
+
 def fit_ratings(games):
     teams = sorted({g[s + 'Team'] for g in games for s in ('home', 'away')})
     idx = {t: i for i, t in enumerate(teams)}
@@ -80,8 +88,8 @@ def fit_ratings(games):
         loc = 0 if g.get('neutralSite') else .5
         X[2 * k, h] = 1; X[2 * k, n + a] = -1; X[2 * k, -1] = loc; y[2 * k] = g['homePoints']
         X[2 * k + 1, a] = 1; X[2 * k + 1, n + h] = -1; X[2 * k + 1, -1] = -loc; y[2 * k + 1] = g['awayPoints']
-    m = Ridge(alpha=RATING_ALPHA, solver='cholesky').fit(X, y)
-    return {t: {'offense': float(m.coef_[i]), 'defense': float(m.coef_[n + i])} for t, i in idx.items()}
+    coef = ridge_coef(X, y, RATING_ALPHA)
+    return {t: {'offense': float(coef[i]), 'defense': float(coef[n + i])} for t, i in idx.items()}
 
 
 def score_with_contribs(row, m):
