@@ -77,6 +77,35 @@ def ridge_coef(X, y, alpha):
     return np.linalg.solve(Xc.T @ Xc + alpha * np.eye(X.shape[1]), Xc.T @ yc)
 
 
+def append_line_history(wk, week, state_dir):
+    """Append-only snapshot log: one row per game per build, skipped when the line hasn't changed
+    since that game's last logged row. Gives a true open / current / close for CLV."""
+    f = state_dir / 'line_history.csv'
+    now = pd.Timestamp.now(tz='UTC').strftime('%Y-%m-%dT%H:%M:%SZ')
+    cols = ['logged_utc', 'week', 'game_id', 'away_team', 'home_team', 'kickoff_utc',
+            'market_spread', 'market_total', 'line_provider']
+    snap = pd.DataFrame({
+        'logged_utc': now, 'week': week, 'game_id': wk['game_id'], 'away_team': wk['away_team'],
+        'home_team': wk['home_team'], 'kickoff_utc': wk['kickoff_utc'],
+        'market_spread': wk['market_spread'], 'market_total': wk.get('market_total'),
+        'line_provider': wk.get('line_provider')})[cols]
+    if f.exists():
+        hist = pd.read_csv(f)
+        last = hist.sort_values('logged_utc').groupby('game_id').tail(1).set_index('game_id')
+        def changed(r):
+            if r.game_id not in last.index:
+                return True
+            l = last.loc[r.game_id]
+            same = lambda a, b: (pd.isna(a) and pd.isna(b)) or (not pd.isna(a) and not pd.isna(b) and abs(float(a) - float(b)) < 1e-9)
+            return not (same(r.market_spread, l['market_spread']) and same(r.market_total, l['market_total']))
+        snap = snap[snap.apply(changed, axis=1)]
+        out = pd.concat([hist, snap], ignore_index=True)
+    else:
+        out = snap
+    out.to_csv(f, index=False)
+    return len(snap)
+
+
 def fit_ratings(games):
     teams = sorted({g[s + 'Team'] for g in games for s in ('home', 'away')})
     idx = {t: i for i, t in enumerate(teams)}
@@ -321,7 +350,9 @@ def main():
         prev = prev[['home_team', 'away_team', 'prev_spread']]
         wk = wk.merge(prev, on=['home_team', 'away_team'], how='left')
     wk.to_pickle(prev_pkl)
+    n_logged = append_line_history(wk, a.week, state)
     (out / 'index.html').write_text(build_page(wk, a.week, a.season, inj), encoding='utf-8')
+    print(f'Line history: {n_logged} new line snapshots logged -> {state / "line_history.csv"}')
     print(f'Week {a.week}: {len(wk)} games scored -> {out / "index.html"} (injuries: {"yes" if inj else "none"})')
 
 
