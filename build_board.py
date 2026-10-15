@@ -276,7 +276,7 @@ def qb_block(r):
     notes = []
     for side, team in (('home', r.home_team), ('away', r.away_team)):
         fl, tx = getattr(r, f'qb_{side}_flag', None), getattr(r, f'qb_{side}_note', '')
-        if fl:
+        if isinstance(fl, str) and fl:
             notes.append((fl, team, tx))
     if not notes:
         return '', ''
