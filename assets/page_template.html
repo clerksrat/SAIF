@@ -47,6 +47,7 @@ button{background:transparent;color:var(--ink-soft);cursor:pointer;font-weight:6
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .game{background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:16px 18px;min-width:0}
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:12px;color:var(--ink-faint)}
+.game.done{opacity:.55;background:var(--paper)}.game.done h2{color:var(--ink-soft)}
 .finaltag{background:var(--rule);color:var(--ink);border-radius:6px;padding:2px 7px;font-weight:600}
 .tiertag{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 7px;font-weight:600}
 h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px;line-height:1.2;margin:8px 0 6px;color:var(--ink)}
@@ -164,7 +165,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <p id="empty" hidden>No matching games. Lower the minimum or reset filters.</p>
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
-function render(){let query=$('search').value.trim().toLowerCase().replace(/cincy/g,'cincinnati'),n=0;cards.sort((a,b)=>$('sort').value==='edge'?Number(b.dataset.edge)-Number(a.dataset.edge)||Number(a.dataset.time)-Number(b.dataset.time):Number(a.dataset.time)-Number(b.dataset.time));cards.forEach(c=>{let d=c.dataset,show=d.search.includes(query)&&(!$('day').value||d.day===$('day').value)&&Number(d.edge)>=Number($('minimum').value)&&(!$('side').value||d.side===$('side').value);c.hidden=!show;if(show)n++;$('cards').append(c)});$('count').textContent=n+' of '+cards.length+' games shown';$('empty').hidden=n>0}
+function render(){let query=$('search').value.trim().toLowerCase().replace(/cincy/g,'cincinnati'),n=0;cards.sort((a,b)=>Number(a.dataset.done)-Number(b.dataset.done)||($('sort').value==='edge'?Number(b.dataset.edge)-Number(a.dataset.edge)||Number(a.dataset.time)-Number(b.dataset.time):Number(a.dataset.time)-Number(b.dataset.time)));cards.forEach(c=>{let d=c.dataset,show=d.search.includes(query)&&(!$('day').value||d.day===$('day').value)&&Number(d.edge)>=Number($('minimum').value)&&(!$('side').value||d.side===$('side').value);c.hidden=!show;if(show)n++;$('cards').append(c)});$('count').textContent=n+' of '+cards.length+' games shown';$('empty').hidden=n>0}
 const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
 $('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
 render();$('preview').hidden=true;

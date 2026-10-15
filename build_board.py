@@ -315,7 +315,7 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    return f'''<article class="game" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
+    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
