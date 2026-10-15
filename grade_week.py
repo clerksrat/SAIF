@@ -144,8 +144,14 @@ def main():
             'alpha_margin': r['independent_margin'], 'beta_margin': r['beta_margin'],
             'alpha_edge': round(r['independent_edge'], 2), 'beta_edge': round(r['beta_edge'], 2),
         }
+        hf, af = r.get('qb_home_flag'), r.get('qb_away_flag')
+        hf = hf if isinstance(hf, str) else ''
+        af = af if isinstance(af, str) else ''
+        row['qb_home_flag'], row['qb_away_flag'] = hf, af
         for tag, col in (('alpha', 'independent_edge'), ('beta', 'beta_edge')):
             pick, res, units = grade_side(r[col], cover)
+            # muted = pick is on a team whose QB1 absence the models can't see (STALE)
+            row[f'{tag}_qb_mute'] = bool((pick == 'home' and hf == 'STALE') or (pick == 'away' and af == 'STALE'))
             row[f'{tag}_pick'], row[f'{tag}_result'], row[f'{tag}_units'] = pick, res, units
             row[f'{tag}_bucket'] = bucket(r[col])
         row['alpha_err'] = abs(actual - r['independent_margin'])
@@ -169,6 +175,13 @@ def main():
         summ.append(s)
         print(f"  {tag.upper():5s} ATS {s['W']}-{s['L']}-{s['P']} ({s['ats_pct']}%)  "
               f"flat -110: {s['units_flat_110']:+.2f}u  ROI {s['roi_pct']}%  MAE {s['mae']}")
+    if 'alpha_qb_mute' in df:
+        print('\n  QB1 flag check (STALE = pick on team missing QB1):')
+        for tag in ('alpha', 'beta'):
+            for lbl, m in (('muted', df[f'{tag}_qb_mute']), ('kept ', ~df[f'{tag}_qb_mute'])):
+                g = df[m & df[f'{tag}_result'].isin(['W', 'L', 'P'])]
+                if len(g):
+                    print(f"    {tag:5s} {lbl}: {(g[f'{tag}_result']=='W').sum()}-{(g[f'{tag}_result']=='L').sum()}-{(g[f'{tag}_result']=='P').sum()}  {g[f'{tag}_units'].sum():+.2f}u")
     print(f"  MARKET MAE {round(df['market_err'].mean(), 2)} (pull-time line)")
 
     print('\n  ATS by edge size (Alpha / Beta):')
