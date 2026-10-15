@@ -272,6 +272,29 @@ def model_tile(name, edge, fair_spread, r):
             f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(edge):.1f}</span></div></div>')
 
 
+def qb_block(r):
+    notes = []
+    for side, team in (('home', r.home_team), ('away', r.away_team)):
+        fl, tx = getattr(r, f'qb_{side}_flag', None), getattr(r, f'qb_{side}_note', '')
+        if fl:
+            notes.append((fl, team, tx))
+    if not notes:
+        return '', ''
+    out = ''
+    mute = ''
+    for fl, team, tx in notes:
+        cls = {'STALE': 'qb-stale', 'PRICED': 'qb-info', 'WATCH': 'qb-info'}[fl]
+        out += f'<p class="qbflag {cls}"><b>{e(team)}:</b> {e(tx)}.</p>'
+    for side in ('home', 'away'):
+        if getattr(r, f'qb_{side}_flag', None) == 'STALE':
+            fav_home = r.independent_edge > 0
+            if fav_home == (side == 'home'):
+                mute = 'NO PLAY &mdash; pick is on the team missing QB1; Alpha/Beta can\'t see it'
+            else:
+                mute = mute or 'Note: shown edge is biased toward the opponent (QB1 absence not in models)'
+    return out, mute
+
+
 def build_card(r, inj):
     t = pd.Timestamp(r.kickoff_utc).tz_convert('America/New_York')
     day = t.strftime('%A')
@@ -283,6 +306,8 @@ def build_card(r, inj):
         hb, hn = injury_block(inj, r.home_team)
         ab, an = injury_block(inj, r.away_team)
         inj_html = f'<details class="injuries"><summary>Injuries &amp; availability ({hn + an} listed)</summary>{hb}{ab}</details>'
+    qb_html, qb_mute = qb_block(r)
+    qb_banner = f'<p class="qbflag qb-stale qb-mute">{qb_mute}</p>' if qb_mute.startswith('NO PLAY') else ''
     final = ''
     if pd.notna(getattr(r, 'actual_margin', np.nan)):
         final = f'<span class="finaltag">Final: {e(r.home_team if r.actual_margin > 0 else r.away_team)} by {abs(r.actual_margin):.0f}</span>'
@@ -294,12 +319,12 @@ def build_card(r, inj):
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
- <div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
+ {qb_banner}<div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
 <details class="contrib"><summary>Where the margin comes from</summary>
  <p class="contrib-sub">Alpha</p>{contrib_rows(r.alpha_contribs, r.home_team, r.away_team)}
  <p class="contrib-sub">Beta</p>{contrib_rows(r.beta_contribs, r.home_team, r.away_team)}
  <p class="contrib-note">Exact linear decomposition of each model's own prediction &mdash; intercept + each feature's standardized value &times; its fitted coefficient. Bars run from the center: right/gold favors {e(r.home_team)} (home), left/blue favors {e(r.away_team)} (away).</p>
-</details>{inj_html}
+</details>{qb_html}{inj_html}
 </article>'''
 
 
@@ -338,6 +363,9 @@ def main():
     wk = score_week(data_dir, a.season, a.week)
     names = sorted(set(wk.home_team) | set(wk.away_team))
     inj = load_injuries(data_dir, names)
+    from qb_flags import flag_board
+    wk, have_box = flag_board(wk, data_dir / 'qb_box', a.season, a.week, inj)
+    print(f'QB1 flags: {int(wk.qb_home_flag.notna().sum() + wk.qb_away_flag.notna().sum())} team flags' + ('' if have_box else ' (no qb_box data yet -- run saif_pull_all.py)'))
     out = HERE / a.out
     out.mkdir(parents=True, exist_ok=True)
     state = HERE / 'state'

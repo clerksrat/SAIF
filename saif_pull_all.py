@@ -136,6 +136,30 @@ def run_injuries(out):
         print(f'[injuries] {endpoint}: {len(data)} records', flush=True)
 
 
+# ---------------------------------------------------------------- step 2b: QB box scores
+def run_qb_box(out, season, max_week=15):
+    """Per-game passing box scores (CFBD /games/players) -> QB1 availability flags. ~1-2 calls/run.
+    Weeks already saved are skipped, except the newest one (it may have been pulled mid-week)."""
+    key = os.environ.get('CFBD_API_KEY', '').strip()
+    if not key:
+        print('[qb] CFBD_API_KEY not set -- skipped', flush=True)
+        return
+    box = Path(out) / 'qb_box'
+    box.mkdir(parents=True, exist_ok=True)
+    have = sorted(int(p.stem.rsplit('_w', 1)[1]) for p in box.glob(f'passing_{season}_w*.json'))
+    newest = have[-1] if have else 0
+    for wk in range(1, max_week + 1):
+        f = box / f'passing_{season}_w{wk:02d}.json'
+        if f.exists() and wk != newest:
+            continue
+        q = urlencode({'year': season, 'week': wk, 'seasonType': 'regular', 'category': 'passing'})
+        data, _ = http_json('https://api.collegefootballdata.com/games/players?' + q, {'Authorization': f'Bearer {key}'})
+        if not data:
+            break
+        write_json(f, data)
+        print(f'[qb] week {wk}: {len(data)} games', flush=True)
+
+
 # ---------------------------------------------------------------- step 3: odds
 def flatten_odds(games):
     rows = []
@@ -199,6 +223,7 @@ def main():
         run_cfbd(out, a.season)
     out.mkdir(parents=True, exist_ok=True)
     for label, skip, fn in (('injuries', a.skip_injuries, lambda: run_injuries(out)),
+                            ('qb box scores', a.skip_cfbd, lambda: run_qb_box(out, a.season)),
                             ('odds', a.skip_odds, lambda: run_odds(out))):
         if skip:
             continue
