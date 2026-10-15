@@ -42,18 +42,34 @@ HERE = Path(__file__).resolve().parent
 
 
 def load_env_file(path=HERE / '.env'):
-    """Read KEY=value lines from .env beside this script (real environment variables win)."""
-    if not path.exists():
+    """Read KEY=value lines from .env beside this script (real environment variables win).
+    Tolerates UTF-8 BOM / UTF-16 (PowerShell and Notepad write these), 'export ' prefixes and quotes."""
+    if not Path(path).exists():
+        print(f'[env] no .env found at {path} -- using environment variables only', flush=True)
         return
-    for line in path.read_text(encoding='utf-8').splitlines():
-        line = line.strip()
+    raw = Path(path).read_bytes()
+    for enc in ('utf-8-sig', 'utf-16'):
+        try:
+            text = raw.decode(enc)
+            if '=' in text:
+                break
+        except UnicodeError:
+            continue
+    else:
+        text = raw.decode('utf-8', 'ignore')
+    found = []
+    for line in text.splitlines():
+        line = line.strip().lstrip('\ufeff')
+        if line.lower().startswith('export '):
+            line = line[7:].strip()
         if not line or line.startswith('#') or '=' not in line:
             continue
         key, value = line.split('=', 1)
-        value = value.strip().strip('"').strip("'")
+        key, value = key.strip(), value.strip().strip('"').strip("'")
         if value:
-            os.environ.setdefault(key.strip(), value)
-
+            os.environ.setdefault(key, value)
+            found.append(key)
+    print(f'[env] loaded {path.name if hasattr(path, "name") else path}: keys found = {found or "NONE"}', flush=True)
 
 load_env_file()
 sys.path.insert(0, str(HERE))
