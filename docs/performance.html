@@ -74,6 +74,13 @@
   td { padding: 8px 6px; border-bottom: 1px solid var(--rule); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
   td.name { font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; }
   tr:last-child td { border-bottom: none; }
+  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 14px; }
+  .vs .box { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; }
+  .vs .box.hl { border-color: var(--accent); }
+  .vs .ttl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); font-weight: 600; margin-bottom: 4px; }
+  .vs .rec { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; }
+  .vs .meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+  .empty { font-size: 13px; color: var(--ink-faint); padding: 6px 0 14px; }
   .foot { font-size: 12px; color: var(--ink-faint); margin-top: 4px; line-height: 1.5; }
 </style>
 </head>
@@ -110,6 +117,12 @@
       <thead><tr><th>Week</th><th>W</th><th>L</th><th>P</th><th>ATS%</th><th>Units</th></tr></thead>
       <tbody id="liveWeekRows"></tbody>
     </table>
+  </div>
+
+  <div class="card" style="border-color:var(--accent);">
+    <h2>2026 — Model plays vs. all games (Live)</h2>
+    <p class="foot" style="margin-top:-2px;margin-bottom:6px;" id="playsNote"></p>
+    <div id="playsBody"></div>
   </div>
 
   <div class="card" style="border-color:var(--accent);">
@@ -159,6 +172,28 @@ function fmtPct(p) { return p === null ? '—' : (p*100).toFixed(1) + '%'; }
 function fmtUnits(u) { return (u > 0 ? '+' : '') + u; }
 function unitsClass(u) { return u > 0 ? 'pos' : (u < 0 ? 'neg' : ''); }
 
+function renderPlays(lm) {
+  const minE = LIVE.min_edge || 1.5, weeks = LIVE.edge_weeks || [];
+  const span = weeks.length ? (weeks.length > 1 ? `Weeks ${weeks[0]}–${weeks[weeks.length-1]}` : `Week ${weeks[0]}`) : '';
+  document.getElementById('playsNote').textContent =
+    `Plays = games where this model's edge is ${minE}+ points (the PICK games on the board), graded at the board's line. ` +
+    `Break-even at −110 is 52.4%. ` + (span ? `${span}; weeks 4–5 have totals only, no per-game edges.` : '');
+  const box = (ttl, r, hl) => `<div class="box${hl ? ' hl' : ''}"><div class="ttl">${ttl}</div>
+      <div class="rec">${r.wins}-${r.losses}-${r.pushes}</div>
+      <div class="meta">${fmtPct(r.ats_pct)} · <span class="${unitsClass(r.units)}">${fmtUnits(r.units)}u</span> · ${r.games} gms</div></div>`;
+  if (!lm.plays || !lm.plays.games) {
+    document.getElementById('playsBody').innerHTML = '<p class="empty">Appears after the next grading run (update_performance.py).</p>';
+    return;
+  }
+  const rows = Object.entries(lm.by_edge || {}).map(([b, r]) =>
+    `<tr><td class="name">${b}</td><td>${r.wins}</td><td>${r.losses}</td><td>${r.pushes}</td>
+      <td>${fmtPct(r.ats_pct)}</td><td class="${unitsClass(r.units)}">${fmtUnits(r.units)}</td></tr>`).join('');
+  document.getElementById('playsBody').innerHTML =
+    `<div class="vs">${box(`Plays (edge ${minE}+)`, lm.plays, true)}${box('All games, same weeks', lm.plays_all_games, false)}</div>
+     <table><thead><tr><th>Edge size</th><th>W</th><th>L</th><th>P</th><th>ATS%</th><th>Units</th></tr></thead><tbody>${rows}</tbody></table>
+     <p class="foot">If the model is finding something real, the record should improve as the edge gets bigger.</p>`;
+}
+
 function renderLive(modelKey) {
   const lm = LIVE.models[modelKey];
   const o = lm.overall;
@@ -174,6 +209,7 @@ function renderLive(modelKey) {
     return `<tr><td class="name">Week ${w}</td><td>${r.wins}</td><td>${r.losses}</td><td>${r.pushes}</td>
       <td>${fmtPct(r.ats_pct)}</td><td class="${unitsClass(r.units)}">${fmtUnits(r.units)}</td></tr>`;
   }).join('');
+  renderPlays(lm);
   const tierOrder = ['P4vP4','G5vG5','CROSS','OTHER'];
   const tierLabel = {P4vP4:'P4 vs P4', G5vG5:'G5 vs G5', CROSS:'Cross-tier', OTHER:'Other'};
   document.getElementById('liveTierRows').innerHTML = tierOrder.filter(g => lm.by_tier[g]).map(g => {
