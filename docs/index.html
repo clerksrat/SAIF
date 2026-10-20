@@ -88,6 +88,30 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .injury-player p{margin:4px 0}
 .injury-status{display:inline-block;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:8px;margin:3px 0;font-weight:600}
 .injury-player .injury-time{font-size:11px;color:var(--ink-faint)}
+/* ---------- top plays ---------- */
+.plays{margin:18px 0 0;background:var(--paper-raised);border:1px solid var(--accent);border-radius:14px;padding:14px 16px}
+.plays-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.plays h3{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:0;color:var(--ink)}
+.plays-count{font-size:12.5px;color:var(--ink-faint)}
+.plays-note{font-size:12px;color:var(--ink-faint);margin:4px 0 10px;line-height:1.45}
+.plays-note a{color:var(--ink-soft)}
+.plays-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.play{display:grid;grid-template-columns:26px 1fr auto;gap:2px 10px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;width:100%;min-height:0;font:inherit;color:inherit}
+.play:hover,.play:focus-visible{border-color:var(--accent);outline:none}
+.play .rank{grid-row:1/3;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);font-weight:600}
+.play .bet{font-weight:700;font-size:16px;color:var(--ink);line-height:1.25}
+.play .sub{grid-column:2;font-size:12px;color:var(--ink-faint);line-height:1.4}
+.play .agree{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:5px;vertical-align:1px}
+.play .agree.yes{background:var(--accent-soft);color:var(--accent)}
+.play .agree.no{border:1px solid var(--rule-strong);color:var(--ink-faint)}
+.play .edgebox{grid-column:3;grid-row:1/3;text-align:right;line-height:1.1}
+.play .edgebox b{display:block;font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
+.play .edgebox span{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em}
+.plays-more{margin-top:10px;min-height:40px;font-size:13.5px}
+.plays-muted{font-size:12px;color:var(--ink-faint);margin:10px 0 0}
+.game.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,40%{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+@media(max-width:600px){.plays{padding:12px}.plays-list{grid-template-columns:1fr}.play .bet{font-size:15px}}
 [hidden]{display:none!important}
 
 /* ---------- tablet ---------- */
@@ -135,6 +159,14 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 </header>
 
 <div class="warn"><b>Research models, not a proven edge.</b> Injuries are not in either model &mdash; open a game&rsquo;s injury list before you bet it.</div>
+
+<section class="plays" id="plays" hidden aria-labelledby="playsTitle">
+  <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s top plays</h3><span class="plays-count" id="playsCount"></span></div>
+  <p class="plays-note">Alpha&rsquo;s picks with an edge of 1.5+ points on games not yet played, ranked by edge. A bigger edge is a bigger disagreement with the market, not a proven better bet &mdash; see <a href="performance.html">Model performance</a>. Tap a play to jump to its game.</p>
+  <ol class="plays-list" id="playsList"></ol>
+  <button type="button" class="plays-more" id="playsMore" hidden></button>
+  <p class="plays-muted" id="playsMuted" hidden></p>
+</section>
 
 <details class="about"><summary>About the models, data &amp; caveats</summary>
 <p class="note"><b>Availability snapshot: Oct 19, 2026 · 7:52 AM ET.</b> Open "Injuries &amp; availability" on each game for player reports. This is a saved snapshot, not live data; no injury adjustments have been applied to either model.</p>
@@ -459,4 +491,51 @@ function render(){let query=$('search').value.trim().toLowerCase().replace(/cinc
 const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
 $('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
 render();$('preview').hidden=true;
+(function(){
+  const TOP = 5, MIN = 1.5;
+  const tile = (c, i) => c.querySelectorAll('.mtile')[i];
+  const edgeOf = t => { const m = t && t.querySelector('.msub') && t.querySelector('.msub').textContent.match(/Edge\s+([\d.]+)/); return m ? parseFloat(m[1]) : 0; };
+  const pickOf = t => { const p = t && t.querySelector('.pick'); return p ? p.textContent.replace(/\u00a0/g, ' ').trim() : null; };
+  let plays = [], muted = 0;
+  cards.forEach((c, i) => {
+    if (c.dataset.done === '1') return;
+    const a = tile(c, 0), b = tile(c, 1), pick = pickOf(a), edge = edgeOf(a);
+    if (!pick || edge < MIN) return;
+    if (c.querySelector('.qb-mute')) { muted++; return; }
+    if (!c.id) c.id = 'game-' + i;
+    const bp = pickOf(b);
+    plays.push({ card: c, pick, edge, beta: bp === pick ? 'yes' : (bp ? 'other' : 'none'),
+      match: c.querySelector('h2').textContent.replace(/\s+/g, ' ').trim(),
+      when: (c.querySelector('.meta span') || {}).textContent || '' });
+  });
+  if (!plays.length) return;
+  plays.sort((x, y) => y.edge - x.edge || Number(x.card.dataset.time) - Number(y.card.dataset.time));
+  const esc = s => s.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const tag = p => p.beta === 'yes' ? '<span class="agree yes">Beta agrees</span>'
+                 : p.beta === 'other' ? '<span class="agree no">Beta: other side</span>' : '<span class="agree no">Beta: no play</span>';
+  $('playsList').innerHTML = plays.map((p, i) => `<li><button type="button" class="play" data-target="${p.card.id}"${i >= TOP ? ' data-extra hidden' : ''}>
+      <span class="rank">${i + 1}</span><span class="bet">${esc(p.pick)}${tag(p)}</span>
+      <span class="edgebox"><b>${p.edge.toFixed(1)}</b><span>edge</span></span>
+      <span class="sub">${esc(p.match)} &middot; <span class="nw">${esc(p.when)}</span></span></button></li>`).join('');
+  $('playsCount').textContent = plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' this week';
+  if (plays.length > TOP) {
+    const more = $('playsMore'); more.hidden = false; more.textContent = 'Show all ' + plays.length + ' plays';
+    more.addEventListener('click', () => {
+      const open = more.dataset.open !== '1'; more.dataset.open = open ? '1' : '0';
+      document.querySelectorAll('#playsList [data-extra]').forEach(b => { b.hidden = !open; b.parentElement.hidden = !open; });
+      more.textContent = open ? 'Show top ' + TOP : 'Show all ' + plays.length + ' plays';
+    });
+    document.querySelectorAll('#playsList [data-extra]').forEach(b => b.parentElement.hidden = true);
+  }
+  if (muted) { const m = $('playsMuted'); m.hidden = false; m.textContent = muted + (muted === 1 ? ' play' : ' plays') + ' left off: the pick is on a team missing its starting QB, which the models can\u2019t see.'; }
+  $('playsList').addEventListener('click', e => {
+    const b = e.target.closest('.play'); if (!b) return;
+    const c = document.getElementById(b.dataset.target);
+    Object.keys(defaults).forEach(id => $(id).value = defaults[id]); render();
+    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
+  });
+  $('plays').hidden = false;
+})();
+
 </script></html>
