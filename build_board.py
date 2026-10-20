@@ -171,6 +171,9 @@ def score_week(data_dir, season, week):
     wk['beta_fair_spread'] = -wk['beta_margin']
     wk['beta_edge'] = wk['beta_margin'] + wk['market_spread']
     wk = wk[wk.market_spread.notna()].copy()
+    if wk.empty:
+        raise SystemExit(f'Week {week}: none of the games in {data_dir.name} have a market line yet. '
+                         f'Run saif_pull_all.py first (this data folder may be from an older pull).')
     wk['kickoff_utc'] = pd.to_datetime(wk['kickoff_utc'], utc=True)
     return wk.sort_values('kickoff_utc').reset_index(drop=True)
 
