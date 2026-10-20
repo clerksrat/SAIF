@@ -4,6 +4,7 @@
   command = ""
 
 # Serverless functions (live final scores for the board). Kept outside docs/ so the source isn't published.
+# Needs the CFBD_API_KEY environment variable (Site configuration > Environment variables, Functions scope).
 [functions]
   directory = "netlify/functions"
 
