@@ -267,6 +267,11 @@ def model_tile(name, edge, fair_spread, r):
     num = r.market_spread if edge > 0 else -r.market_spread
     pick = (f'<span class="pick {edge_class(edge)}">{e(team)} <span class="nw">{sgn(num)}</span></span>' if abs(edge) >= MIN_EDGE
             else '<span class="noplay">No play</span>')
+    if abs(edge) >= MIN_EDGE:
+        best = getattr(r, 'best_home_spread' if edge > 0 else 'best_away_spread', np.nan)
+        books = getattr(r, 'best_home_books' if edge > 0 else 'best_away_books', '')
+        if pd.notna(best) and best - num >= .25 and isinstance(books, str) and books:
+            pick += f'<div class="bestbook">Better: <b>{sgn(best)}</b> at {e(books)}</div>'
     return (f'<div class="mtile"><div class="mlabel">{name}</div>{pick}'
             f'<div class="msub">Model <b>{bet_line(fair_spread, r.home_team, r.away_team)}</b> '
             f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(edge):.1f}</span></div></div>')
@@ -315,17 +320,10 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    bh, ba = getattr(r, 'best_home_spread', np.nan), getattr(r, 'best_away_spread', np.nan)
-    best = []
-    if pd.notna(ba) and abs(ba - (-r.market_spread)) >= .25:
-        best.append(f'{e(r.away_team)}&nbsp;{sgn(ba)}')
-    if pd.notna(bh) and abs(bh - r.market_spread) >= .25:
-        best.append(f'{e(r.home_team)}&nbsp;{sgn(bh)}')
-    best_html = f'<span class="besttag">Best available: {" &middot; ".join(best)}</span>' if best else ''
     return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
- <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}{best_html}</p>
+ <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
  {qb_banner}<div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
 <details class="contrib"><summary>Where the margin comes from</summary>
  <p class="contrib-sub">Alpha</p>{contrib_rows(r.alpha_contribs, r.home_team, r.away_team)}

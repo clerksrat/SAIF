@@ -6,6 +6,7 @@ apply_odds_lines(wk, data_dir) matches those games to the board's CFBD games and
     cfbd_spread        <- the CFBD line it replaced (kept for reference)
     best_home_spread   <- best number for a home-side bettor (the largest home spread on offer)
     best_away_spread   <- best number for an away-side bettor, written from the AWAY side (e.g. +17.0)
+    best_home_books / best_away_books <- which sportsbooks offer that best number (e.g. "FanDuel, BetMGM")
     odds_n_books, line_provider ("Consensus (N books)"), lines_asof (UTC timestamp of the pull)
 and recomputes both models' edges against the new line. Unmatched games keep their CFBD line.
 """
@@ -51,6 +52,11 @@ def consensus(points):
     return min(modes, key=lambda p: (abs(p - med), p))
 
 
+def book_list(names, show=2):
+    names = sorted(set(names))
+    return ', '.join(names[:show]) + (f' +{len(names) - show} more' if len(names) > show else '')
+
+
 def odds_games(data_dir):
     f = data_dir / 'odds_api' / 'raw_odds.json'
     if not f.exists():
@@ -59,7 +65,7 @@ def odds_games(data_dir):
     out = []
     for g in raw.get('data', []):
         home = g.get('home_team')
-        pts = []
+        pts, books = [], []
         for bk in g.get('bookmakers', []):
             for m in bk.get('markets', []):
                 if m.get('key') != 'spreads':
@@ -67,9 +73,10 @@ def odds_games(data_dir):
                 for o in m.get('outcomes', []):
                     if o.get('name') == home and o.get('point') is not None:
                         pts.append(float(o['point']))
+                        books.append(bk.get('title') or bk.get('key') or '?')
         if pts:
             out.append({'home': home, 'away': g.get('away_team'), 'time': pd.Timestamp(g['commence_time']),
-                        'pts': pts})
+                        'pts': pts, 'books': books})
     return out, raw.get('retrieved_at_utc')
 
 
@@ -79,6 +86,8 @@ def apply_odds_lines(wk, data_dir):
     wk['cfbd_spread'] = wk['market_spread']
     for c in ('best_home_spread', 'best_away_spread', 'odds_n_books'):
         wk[c] = np.nan
+    wk['best_home_books'] = ''
+    wk['best_away_books'] = ''
     wk['lines_asof'] = asof
     if not games:
         print('[lines] no Odds API data found -- using CFBD lines for every game')
@@ -108,6 +117,8 @@ def apply_odds_lines(wk, data_dir):
         wk.at[i, 'market_spread'] = consensus(pts)
         wk.at[i, 'best_home_spread'] = max(pts)        # home bettor wants the biggest number
         wk.at[i, 'best_away_spread'] = -min(pts)       # away bettor's line, from the away side
+        wk.at[i, 'best_home_books'] = book_list([b for p, b in zip(pts, g['books']) if p == max(pts)])
+        wk.at[i, 'best_away_books'] = book_list([b for p, b in zip(pts, g['books']) if p == min(pts)])
         wk.at[i, 'odds_n_books'] = len(pts)
         wk.at[i, 'line_provider'] = f'Consensus ({len(pts)} books)'
         matched += 1

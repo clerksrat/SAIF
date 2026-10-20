@@ -56,7 +56,9 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .line .lbl{color:var(--ink-faint);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
 .line b{color:var(--ink);font-weight:600;white-space:nowrap}
 .qbflag{margin:8px 0;padding:7px 10px;border-radius:8px;font-size:12.5px;line-height:1.4}.qb-stale{background:var(--accent-soft);color:var(--accent)}.qb-info{background:var(--rule);color:var(--ink-soft)}.qb-mute{font-weight:700}
-.besttag{display:block;color:var(--ink-faint);font-size:12.5px;margin-top:2px}
+.bestbook{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.35}
+.bestbook b{color:var(--win);font-weight:700}
+.play .bestnote{color:var(--win)}
 .linesnote{margin-top:-4px}
 .movetag{color:var(--ink-faint);font-size:12.5px;white-space:nowrap}
 .models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -235,7 +237,8 @@ function buildPlays() {
     if (c.querySelector('.qb-mute')) { muted++; return; }
     const bp = pickOf(b);
     plays.push({ card: c, pick, edge, beta: bp === pick ? 'yes' : (bp ? 'other' : 'none'),
-      match: norm(c.querySelector('h2').textContent), when: (c.querySelector('.meta span') || {}).textContent || '' });
+      match: norm(c.querySelector('h2').textContent), when: (c.querySelector('.meta span') || {}).textContent || '',
+      better: a.querySelector('.bestbook') ? norm(a.querySelector('.bestbook').textContent) : '' });
   });
   plays.sort((x, y) => y.edge - x.edge || Number(x.card.dataset.time) - Number(y.card.dataset.time));
   const tag = p => p.beta === 'yes' ? '<span class="agree yes">Beta agrees</span>'
@@ -243,7 +246,7 @@ function buildPlays() {
   $('playsList').innerHTML = plays.map((p, i) => `<li${i >= TOP && $('playsMore').dataset.open !== '1' ? ' hidden' : ''}><button type="button" class="play" data-target="${p.card.id}">
       <span class="rank">${i + 1}</span><span class="bet">${esc(p.pick)}${tag(p)}</span>
       <span class="edgebox"><b>${p.edge.toFixed(1)}</b><span>edge</span></span>
-      <span class="sub">${esc(p.match)} &middot; <span class="nw">${esc(p.when)}</span></span></button></li>`).join('');
+      <span class="sub">${esc(p.match)} &middot; <span class="nw">${esc(p.when)}</span>${p.better ? `<br><span class="bestnote">${esc(p.better)}</span>` : ''}</span></button></li>`).join('');
   $('playsCount').textContent = plays.length ? plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' left this week' : 'No plays left this week';
   const more = $('playsMore');
   more.hidden = plays.length <= TOP;
