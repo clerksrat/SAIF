@@ -87,6 +87,9 @@
   .sidetbl td, .sidetbl th { white-space: nowrap; padding-left: 5px; padding-right: 5px; }
   .sidetbl td.sub { padding-left: 18px; }
   @media (max-width: 480px) { .sidetbl .allrec { display: none; } }
+  tr.model td.name { font-weight: 600; color: var(--ink); }
+  .benchtbl td.name { white-space: normal; min-width: 120px; }
+  tr.hl td { background: var(--accent-soft); }
   .empty { font-size: 13px; color: var(--ink-faint); padding: 6px 0 14px; }
   .foot { font-size: 12px; color: var(--ink-faint); margin-top: 4px; line-height: 1.5; }
 </style>
@@ -130,6 +133,12 @@
     <h2>2026 — Model plays vs. all games (Live)</h2>
     <p class="foot" style="margin-top:-2px;margin-bottom:6px;" id="playsNote"></p>
     <div id="playsBody"></div>
+  </div>
+
+  <div class="card" style="border-color:var(--accent);">
+    <h2>2026 — Model vs. simple strategies (Live)</h2>
+    <p class="foot" style="margin-top:-2px;margin-bottom:6px;" id="benchNote">Same games, same lines, no model: what betting every underdog, favorite or home team would have done. A model worth betting has to beat these.</p>
+    <div id="benchBody"></div>
   </div>
 
   <div class="card" style="border-color:var(--accent);">
@@ -207,6 +216,24 @@ function renderPlays(lm) {
      <p class="foot">If the model is finding something real, the record should improve as the edge gets bigger.</p>`;
 }
 
+function renderBench() {
+  const b = LIVE.benchmarks;
+  if (!b || !Object.keys(b).length) {
+    document.getElementById('benchBody').innerHTML = '<p class="empty">Appears after the next grading run (update_performance.py).</p>';
+    return;
+  }
+  const minE = LIVE.min_edge || 1.5;
+  const row = (name, r, cls) => r ? `<tr class="${cls}"><td class="name">${name}</td><td>${r.wins}-${r.losses}-${r.pushes}</td>
+      <td>${fmtPct(r.ats_pct)}</td><td class="${unitsClass(r.units)}">${fmtUnits(r.units)}</td></tr>` : '';
+  const A = LIVE.models['Verified'], B = LIVE.models['Flat-corrected'];
+  const rows = row(`Alpha plays (edge ${minE}+)`, A.plays, 'model hl') + row('Alpha, every game', A.plays_all_games, 'model')
+    + row(`Beta plays (edge ${minE}+)`, B.plays, 'model') + row('Beta, every game', B.plays_all_games, 'model')
+    + Object.entries(b).map(([n, r], i) => row(n, r, i === 0 ? 'gap' : '')).join('');
+  document.getElementById('benchBody').innerHTML = `<div class="tscroll"><table class="sidetbl benchtbl">
+    <thead><tr><th>Strategy</th><th>Record</th><th>ATS%</th><th>Units</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="foot">Flat &minus;110 on every bet, graded at the board&rsquo;s line. Weeks with per-game results only (${(LIVE.edge_weeks || []).join(', ')}). Pick&rsquo;em games have no underdog or favorite and are left out of those rows.</p>`;
+}
+
 function renderSide(lm) {
   const s = lm.by_side;
   if (!s || !s.all || !Object.keys(s.all).length) {
@@ -247,6 +274,7 @@ function renderLive(modelKey) {
   }).join('');
   renderPlays(lm);
   renderSide(lm);
+  renderBench();
   const tierOrder = ['P4vP4','G5vG5','CROSS','OTHER'];
   const tierLabel = {P4vP4:'P4 vs P4', G5vG5:'G5 vs G5', CROSS:'Cross-tier', OTHER:'Other'};
   document.getElementById('liveTierRows').innerHTML = tierOrder.filter(g => lm.by_tier[g]).map(g => {
