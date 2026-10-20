@@ -1,4 +1,9 @@
-"""Add graded live weeks to docs/performance.html.
+"""Add graded live weeks to docs/live.json (the data file docs/performance.html reads).
+
+Only the data file is written; the page itself is never edited by this script, so updating
+performance.html on GitHub and running this locally can't overwrite each other. Just upload
+docs/live.json after running. (First run with no live.json: the data is seeded from the
+numbers embedded in performance.html.)
 
 Usage (after grade_week.py has written state/graded/week{N}_graded.csv):
     python update_performance.py          # folds in every graded week found
@@ -20,6 +25,7 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 PAGE = HERE / 'docs' / 'performance.html'
+LIVE_JSON = HERE / 'docs' / 'live.json'
 WIN = 100 / 110
 MODELS = {'Verified': 'alpha', 'Flat-corrected': 'beta'}
 MIN_EDGE = 1.5  # keep in step with MIN_EDGE in build_board.py
@@ -95,10 +101,13 @@ def main():
     ap.add_argument('--dry', action='store_true')
     a = ap.parse_args()
 
-    html = PAGE.read_text(encoding='utf-8')
-    i = html.index('const LIVE = ') + len('const LIVE = ')
-    live, end = json.JSONDecoder().raw_decode(html[i:])
-    end += i
+    if LIVE_JSON.exists():
+        live = json.loads(LIVE_JSON.read_text(encoding='utf-8'))
+    else:  # one-time seed from the numbers embedded in the page
+        html = PAGE.read_text(encoding='utf-8')
+        i = html.index('LIVE = ') + len('LIVE = ')
+        live, _ = json.JSONDecoder().raw_decode(html[i:])
+        print(f'seeded from {PAGE.name} (no {LIVE_JSON.name} yet)')
 
     files = sorted(glob.glob(str(HERE / 'state' / 'graded' / 'week*_graded.csv')))
     if not files:
@@ -202,10 +211,8 @@ def main():
     if a.dry:
         return
 
-    html = html[:i] + json.dumps(live) + html[end:]
-    html = re.sub(r'Weeks? [\d&;a-z\-–]+ tracked so far\.', f'Weeks {span} tracked so far.', html, count=1)
-    PAGE.write_text(html, encoding='utf-8')
-    print(f'Updated {PAGE}')
+    LIVE_JSON.write_text(json.dumps(live, indent=1), encoding='utf-8')
+    print(f'Updated {LIVE_JSON}  -> upload this one file to the docs folder on GitHub')
 
 
 if __name__ == '__main__':
