@@ -315,10 +315,17 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
+    bh, ba = getattr(r, 'best_home_spread', np.nan), getattr(r, 'best_away_spread', np.nan)
+    best = []
+    if pd.notna(ba) and abs(ba - (-r.market_spread)) >= .25:
+        best.append(f'{e(r.away_team)}&nbsp;{sgn(ba)}')
+    if pd.notna(bh) and abs(bh - r.market_spread) >= .25:
+        best.append(f'{e(r.home_team)}&nbsp;{sgn(bh)}')
+    best_html = f'<span class="besttag">Best available: {" &middot; ".join(best)}</span>' if best else ''
     return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
- <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
+ <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}{best_html}</p>
  {qb_banner}<div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
 <details class="contrib"><summary>Where the margin comes from</summary>
  <p class="contrib-sub">Alpha</p>{contrib_rows(r.alpha_contribs, r.home_team, r.away_team)}
@@ -345,9 +352,18 @@ def build_page(wk, week, season, inj):
     else:
         inj_note = '<p class="note"><b>No injury snapshot this week.</b> Check each team\'s current injury report manually before betting.</p>'
     cards = ''.join(build_card(r, inj) for r in wk.itertuples())
+    n_cons = int(wk['line_provider'].fillna('').astype(str).str.startswith('Consensus').sum()) if 'line_provider' in wk else 0
+    asof = wk['lines_asof'].dropna().iloc[0] if 'lines_asof' in wk and wk['lines_asof'].notna().any() else None
+    if n_cons and asof:
+        ts = pd.Timestamp(asof).tz_convert('America/New_York')
+        lines_note = (f'<b>Lines</b> as of {ts.strftime("%a %b")} {ts.day}, {ts.strftime("%I:%M %p").lstrip("0")} ET &mdash; '
+                      f'consensus across US sportsbooks for {n_cons} of {len(wk)} games (The Odds API), CollegeFootballData for the rest. '
+                      'Lines move; check your book before betting.')
+    else:
+        lines_note = '<b>Lines</b> from CollegeFootballData at the time of the pull. Lines move; check your book before betting.'
     repl = {'{{LOGO}}': logo, '{{WEEK}}': str(week), '{{SEASON}}': str(season), '{{SPAN}}': span, '{{N_GAMES}}': str(len(wk)),
             '{{N_TIER}}': str(n_tier), '{{INJ_NOTE}}': inj_note, '{{BUCKETS}}': buckets,
-            '{{THROUGH_WEEK}}': str(week - 1), '{{CARDS}}': cards}
+            '{{THROUGH_WEEK}}': str(week - 1), '{{CARDS}}': cards, '{{LINES_NOTE}}': lines_note}
     for k, v in repl.items():
         template = template.replace(k, v)
     return template
@@ -361,6 +377,8 @@ def main():
     a = ap.parse_args()
     data_dir = HERE / f'cfb_fullseason_data_{a.season}'
     wk = score_week(data_dir, a.season, a.week)
+    from odds_lines import apply_odds_lines
+    wk = apply_odds_lines(wk, data_dir)   # Odds API consensus where available, CFBD otherwise
     names = sorted(set(wk.home_team) | set(wk.away_team))
     inj = load_injuries(data_dir, names)
     from qb_flags import flag_board
@@ -375,8 +393,13 @@ def main():
         prev = pd.read_pickle(prev_pkl)
         # keep the FIRST line this tool saw for the game, so repeated rebuilds don't erase the move
         prev['prev_spread'] = prev['prev_spread'].fillna(prev['market_spread']) if 'prev_spread' in prev else prev['market_spread']
-        prev = prev[['home_team', 'away_team', 'prev_spread']]
+        prev['prev_provider'] = prev['line_provider'] if 'line_provider' in prev else None
+        prev = prev[['home_team', 'away_team', 'prev_spread', 'prev_provider']]
         wk = wk.merge(prev, on=['home_team', 'away_team'], how='left')
+        is_cons = lambda s: s.fillna('').astype(str).str.startswith('Consensus')
+        switched = is_cons(wk['line_provider']) & ~is_cons(wk['prev_provider'])
+        wk.loc[switched, 'prev_spread'] = np.nan   # source changed (CFBD -> consensus): start line moves fresh
+        wk = wk.drop(columns='prev_provider')
     wk.to_pickle(prev_pkl)
     n_logged = append_line_history(wk, a.week, state)
     (out / 'index.html').write_text(build_page(wk, a.week, a.season, inj), encoding='utf-8')

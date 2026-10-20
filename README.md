@@ -24,5 +24,6 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 
 ## Notes
 - First pull needs 2022–2025 history; keep `cfb_expanded_data/` beside the scripts if you have it, otherwise the first run re-downloads it.
-- Not automated yet: grading and `performance.html` updates; Odds API team-name matching into the board.
+- Lines: the board uses The Odds API consensus across US books (`odds_lines.py`), falling back to CFBD per game; cards show the best number available.
+- After games finish: `python grade_week.py N`, `python update_performance.py`, then upload `docs/live.json`.
 - Research tool, not betting advice. Injuries are display-only and not in either model.

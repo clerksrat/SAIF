@@ -56,6 +56,8 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .line .lbl{color:var(--ink-faint);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
 .line b{color:var(--ink);font-weight:600;white-space:nowrap}
 .qbflag{margin:8px 0;padding:7px 10px;border-radius:8px;font-size:12.5px;line-height:1.4}.qb-stale{background:var(--accent-soft);color:var(--accent)}.qb-info{background:var(--rule);color:var(--ink-soft)}.qb-mute{font-weight:700}
+.besttag{display:block;color:var(--ink-faint);font-size:12.5px;margin-top:2px}
+.linesnote{margin-top:-4px}
 .movetag{color:var(--ink-faint);font-size:12.5px;white-space:nowrap}
 .models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .mtile{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;min-width:0}
@@ -186,6 +188,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 </details>
 
 <p class="legend"><b>Line</b> = market spread, favorite shown with &minus;. <b>Pick</b> = the side each model would bet, at that market number (solid = edge 3+ pts, outline = 1.5&ndash;3). Edges under 1.5 pts show as <b>No play</b>.</p>
+<p class="legend linesnote">{{LINES_NOTE}}</p>
 <p id="preview" class="legend">All {{N_GAMES}} games with a posted market spread are listed below. Filters need JavaScript.</p>
 
 <div class="filters" id="filters">
