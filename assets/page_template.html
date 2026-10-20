@@ -47,7 +47,7 @@ button{background:transparent;color:var(--ink-soft);cursor:pointer;font-weight:6
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .game{background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:16px 18px;min-width:0}
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:12px;color:var(--ink-faint)}
-.game.done{opacity:.55;background:var(--paper)}.game.done h2{color:var(--ink-soft)}
+.game.done{opacity:.72;background:var(--paper)}.game.done h2{color:var(--ink-soft)}
 .finaltag{background:var(--rule);color:var(--ink);border-radius:6px;padding:2px 7px;font-weight:600}
 .tiertag{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 7px;font-weight:600}
 h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px;line-height:1.2;margin:8px 0 6px;color:var(--ink)}
@@ -60,7 +60,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .mtile{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;min-width:0}
 .mlabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:6px}
-.pick{display:inline-block;font-weight:700;font-size:15.5px;line-height:1.3;padding:5px 9px;border-radius:7px}
+.pick{display:inline-block;max-width:100%;overflow-wrap:anywhere;font-weight:700;font-size:15.5px;line-height:1.3;padding:5px 9px;border-radius:7px}
 .pick.edge-strong{background:var(--accent);color:#14261D}
 .pick.edge-mid{border:1.5px solid var(--accent);color:var(--accent)}
 .noplay{display:inline-block;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--rule-strong);border-radius:7px;padding:6px 9px}
@@ -109,6 +109,11 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .play .edgebox span{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em}
 .plays-more{margin-top:10px;min-height:40px;font-size:13.5px}
 .plays-muted{font-size:12px;color:var(--ink-faint);margin:10px 0 0}
+.plays-sofar{font-size:13px;color:var(--ink-soft);margin:6px 0 10px;padding:7px 10px;background:var(--paper);border-radius:8px}
+.plays-sofar b{color:var(--ink)}
+.pos{color:var(--win)}.neg{color:var(--loss)}
+.res{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:6px;vertical-align:2px}
+.res-W{background:#1F3A27;color:var(--win)}.res-L{background:#3A2321;color:var(--loss)}.res-P{background:var(--rule);color:var(--ink-soft)}
 .game.flash{animation:flash 1.6s ease-out}
 @keyframes flash{0%,40%{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
 @media(max-width:600px){.plays{padding:12px}.plays-list{grid-template-columns:1fr}.play .bet{font-size:15px}}
@@ -162,6 +167,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 
 <section class="plays" id="plays" hidden aria-labelledby="playsTitle">
   <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s top plays</h3><span class="plays-count" id="playsCount"></span></div>
+  <p class="plays-sofar" id="playsSoFar" hidden></p>
   <p class="plays-note">Alpha&rsquo;s picks with an edge of 1.5+ points on games not yet played, ranked by edge. A bigger edge is a bigger disagreement with the market, not a proven better bet &mdash; see <a href="performance.html">Model performance</a>. Tap a play to jump to its game.</p>
   <ol class="plays-list" id="playsList"></ol>
   <button type="button" class="plays-more" id="playsMore" hidden></button>
@@ -193,7 +199,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 </div>
 
 <p id="count" role="status" aria-live="polite">{{N_GAMES}} of {{N_GAMES}} games shown</p>
-<div id="cards" class="grid">{{CARDS}}</div>
+<div id="cards" class="grid" data-season="{{SEASON}}" data-week="{{WEEK}}">{{CARDS}}</div>
 <p id="empty" hidden>No matching games. Lower the minimum or reset filters.</p>
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
@@ -201,51 +207,102 @@ function render(){let query=$('search').value.trim().toLowerCase().replace(/cinc
 const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
 $('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
 render();$('preview').hidden=true;
-(function(){
-  const TOP = 5, MIN = 1.5;
-  const tile = (c, i) => c.querySelectorAll('.mtile')[i];
-  const edgeOf = t => { const m = t && t.querySelector('.msub') && t.querySelector('.msub').textContent.match(/Edge\s+([\d.]+)/); return m ? parseFloat(m[1]) : 0; };
-  const pickOf = t => { const p = t && t.querySelector('.pick'); return p ? p.textContent.replace(/\u00a0/g, ' ').trim() : null; };
+// ---------- top plays + live final scores ----------
+const TOP = 5, MIN = 1.5;
+const norm = s => (s || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
+const esc = s => s.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const tile = (c, i) => c.querySelectorAll('.mtile')[i];
+const edgeOf = t => { const m = t && t.querySelector('.msub') && t.querySelector('.msub').textContent.match(/Edge\s+([\d.]+)/); return m ? parseFloat(m[1]) : 0; };
+const pickOf = t => { const p = t && t.querySelector('.pick'); return p ? norm(p.textContent) : null; };
+const teamsOf = c => { const t = [...c.querySelector('h2').childNodes].filter(n => n.nodeType === 3).map(n => norm(n.textContent)).filter(Boolean); return { away: t[0] || '', home: t[t.length - 1] || '' }; };
+cards.forEach((c, i) => { if (!c.id) c.id = 'game-' + i; });
+
+function soFar(idx) {           // graded plays for model idx (0 = Alpha, 1 = Beta)
+  let w = 0, l = 0, p = 0;
+  cards.forEach(c => { const t = tile(c, idx); const r = t && t.dataset.res; if (r === 'W') w++; else if (r === 'L') l++; else if (r === 'P') p++; });
+  return { w, l, p, units: w * 100 / 110 - l };
+}
+
+function buildPlays() {
   let plays = [], muted = 0;
-  cards.forEach((c, i) => {
+  cards.forEach(c => {
     if (c.dataset.done === '1') return;
     const a = tile(c, 0), b = tile(c, 1), pick = pickOf(a), edge = edgeOf(a);
     if (!pick || edge < MIN) return;
     if (c.querySelector('.qb-mute')) { muted++; return; }
-    if (!c.id) c.id = 'game-' + i;
     const bp = pickOf(b);
     plays.push({ card: c, pick, edge, beta: bp === pick ? 'yes' : (bp ? 'other' : 'none'),
-      match: c.querySelector('h2').textContent.replace(/\s+/g, ' ').trim(),
-      when: (c.querySelector('.meta span') || {}).textContent || '' });
+      match: norm(c.querySelector('h2').textContent), when: (c.querySelector('.meta span') || {}).textContent || '' });
   });
-  if (!plays.length) return;
   plays.sort((x, y) => y.edge - x.edge || Number(x.card.dataset.time) - Number(y.card.dataset.time));
-  const esc = s => s.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
   const tag = p => p.beta === 'yes' ? '<span class="agree yes">Beta agrees</span>'
                  : p.beta === 'other' ? '<span class="agree no">Beta: other side</span>' : '<span class="agree no">Beta: no play</span>';
-  $('playsList').innerHTML = plays.map((p, i) => `<li><button type="button" class="play" data-target="${p.card.id}"${i >= TOP ? ' data-extra hidden' : ''}>
+  $('playsList').innerHTML = plays.map((p, i) => `<li${i >= TOP && $('playsMore').dataset.open !== '1' ? ' hidden' : ''}><button type="button" class="play" data-target="${p.card.id}">
       <span class="rank">${i + 1}</span><span class="bet">${esc(p.pick)}${tag(p)}</span>
       <span class="edgebox"><b>${p.edge.toFixed(1)}</b><span>edge</span></span>
       <span class="sub">${esc(p.match)} &middot; <span class="nw">${esc(p.when)}</span></span></button></li>`).join('');
-  $('playsCount').textContent = plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' this week';
-  if (plays.length > TOP) {
-    const more = $('playsMore'); more.hidden = false; more.textContent = 'Show all ' + plays.length + ' plays';
-    more.addEventListener('click', () => {
-      const open = more.dataset.open !== '1'; more.dataset.open = open ? '1' : '0';
-      document.querySelectorAll('#playsList [data-extra]').forEach(b => { b.hidden = !open; b.parentElement.hidden = !open; });
-      more.textContent = open ? 'Show top ' + TOP : 'Show all ' + plays.length + ' plays';
-    });
-    document.querySelectorAll('#playsList [data-extra]').forEach(b => b.parentElement.hidden = true);
-  }
-  if (muted) { const m = $('playsMuted'); m.hidden = false; m.textContent = muted + (muted === 1 ? ' play' : ' plays') + ' left off: the pick is on a team missing its starting QB, which the models can\u2019t see.'; }
-  $('playsList').addEventListener('click', e => {
-    const b = e.target.closest('.play'); if (!b) return;
-    const c = document.getElementById(b.dataset.target);
-    Object.keys(defaults).forEach(id => $(id).value = defaults[id]); render();
-    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
-  });
-  $('plays').hidden = false;
-})();
+  $('playsCount').textContent = plays.length ? plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' left this week' : 'No plays left this week';
+  const more = $('playsMore');
+  more.hidden = plays.length <= TOP;
+  more.textContent = more.dataset.open === '1' ? 'Show top ' + TOP : 'Show all ' + plays.length + ' plays';
+  const m = $('playsMuted');
+  m.hidden = !muted;
+  m.textContent = muted + (muted === 1 ? ' play' : ' plays') + ' left off: the pick is on a team missing its starting QB, which the models can’t see.';
+  const A = soFar(0), B = soFar(1), sf = $('playsSoFar');
+  const fmt = r => `${r.w}–${r.l}${r.p ? '–' + r.p : ''} (<span class="${r.units >= 0 ? 'pos' : 'neg'}">${r.units >= 0 ? '+' : '−'}${Math.abs(r.units).toFixed(1)}u</span>)`;
+  sf.hidden = !(A.w + A.l + A.p + B.w + B.l + B.p);
+  sf.innerHTML = `<b>Graded so far this week</b> &middot; Alpha plays ${fmt(A)} &middot; Beta plays ${fmt(B)}`;
+  $('plays').hidden = !plays.length && sf.hidden;
+}
+$('playsMore').onclick = () => { const more = $('playsMore'); more.dataset.open = more.dataset.open === '1' ? '0' : '1'; buildPlays(); };
+$('playsList').addEventListener('click', e => {
+  const b = e.target.closest('.play'); if (!b) return;
+  const c = document.getElementById(b.dataset.target);
+  Object.keys(defaults).forEach(id => $(id).value = defaults[id]); render();
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
+});
+buildPlays();
 
+// Final scores: /api/scores (Netlify function, cached 10 min) -> grey out, move down, grade each pick.
+function applyScores(data) {
+  const fin = {};
+  (data.games || []).forEach(g => { if (g.done) fin[(g.home + '|' + g.away).toLowerCase()] = g; });
+  let changed = false;
+  cards.forEach(c => {
+    if (c.dataset.graded === '1') return;
+    const { home, away } = teamsOf(c), g = fin[(home + '|' + away).toLowerCase()];
+    if (!g) return;
+    c.dataset.graded = '1'; c.dataset.done = '1'; c.classList.add('done'); changed = true;
+    const meta = c.querySelector('.meta');
+    let ft = meta.querySelector('.finaltag');
+    if (!ft) { ft = document.createElement('span'); ft.className = 'finaltag'; meta.appendChild(ft); }
+    ft.textContent = `Final: ${away} ${g.ap}, ${home} ${g.hp}`;
+    c.querySelectorAll('.mtile').forEach(t => {
+      const p = t.querySelector('.pick'); if (!p) return;
+      const s = norm(p.textContent), k = s.lastIndexOf(' '), team = s.slice(0, k), n = s.slice(k + 1);
+      const num = n === 'PK' ? 0 : parseFloat(n.replace('−', '-'));
+      const cover = (team.toLowerCase() === home.toLowerCase() ? g.hp - g.ap : g.ap - g.hp) + num;
+      const r = cover > 0 ? 'W' : cover < 0 ? 'L' : 'P';
+      t.dataset.res = r;
+      const badge = document.createElement('span');
+      badge.className = 'res res-' + r; badge.textContent = { W: 'Won', L: 'Lost', P: 'Push' }[r];
+      p.after(badge);
+    });
+  });
+  if (changed) { render(); buildPlays(); }
+}
+const SEASON = $('cards').dataset.season, WEEK = $('cards').dataset.week;
+async function pollScores() {
+  try {
+    const r = await fetch(`/api/scores?year=${SEASON}&week=${WEEK}`);
+    if (r.ok) applyScores(await r.json());
+  } catch (e) { /* offline or function not deployed: board still works */ }
+}
+const pending = () => { const now = Date.now() / 1000; return cards.some(c => c.dataset.done !== '1' && now > Number(c.dataset.time) + 2.5 * 3600); };
+if (SEASON && WEEK && /^https?:/.test(location.protocol)) {
+  pollScores();
+  setInterval(() => { if (!document.hidden && pending()) pollScores(); }, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && pending()) pollScores(); });
+}
 </script></html>

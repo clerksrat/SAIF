@@ -265,7 +265,7 @@ def bet_line(spread, home, away):
 def model_tile(name, edge, fair_spread, r):
     team = r.home_team if edge > 0 else r.away_team
     num = r.market_spread if edge > 0 else -r.market_spread
-    pick = (f'<span class="pick {edge_class(edge)}">{e(team)}&nbsp;{sgn(num)}</span>' if abs(edge) >= MIN_EDGE
+    pick = (f'<span class="pick {edge_class(edge)}">{e(team)} <span class="nw">{sgn(num)}</span></span>' if abs(edge) >= MIN_EDGE
             else '<span class="noplay">No play</span>')
     return (f'<div class="mtile"><div class="mlabel">{name}</div>{pick}'
             f'<div class="msub">Model <b>{bet_line(fair_spread, r.home_team, r.away_team)}</b> '
@@ -345,7 +345,7 @@ def build_page(wk, week, season, inj):
     else:
         inj_note = '<p class="note"><b>No injury snapshot this week.</b> Check each team\'s current injury report manually before betting.</p>'
     cards = ''.join(build_card(r, inj) for r in wk.itertuples())
-    repl = {'{{LOGO}}': logo, '{{WEEK}}': str(week), '{{SPAN}}': span, '{{N_GAMES}}': str(len(wk)),
+    repl = {'{{LOGO}}': logo, '{{WEEK}}': str(week), '{{SEASON}}': str(season), '{{SPAN}}': span, '{{N_GAMES}}': str(len(wk)),
             '{{N_TIER}}': str(n_tier), '{{INJ_NOTE}}': inj_note, '{{BUCKETS}}': buckets,
             '{{THROUGH_WEEK}}': str(week - 1), '{{CARDS}}': cards}
     for k, v in repl.items():
