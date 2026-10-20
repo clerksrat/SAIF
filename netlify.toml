@@ -2,6 +2,8 @@
 [build]
   publish = "docs"
   command = ""
+  # Skip the deploy (no credits used) when a push touches nothing the site serves -- e.g. scripts or state files only.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- docs netlify netlify.toml"
 
 # Serverless functions (live final scores for the board). Kept outside docs/ so the source isn't published.
 # Needs the CFBD_API_KEY environment variable (Site configuration > Environment variables, Functions scope).
