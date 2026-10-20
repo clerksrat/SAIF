@@ -50,6 +50,23 @@ def by_side(d, tag):
     return {row: tally(d.loc[m[row], f'{tag}_result']) for row in SIDE_ROWS if m[row].any()}
 
 
+BENCH_ROWS = ['Every underdog', 'Every underdog +10 or more', 'Every favorite', 'Every home team']
+
+
+def benchmarks(df):
+    """Model-free strategies graded on the same games and lines: bet every underdog / favorite / home team."""
+    d = df[df['market_spread_home'].notna() & df['home_cover_margin'].notna()]
+    flip = {'W': 'L', 'L': 'W', 'P': 'P'}
+    home = d['home_cover_margin'].map(lambda c: 'W' if c > 0 else 'L' if c < 0 else 'P')
+    sp = d['market_spread_home']
+    dog = home.where(sp > 0, home.map(flip))           # home is the dog when its spread is positive
+    has_fav = sp != 0
+    return {'Every underdog': tally(dog[has_fav]),
+            'Every underdog +10 or more': tally(dog[sp.abs() >= 10]),
+            'Every favorite': tally(dog[has_fav].map(flip)),
+            'Every home team': tally(home)}
+
+
 def tally(results):
     w, l, p = (int((results == x).sum()) for x in 'WLP')
     n = w + l
@@ -104,6 +121,7 @@ def main():
             continue
         df = pd.read_csv(f)
         graded_weeks.append(wk)
+        live.setdefault('bench_detail', {})[str(wk)] = benchmarks(df)
         for mk, tag in MODELS.items():
             d = df[df[f'{tag}_result'].isin(['W', 'L', 'P'])]
             conf = {}
@@ -149,6 +167,11 @@ def main():
         m['by_side'] = {grp: {r: side[grp][r] for r in SIDE_ROWS if r in side[grp]} for grp in side}
     live['edge_weeks'] = sorted(int(w) for w, d in live['models']['Verified']['detail'].items() if 'plays' in d)
     live['min_edge'] = MIN_EDGE
+    bench = {}
+    for w, b in live.get('bench_detail', {}).items():
+        for name, t in b.items():
+            bench[name] = add(bench.get(name, {}), t)
+    live['benchmarks'] = {n: bench[n] for n in BENCH_ROWS if n in bench}
 
     live['weeks_graded'] = sorted(set(base_weeks) | {int(w) for w in live['models']['Verified']['detail']})
     wk = live['weeks_graded']
@@ -171,6 +194,10 @@ def main():
                     u = sa[r]
                     print(f"{'':17s}{r:>24s}: {t['wins']}-{t['losses']}-{t['pushes']} {t['units']:+.2f}u"
                           f"  |  {u['wins']}-{u['losses']}-{u['pushes']} {u['units']:+.2f}u")
+    if live['benchmarks']:
+        print('benchmarks (same games, no model):')
+        for n, t in live['benchmarks'].items():
+            print(f"{'':17s}{n:>26s}: {t['wins']}-{t['losses']}-{t['pushes']}  ATS {(t['ats_pct'] or 0):.1%}  {t['units']:+.2f}u")
     print('weeks on page:', wk)
     if a.dry:
         return
