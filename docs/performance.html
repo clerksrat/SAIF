@@ -80,6 +80,13 @@
   .vs .ttl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); font-weight: 600; margin-bottom: 4px; }
   .vs .rec { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; }
   .vs .meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+  td.sub { padding-left: 20px; color: var(--ink-soft); }
+  tr.gap td { border-top: 1px solid var(--rule-strong); }
+  td.dim { color: var(--ink-faint); }
+  .tscroll { overflow-x: auto; }
+  .sidetbl td, .sidetbl th { white-space: nowrap; padding-left: 5px; padding-right: 5px; }
+  .sidetbl td.sub { padding-left: 18px; }
+  @media (max-width: 480px) { .sidetbl .allrec { display: none; } }
   .empty { font-size: 13px; color: var(--ink-faint); padding: 6px 0 14px; }
   .foot { font-size: 12px; color: var(--ink-faint); margin-top: 4px; line-height: 1.5; }
 </style>
@@ -123,6 +130,12 @@
     <h2>2026 — Model plays vs. all games (Live)</h2>
     <p class="foot" style="margin-top:-2px;margin-bottom:6px;" id="playsNote"></p>
     <div id="playsBody"></div>
+  </div>
+
+  <div class="card" style="border-color:var(--accent);">
+    <h2>2026 — Which side the model takes (Live)</h2>
+    <p class="foot" style="margin-top:-2px;margin-bottom:6px;" id="sideNote">Whether the picks are laying points or getting them, and home or away. Shows if the record comes from one kind of bet.</p>
+    <div id="sideBody"></div>
   </div>
 
   <div class="card" style="border-color:var(--accent);">
@@ -194,6 +207,29 @@ function renderPlays(lm) {
      <p class="foot">If the model is finding something real, the record should improve as the edge gets bigger.</p>`;
 }
 
+function renderSide(lm) {
+  const s = lm.by_side;
+  if (!s || !s.all || !Object.keys(s.all).length) {
+    document.getElementById('sideBody').innerHTML = '<p class="empty">Appears after the next grading run (update_performance.py).</p>';
+    return;
+  }
+  const order = ['Favorite', 'Underdog', 'Underdog +10 or more', "Pick'em", 'Home team', 'Away team'];
+  const label = {'Underdog +10 or more': '+10 or more', 'Home team': 'Home', 'Away team': 'Away'};
+  const z = {wins: 0, losses: 0, pushes: 0, units: 0, ats_pct: null, games: 0};
+  const rows = order.filter(r => s.all[r]).map(r => {
+    const p = s.plays[r] || z, a = s.all[r];
+    const cls = (r === 'Home team' ? ' class="gap"' : '');
+    return `<tr${cls}><td class="name${r === 'Underdog +10 or more' ? ' sub' : ''}">${label[r] || r}</td>
+      <td>${p.wins}-${p.losses}-${p.pushes}</td><td>${fmtPct(p.ats_pct)}</td>
+      <td class="${unitsClass(p.units)}">${fmtUnits(p.units)}</td>
+      <td class="dim allrec">${a.wins}-${a.losses}</td><td class="dim">${fmtPct(a.ats_pct)}</td></tr>`;
+  }).join('');
+  document.getElementById('sideBody').innerHTML = `<div class="tscroll"><table class="sidetbl">
+    <thead><tr><th>Pick is on</th><th>Plays</th><th>ATS%</th><th>Units</th><th class="allrec">All</th><th>All games</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <p class="foot">Plays = edge ${LIVE.min_edge || 1.5}+. "All games" = every game graded, including No plays. Home/away is the listed home team, so neutral-site games count as home for one side.</p>`;
+}
+
 function renderLive(modelKey) {
   const lm = LIVE.models[modelKey];
   const o = lm.overall;
@@ -210,6 +246,7 @@ function renderLive(modelKey) {
       <td>${fmtPct(r.ats_pct)}</td><td class="${unitsClass(r.units)}">${fmtUnits(r.units)}</td></tr>`;
   }).join('');
   renderPlays(lm);
+  renderSide(lm);
   const tierOrder = ['P4vP4','G5vG5','CROSS','OTHER'];
   const tierLabel = {P4vP4:'P4 vs P4', G5vG5:'G5 vs G5', CROSS:'Cross-tier', OTHER:'Other'};
   document.getElementById('liveTierRows').innerHTML = tierOrder.filter(g => lm.by_tier[g]).map(g => {

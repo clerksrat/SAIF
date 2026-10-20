@@ -33,6 +33,23 @@ def edge_bucket(x):
             return name
 
 
+SIDE_ROWS = ['Favorite', 'Underdog', 'Underdog +10 or more', "Pick'em", 'Home team', 'Away team']
+
+
+def side_masks(d, tag):
+    """Which side each pick is on. The line the pick is taken at is the home spread for a home pick
+    and its negative for an away pick: negative = laying points (favorite), positive = getting them."""
+    home = d[f'{tag}_pick'] == 'home'
+    line = d['market_spread_home'].where(home, -d['market_spread_home'])
+    return {'Favorite': line < 0, 'Underdog': line > 0, 'Underdog +10 or more': line >= 10,
+            "Pick'em": line == 0, 'Home team': home, 'Away team': ~home}
+
+
+def by_side(d, tag):
+    m = side_masks(d, tag)
+    return {row: tally(d.loc[m[row], f'{tag}_result']) for row in SIDE_ROWS if m[row].any()}
+
+
 def tally(results):
     w, l, p = (int((results == x).sum()) for x in 'WLP')
     n = w + l
@@ -95,10 +112,12 @@ def main():
             tier = {t: tally(g[f'{tag}_result']) for t, g in d.groupby('tier')}
             eb = d[f'{tag}_edge'].map(edge_bucket)
             by_edge = {b: tally(d.loc[eb == b, f'{tag}_result']) for b, _, _ in EDGE_BUCKETS if (eb == b).any()}
-            plays = tally(d.loc[d[f'{tag}_edge'].abs() >= MIN_EDGE, f'{tag}_result'])
+            is_play = d[f'{tag}_edge'].abs() >= MIN_EDGE
+            plays = tally(d.loc[is_play, f'{tag}_result'])
             live['models'][mk]['detail'][str(wk)] = {
                 'overall': tally(d[f'{tag}_result']), 'by_tier': tier, 'by_conference': conf,
-                'by_edge': by_edge, 'plays': plays}
+                'by_edge': by_edge, 'plays': plays,
+                'by_side': {'plays': by_side(d[is_play], tag), 'all': by_side(d, tag)}}
 
     for mk in MODELS:
         m = live['models'][mk]
@@ -122,6 +141,12 @@ def main():
         m['plays_all_games'] = all_g or None
         m['by_edge'] = {b: by_edge[b] for b, _, _ in EDGE_BUCKETS if b in by_edge}
         m['plays_by_week'] = {w: d['plays'] for w, d in ew.items()}
+        side = {'plays': {}, 'all': {}}
+        for d in ew.values():
+            for grp in side:
+                for row, t in d.get('by_side', {}).get(grp, {}).items():
+                    side[grp][row] = add(side[grp].get(row, {}), t)
+        m['by_side'] = {grp: {r: side[grp][r] for r in SIDE_ROWS if r in side[grp]} for grp in side}
     live['edge_weeks'] = sorted(int(w) for w, d in live['models']['Verified']['detail'].items() if 'plays' in d)
     live['min_edge'] = MIN_EDGE
 
@@ -138,6 +163,14 @@ def main():
                   f"({p['games']} games, edge >= {MIN_EDGE}, weeks {live['edge_weeks']})")
             for b, t in live['models'][mk]['by_edge'].items():
                 print(f"{'':17s}{b:>15s}: {t['wins']}-{t['losses']}-{t['pushes']}  {t['units']:+.2f}u")
+            sp, sa = live['models'][mk]['by_side']['plays'], live['models'][mk]['by_side']['all']
+            print(f"{'':17s}{'side (plays | all games)':>24s}")
+            for r in SIDE_ROWS:
+                if r in sa:
+                    t = sp.get(r, {'wins': 0, 'losses': 0, 'pushes': 0, 'units': 0})
+                    u = sa[r]
+                    print(f"{'':17s}{r:>24s}: {t['wins']}-{t['losses']}-{t['pushes']} {t['units']:+.2f}u"
+                          f"  |  {u['wins']}-{u['losses']}-{u['pushes']} {u['units']:+.2f}u")
     print('weeks on page:', wk)
     if a.dry:
         return
