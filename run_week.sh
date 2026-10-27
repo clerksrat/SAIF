@@ -9,6 +9,9 @@ if [ "$WEEK" = "auto" ]; then   # week of the next Saturday on/after today; 2026
   WEEK=$(python3 -c "import math,datetime as d;print(math.ceil((d.date.today()-d.date(2026,9,5)).days/7)+1)")
 fi
 [ -f .env ] && set -a && . ./.env && set +a      # CFBD_API_KEY, SPORTSDATAIO_API_KEY, ODDS_API_KEY
+if [ "${2:-}" = "--push" ]; then                  # build with the latest template/scripts from GitHub
+  git pull --rebase -q || echo "WARNING: git pull failed; building with the local copy"
+fi
 python3 saif_pull_all.py
 python3 build_board.py --week "$WEEK"
 if [ "${2:-}" = "--push" ]; then
