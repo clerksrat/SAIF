@@ -100,17 +100,11 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .plays-note{font-size:12px;color:var(--ink-faint);margin:4px 0 10px;line-height:1.45}
 .plays-note a{color:var(--ink-soft)}
 .plays-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
-.play{display:grid;grid-template-columns:26px 1fr auto;gap:2px 10px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;width:100%;min-height:0;font:inherit;color:inherit}
+.play{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:baseline;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;width:100%;min-height:0;font:inherit;color:inherit}
 .play:hover,.play:focus-visible{border-color:var(--accent);outline:none}
-.play .rank{grid-row:1/3;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);font-weight:600}
 .play .bet{font-weight:700;font-size:16px;color:var(--ink);line-height:1.25}
-.play .sub{grid-column:2;font-size:12px;color:var(--ink-faint);line-height:1.4}
-.play .agree{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:5px;vertical-align:1px}
-.play .agree.yes{background:var(--accent-soft);color:var(--accent)}
-.play .agree.no{border:1px solid var(--rule-strong);color:var(--ink-faint)}
-.play .edgebox{grid-column:3;grid-row:1/3;text-align:right;line-height:1.1}
-.play .edgebox b{display:block;font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
-.play .edgebox span{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em}
+.play .when{font-size:12px;color:var(--accent);white-space:nowrap;text-align:right}
+.play .sub{grid-column:1/-1;font-size:12px;color:var(--ink-faint);line-height:1.4}
 .plays-more{margin-top:10px;min-height:40px;font-size:13.5px}
 .plays-muted{font-size:12px;color:var(--ink-faint);margin:10px 0 0}
 .plays-sofar{font-size:13px;color:var(--ink-soft);margin:6px 0 10px;padding:7px 10px;background:var(--paper);border-radius:8px}
@@ -170,9 +164,9 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <div class="warn"><b>Research models, not a proven edge.</b> Injuries are not in either model &mdash; open a game&rsquo;s injury list before you bet it.</div>
 
 <section class="plays" id="plays" hidden aria-labelledby="playsTitle">
-  <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s top plays</h3><span class="plays-count" id="playsCount"></span></div>
+  <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s plays</h3><span class="plays-count" id="playsCount"></span></div>
   <p class="plays-sofar" id="playsSoFar" hidden></p>
-  <p class="plays-note">Alpha&rsquo;s picks with an edge of 1.5+ points on games not yet played, ranked by edge. A bigger edge is a bigger disagreement with the market, not a proven better bet &mdash; see <a href="performance.html">Model performance</a>. Tap a play to jump to its game.</p>
+  <p class="plays-note">Games where Alpha <b>and</b> Beta take the same side, each with an edge of 1.5+ points, in kickoff order. They aren&rsquo;t ranked: so far bigger edges haven&rsquo;t won more often &mdash; see <a href="performance.html">Model performance</a>. Tap a play to jump to its game.</p>
   <ol class="plays-list" id="playsList"></ol>
   <button type="button" class="plays-more" id="playsMore" hidden></button>
   <p class="plays-muted" id="playsMuted" hidden></p>
@@ -222,42 +216,44 @@ const pickOf = t => { const p = t && t.querySelector('.pick'); return p ? norm(p
 const teamsOf = c => { const t = [...c.querySelector('h2').childNodes].filter(n => n.nodeType === 3).map(n => norm(n.textContent)).filter(Boolean); return { away: t[0] || '', home: t[t.length - 1] || '' }; };
 cards.forEach((c, i) => { if (!c.id) c.id = 'game-' + i; });
 
-function soFar(idx) {           // graded plays for model idx (0 = Alpha, 1 = Beta)
+function graded(pick) {        // W/L/P record over cards, using the result on the tile pick(c) returns
   let w = 0, l = 0, p = 0;
-  cards.forEach(c => { const t = tile(c, idx); const r = t && t.dataset.res; if (r === 'W') w++; else if (r === 'L') l++; else if (r === 'P') p++; });
+  cards.forEach(c => { const t = pick(c); const r = t && t.dataset.res; if (r === 'W') w++; else if (r === 'L') l++; else if (r === 'P') p++; });
   return { w, l, p, units: w * 100 / 110 - l };
 }
+// A play for this box = Alpha and Beta both pick the same side at the same number (each needs edge 1.5+).
+const agreed = c => { const a = pickOf(tile(c, 0)), b = pickOf(tile(c, 1)); return a && b && a === b ? a : null; };
 
 function buildPlays() {
-  let plays = [], muted = 0;
+  let plays = [], muted = 0, solo = 0;
   cards.forEach(c => {
     if (c.dataset.done === '1') return;
-    const a = tile(c, 0), b = tile(c, 1), pick = pickOf(a), edge = edgeOf(a);
-    if (!pick || edge < MIN) return;
+    const pick = agreed(c);
+    if (!pick) { if (pickOf(tile(c, 0)) || pickOf(tile(c, 1))) solo++; return; }
     if (c.querySelector('.qb-mute')) { muted++; return; }
-    const bp = pickOf(b);
-    plays.push({ card: c, pick, edge, beta: bp === pick ? 'yes' : (bp ? 'other' : 'none'),
-      match: norm(c.querySelector('h2').textContent), when: (c.querySelector('.meta span') || {}).textContent || '',
+    const a = tile(c, 0);
+    plays.push({ card: c, pick, ea: edgeOf(a), eb: edgeOf(tile(c, 1)),
+      match: norm(c.querySelector('h2').textContent),
+      when: norm((c.querySelector('.meta span') || {}).textContent || '').replace(/\s*ET$/, ''),
       better: a.querySelector('.bestbook') ? norm(a.querySelector('.bestbook').textContent) : '' });
   });
-  plays.sort((x, y) => y.edge - x.edge || Number(x.card.dataset.time) - Number(y.card.dataset.time));
-  const tag = p => p.beta === 'yes' ? '<span class="agree yes">Beta agrees</span>'
-                 : p.beta === 'other' ? '<span class="agree no">Beta: other side</span>' : '<span class="agree no">Beta: no play</span>';
-  $('playsList').innerHTML = plays.map((p, i) => `<li${i >= TOP && $('playsMore').dataset.open !== '1' ? ' hidden' : ''}><button type="button" class="play" data-target="${p.card.id}">
-      <span class="rank">${i + 1}</span><span class="bet">${esc(p.pick)}${tag(p)}</span>
-      <span class="edgebox"><b>${p.edge.toFixed(1)}</b><span>edge</span></span>
-      <span class="sub">${esc(p.match)} &middot; <span class="nw">${esc(p.when)}</span>${p.better ? `<br><span class="bestnote">${esc(p.better)}</span>` : ''}</span></button></li>`).join('');
+  plays.sort((x, y) => Number(x.card.dataset.time) - Number(y.card.dataset.time));
+  const open = $('playsMore').dataset.open === '1';
+  $('playsList').innerHTML = plays.map((p, i) => `<li${i >= TOP && !open ? ' hidden' : ''}><button type="button" class="play" data-target="${p.card.id}">
+      <span class="bet">${esc(p.pick)}</span><span class="when">${esc(p.when)}</span>
+      <span class="sub">${esc(p.match)} &middot; edge ${p.ea.toFixed(1)} Alpha / ${p.eb.toFixed(1)} Beta${p.better ? `<br><span class="bestnote">${esc(p.better)}</span>` : ''}</span></button></li>`).join('');
   $('playsCount').textContent = plays.length ? plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' left this week' : 'No plays left this week';
   const more = $('playsMore');
   more.hidden = plays.length <= TOP;
-  more.textContent = more.dataset.open === '1' ? 'Show top ' + TOP : 'Show all ' + plays.length + ' plays';
-  const m = $('playsMuted');
-  m.hidden = !muted;
-  m.textContent = muted + (muted === 1 ? ' play' : ' plays') + ' left off: the pick is on a team missing its starting QB, which the models can’t see.';
-  const A = soFar(0), B = soFar(1), sf = $('playsSoFar');
+  more.textContent = open ? 'Show next ' + TOP + ' only' : 'Show all ' + plays.length + ' plays';
+  const notes = [];
+  if (solo) notes.push(`${solo} game${solo === 1 ? '' : 's'} where only one model has a play — on the board below.`);
+  if (muted) notes.push(`${muted} agreed play${muted === 1 ? '' : 's'} left off: the pick is on a team missing its starting QB, which the models can’t see.`);
+  const m = $('playsMuted'); m.hidden = !notes.length; m.textContent = notes.join(' ');
+  const G = graded(c => agreed(c) ? tile(c, 0) : null), A = graded(c => tile(c, 0)), B = graded(c => tile(c, 1)), sf = $('playsSoFar');
   const fmt = r => `${r.w}–${r.l}${r.p ? '–' + r.p : ''} (<span class="${r.units >= 0 ? 'pos' : 'neg'}">${r.units >= 0 ? '+' : '−'}${Math.abs(r.units).toFixed(1)}u</span>)`;
   sf.hidden = !(A.w + A.l + A.p + B.w + B.l + B.p);
-  sf.innerHTML = `<b>Graded so far this week</b> &middot; Alpha plays ${fmt(A)} &middot; Beta plays ${fmt(B)}`;
+  sf.innerHTML = `<b>Graded so far this week</b> &middot; These plays ${fmt(G)} &middot; all Alpha plays ${fmt(A)} &middot; all Beta plays ${fmt(B)}`;
   $('plays').hidden = !plays.length && sf.hidden;
 }
 $('playsMore').onclick = () => { const more = $('playsMore'); more.dataset.open = more.dataset.open === '1' ? '0' : '1'; buildPlays(); };
