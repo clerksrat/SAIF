@@ -14,16 +14,17 @@ Keys: put them in a .env file beside this script (see .env.example) or export th
   SPORTSDATAIO_API_KEY    optional -- injuries step is skipped with a warning if absent
   ODDS_API_KEY            optional -- odds step is skipped with a warning if absent
 
-Stale-cache fix: the collector caches every response forever, keyed by
-endpoint+params. For the live season that silently freezes /games, so scores
-never arrive on reruns. This script deletes cached 2026 responses before the
-CFBD step (historical years stay cached, so reruns are still fast).
+Cache: the collector caches every response forever, keyed by endpoint+params.
+Prior seasons are pulled once and never again. For the live season this script
+deletes only what can still change (the schedule/scores, plus stats and lines for
+weeks not yet final) -- finished weeks stay cached. See purge_live_season_cache.
 
 Usage:
     python saif_pull_all.py                 # everything
     python saif_pull_all.py --skip-injuries # CFBD + odds only
     python saif_pull_all.py --skip-odds
     python saif_pull_all.py --season 2026
+    python saif_pull_all.py --week 9        # what run_week.sh uses: live season only through week 9
 """
 import argparse
 import csv
@@ -112,28 +113,84 @@ def http_json(url, headers=None, retries=4):
 
 
 # ---------------------------------------------------------------- step 0/1: CFBD
+# A finished week's CFBD data is kept once it was pulled this long after the week's last kickoff
+# (stats and lines are final by then). Anything newer is refetched.
+STATS_FINAL_AFTER_H = 24
+LINES_FINAL_AFTER_H = 6
+
+
+def _ts(value):
+    try:
+        return datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+    except (TypeError, ValueError):
+        return None
+
+
 def purge_live_season_cache(out, season):
+    """Delete only the cached live-season responses that can still change.
+
+    Prior seasons are never touched (cached forever). For the live season:
+      /games schedule                  -> always refetched (scores, kickoff changes)
+      stats with endWeek=k             -> kept once pulled 24h+ after the last kickoff of weeks <= k
+      /lines for week k                -> kept once pulled 6h+ after week k's last kickoff
+      anything else for the season     -> refetched
+    With no cached schedule yet (first run), every live-season response is refetched."""
     raw = Path(out) / 'raw'
-    removed = 0
-    if raw.exists():
-        for p in raw.glob('*.json'):
-            try:
-                req = json.loads(p.read_text(encoding='utf-8')).get('request', {})
-            except (ValueError, OSError):
-                continue
-            if str(req.get('params', {}).get('year')) == str(season):
-                p.unlink()
-                removed += 1
-    print(f'[cache] removed {removed} cached {season} responses so scores/lines refetch fresh', flush=True)
+    if not raw.exists():
+        print(f'[cache] no cache yet -- first run pulls everything', flush=True)
+        return
+    files = []
+    for p in raw.glob('*.json'):
+        try:
+            saved = json.loads(p.read_text(encoding='utf-8'))
+        except (ValueError, OSError):
+            continue
+        req = saved.get('request', {})
+        if str(req.get('params', {}).get('year')) == str(season):
+            files.append((p, saved))
+    last_kick = {}   # week -> latest kickoff that week, from the previously cached schedule
+    for _, saved in files:
+        if saved['request'].get('endpoint') == '/games':
+            for g in saved.get('data', []):
+                k = _ts(g.get('startDate'))
+                if k and g.get('week') is not None:
+                    last_kick[g['week']] = max(k, last_kick.get(g['week'], k))
+    removed = kept = 0
+    for p, saved in files:
+        req, params = saved['request'], saved['request'].get('params', {})
+        got = _ts(saved.get('retrieved_at_utc'))
+        endpoint = req.get('endpoint')
+        keep = False
+        if got and last_kick:
+            if endpoint in ('/stats/season/advanced', '/stats/season') and params.get('endWeek') is not None:
+                k = int(params['endWeek'])
+                kicks = [t for w, t in last_kick.items() if w <= k]
+                keep = bool(kicks) and got.timestamp() >= max(kicks).timestamp() + STATS_FINAL_AFTER_H * 3600
+            elif endpoint == '/lines' and params.get('week') is not None:
+                t = last_kick.get(int(params['week']))
+                keep = t is not None and got.timestamp() >= t.timestamp() + LINES_FINAL_AFTER_H * 3600
+        if keep:
+            kept += 1
+        else:
+            p.unlink()
+            removed += 1
+    print(f'[cache] {season}: kept {kept} finished-week responses, refetching {removed} live ones', flush=True)
 
 
-def run_cfbd(out, season):
+def run_cfbd(out, season, max_week=None):
+    """max_week: only build feature rows through this week (the board's week). Later weeks
+    can't be scored yet anyway, and skipping them avoids ~3 API calls per future week."""
     purge_live_season_cache(out, season)
     args = argparse.Namespace(
         out=str(out), years=[2022, 2023, 2024, 2025, season], start_week=0, end_week=14,
         prior_weight=4, providers=['Bovada', 'ESPN Bet'], offline=False,
-        cache_source=str(HERE / 'cfb_expanded_data'))
+        cache_source=str(HERE / 'cfb_expanded_data'), max_week=max_week)
     collector.pull(args)
+    try:
+        calls = json.loads((Path(out) / 'run_summary.json').read_text())['network_requests_this_run']
+        print(f'[cfbd] {calls} API calls this run', flush=True)
+    except (OSError, ValueError, KeyError):
+        pass
 
 
 # ---------------------------------------------------------------- step 2: injuries
@@ -232,11 +289,12 @@ def main():
     ap.add_argument('--skip-cfbd', action='store_true')
     ap.add_argument('--skip-injuries', action='store_true')
     ap.add_argument('--skip-odds', action='store_true')
+    ap.add_argument('--week', type=int, help='board week: build live-season features only through this week')
     a = ap.parse_args()
 
     out = HERE / f'cfb_fullseason_data_{a.season}'
     if not a.skip_cfbd:
-        run_cfbd(out, a.season)
+        run_cfbd(out, a.season, a.week)
     out.mkdir(parents=True, exist_ok=True)
     for label, skip, fn in (('injuries', a.skip_injuries, lambda: run_injuries(out)),
                             ('qb box scores', a.skip_cfbd, lambda: run_qb_box(out, a.season)),

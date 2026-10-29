@@ -277,6 +277,10 @@ def pull(args):
         schedule=client.get('/games',{'year':year,'seasonType':'regular'})
         weeks = sorted({g['week'] for g in schedule
                         if args.start_week <= g.get('week',-1) <= args.end_week})
+        # Live season only: stop at the week being built (future weeks can't be scored yet).
+        max_week = getattr(args, 'max_week', None)
+        if max_week is not None and year == max(args.years):
+            weeks = [w for w in weeks if w <= max_week]
         week_labels.append({'season':year,'api_weeks':weeks,
                             'first_kickoff':min(g['startDate'] for g in schedule if g.get('startDate'))})
         atomic_json(out/'week_labels.json',week_labels)
