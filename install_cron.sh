@@ -10,7 +10,7 @@ cd "$(dirname "$0")"
 mkdir -p logs
 chmod +x run_week.sh
 BASE="cd $PWD && . .venv/bin/activate"
-( crontab -l 2>/dev/null | grep -v -e 'run_week.sh' -e 'snapshot_close.py' -e '^CRON_TZ=' ;
+( crontab -l 2>/dev/null | grep -v -e 'run_week.sh' -e 'snapshot_close.py' -e '^CRON_TZ=' || true ;
   echo "CRON_TZ=America/New_York"
   echo "0 9 * * 1 $BASE && ./run_week.sh monday --push >> logs/run.log 2>&1"
   echo "0 9 * * 2-5 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"
