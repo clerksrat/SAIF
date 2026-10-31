@@ -1,0 +1,5 @@
+snapshot_utc,odds_api_id,commence_time,home_team,away_team,close_spread_home,min_spread_home,max_spread_home,n_books,minutes_to_kick
+2026-10-30T22:30:01+00:00,78b3d38cdfa28649fdd2ca92829569ce,2026-10-30T23:00:00Z,Charlotte 49ers,Tulane Green Wave,8.5,7.5,8.5,9,30
+2026-10-30T23:00:02+00:00,78b3d38cdfa28649fdd2ca92829569ce,2026-10-30T23:05:00Z,Charlotte 49ers,Tulane Green Wave,8.0,7.5,8.5,8,5
+2026-10-30T23:00:02+00:00,44ee19d31b9288ad402868d6df737595,2026-10-30T23:35:00Z,UCF Knights,Baylor Bears,2.5,2.5,2.5,9,35
+2026-10-31T02:00:02+00:00,8916ba5e623a0a1d97dd0e7f50e4a205,2026-10-31T02:30:00Z,Sacramento State Hornets,Kent State Golden Flashes,7.5,7.0,7.5,9,30
