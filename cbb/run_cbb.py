@@ -65,7 +65,7 @@ def project(today):
     pred, _ = walk_forward(g, SIDES, prior=load_prior(SEASON), final_through=y)
     tot, _ = walk_forward(g, TOTALS, prior=load_prior(SEASON, '_totals'), final_through=y)
     pred['model_total'] = pred.game_id.map(tot.set_index('game_id').model_total)
-    pred = pred.merge(g[['id', 'startDate', 'status', 'neutralSite']].rename(columns={'id': 'game_id'}),
+    pred = pred.merge(g[['id', 'startDate', 'status', 'neutralSite', 'homeConference', 'awayConference']].rename(columns={'id': 'game_id'}),
                       on='game_id')
     pred['tip'] = pd.to_datetime(pred.startDate, utc=True)
     return pred[pred.date == today].copy(), g
