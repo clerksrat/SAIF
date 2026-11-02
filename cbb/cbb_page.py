@@ -1,6 +1,7 @@
 """Render docs/cbb.html: today's CBB dry-run board + the scorecard against the go-wet gates."""
 import html
 import math
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -10,6 +11,7 @@ from zoneinfo import ZoneInfo
 ET = ZoneInfo("America/New_York")
 
 e = html.escape
+ROOT = Path(__file__).resolve().parent.parent
 GATE_N, WIN = 300, 100 / 110
 
 
@@ -102,7 +104,16 @@ def recent(g, side_play):
             + ''.join(rows) + '</table>')
 
 
+def nav():
+    for line in (ROOT / 'assets' / 'tabs.txt').read_text().splitlines():
+        h, html_ = line.split('\t', 1)
+        if h == 'cbb.html':
+            return html_
+    return ''
+
+
 def render(board, graded, entries, today, now, side_play, total_play):
+    NAV = nav()
     g = graded if graded is not None and len(graded) else None
     plays = g[g.side_edge.abs() >= side_play] if g is not None else None
     s_play = stats(plays, 'side_result', 'side_clv') if plays is not None else None
@@ -142,8 +153,9 @@ table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{text-align:lef
 td{{font-family:'IBM Plex Mono',monospace}}.w{{color:var(--win);font-weight:600}}.l{{color:var(--loss);font-weight:600}}
 footer{{color:var(--faint);font-size:12px;margin-top:28px}}
 </style><main>
+{NAV}
 <h1>College Basketball</h1>
-<p class="sub">Board for {today:%a %b %-d} &middot; updated {now.astimezone(ET):%-I:%M %p ET} &middot; <a href="index.html">Football board &rarr;</a></p>
+<p class="sub">Board for {today:%a %b %-d} &middot; updated {now.astimezone(ET):%-I:%M %p ET}</p>
 <div class="banner"><b>Dry run.</b> Paper only &mdash; no SAIF capital until the gates below are met. Entry line = this morning&rsquo;s consensus; every game is graded against its closing line.</div>
 <h2>Go-wet gates &middot; sides <span class="muted" style="font:400 13px 'IBM Plex Sans'">edge &ge; {side_play:g}</span></h2>
 <div class="gates">{gate_rows(s_play)}</div>
