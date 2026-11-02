@@ -1,0 +1,16 @@
+CBBD backfill 2026-11-02 15:34Z
+2021: 5282 games {'cancelled': 718, 'final': 4285, 'scheduled': 279} | 2 season types | lines for 4629 games | box rows 10624 | calls so far 20
+2022: 6387 games {'final': 5966, 'scheduled': 218, 'cancelled': 193, 'postponed': 10} | 2 season types | lines for 5773 games | box rows 12788 | calls so far 42
+2023: 6261 games {'final': 6222, 'scheduled': 12, 'cancelled': 21, 'postponed': 6} | 2 season types | lines for 5853 games | box rows 12608 | calls so far 66
+2024: 6249 games {'final': 6243, 'cancelled': 2, 'scheduled': 4} | 2 season types | lines for 5311 games | box rows 12588 | calls so far 84
+2025: 6299 games {'final': 6292, 'cancelled': 5, 'scheduled': 2} | 2 season types | lines for 5440 games | box rows 12732 | calls so far 106
+2026: 6318 games {'final': 6300, 'cancelled': 4, 'postponed': 14} | 2 season types | lines for 5754 games | box rows 12716 | calls so far 128
+2027: 85 games {'final': 4, 'in_progress': 1, 'scheduled': 80} | 1 season types | lines for 56 games | box rows 8 | calls so far 131
+TOTAL games 36881 | line rows 62081 (32816 games) | box rows 73594 (96 cols)
+status values: {'cancelled': 943, 'final': 35312, 'scheduled': 595, 'postponed': 30, 'in_progress': 1}
+season types: {'regular': 36198, 'postseason': 683}
+line providers by season: 2021: {'teamrankings': 4511, 'consensus': 3934, 'numberfire': 4067}; 2022: {'consensus': 5119, 'teamrankings': 5733}; 2023: {'ESPN BET': 5833, 'consensus': 5602, 'teamrankings': 5732}; 2024: {'ESPN BET': 5311}; 2025: {'ESPN BET': 5440}; 2026: {'ESPN BET': 1256, 'Bovada': 4952, 'Draft Kings': 4505}; 2027: {'Draft Kings': 56, 'Bovada': 30}
+line fields: ['game_id', 'season', 'startDate', 'homeTeam', 'awayTeam', 'provider', 'spread', 'overUnder', 'homeMoneyline', 'awayMoneyline', 'spreadOpen', 'overUnderOpen']
+spreadOpen filled: 12466 of 62081
+box columns (first 60): ['gameId', 'season', 'seasonLabel', 'seasonType', 'tournament', 'startDate', 'startTimeTbd', 'teamId', 'team', 'conference', 'teamSeed', 'opponentId', 'opponent', 'opponentConference', 'opponentSeed', 'neutralSite', 'isHome', 'conferenceGame', 'gameType', 'notes', 'gameMinutes', 'pace', 'team_possessions', 'team_assists', 'team_steals', 'team_blocks', 'team_trueShooting', 'team_rating', 'team_gameScore', 'team_points_total', 'team_points_byPeriod', 'team_points_largestLead', 'team_points_fastBreak', 'team_points_inPaint', 'team_points_offTurnovers', 'team_twoPointFieldGoals_made', 'team_twoPointFieldGoals_attempted', 'team_twoPointFieldGoals_pct', 'team_threePointFieldGoals_made', 'team_threePointFieldGoals_attempted', 'team_threePointFieldGoals_pct', 'team_freeThrows_made', 'team_freeThrows_attempted', 'team_freeThrows_pct', 'team_fieldGoals_made', 'team_fieldGoals_attempted', 'team_fieldGoals_pct', 'team_turnovers_total', 'team_turnovers_teamTotal', 'team_rebounds_offensive', 'team_rebounds_defensive', 'team_rebounds_total', 'team_fouls_total', 'team_fouls_technical', 'team_fouls_flagrant', 'team_fourFactors_effectiveFieldGoalPct', 'team_fourFactors_freeThrowRate', 'team_fourFactors_turnoverRatio', 'team_fourFactors_offensiveReboundPct', 'opp_possessions']
+API calls this run: 131 (cache hits 0) | quota remaining 4827
