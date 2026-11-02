@@ -1,0 +1,52 @@
+CBBD probe 2026-11-02 14:49Z
+line providers: ['ESPN BET', 'consensus', 'teamrankings', 'numberfire', 'Bovada', 'Draft Kings']
+--- season=2022 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 3000 | 2021-11-09 -> 2022-01-08 | types {'regular': 3000}
+  neutral 361 | conf games 562
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 2433 games with a line | spread 2295 | opener 0 | total 2298 | ML 2271
+  providers: {'teamrankings': 2421, 'consensus': 2147}
+  line coverage by month: 11 1049/1308, 12 1048/1314, 01 336/378
+  Jan 10-17 window: 358 games via date range vs 0 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+  team box rows (1 wk): 716
+--- season=2023 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 3000 | 2022-11-07 -> 2023-01-06 | types {'regular': 3000}
+  neutral 412 | conf games 507
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 2605 games with a line | spread 2545 | opener 0 | total 2596 | ML 2569
+  providers: {'ESPN BET': 2592, 'teamrankings': 2493, 'consensus': 2397}
+  line coverage by month: 11 1204/1427, 12 1212/1381, 01 189/192
+  Jan 10-17 window: 367 games via date range vs 0 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+  team box rows (1 wk): 734
+--- season=2024 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 3000 | 2023-11-06 -> 2024-01-10 | types {'regular': 3000}
+  neutral 401 | conf games 463
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 2312 games with a line | spread 2312 | opener 0 | total 2311 | ML 2291
+  providers: {'ESPN BET': 2312}
+  line coverage by month: 11 1020/1393, 12 954/1243, 01 338/364
+  Jan 10-17 window: 348 games via date range vs 9 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+  team box rows (1 wk): 696
+--- season=2025 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 2999 | 2024-11-04 -> 2025-01-08 | types {'regular': 3000}
+  neutral 384 | conf games 495
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 2477 games with a line | spread 2477 | opener 0 | total 2475 | ML 2362
+  providers: {'ESPN BET': 2477}
+  line fields: ['awayMoneyline', 'homeMoneyline', 'overUnder', 'overUnderOpen', 'provider', 'spread', 'spreadOpen']
+  line coverage by month: 11 1213/1513, 12 945/1162, 01 319/325
+  Jan 10-17 window: 364 games via date range vs 0 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+  team box rows (1 wk): 728 | top fields: ['conference', 'conferenceGame', 'gameId', 'gameMinutes', 'gameType', 'isHome', 'neutralSite', 'notes', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'pace', 'season', 'seasonLabel', 'seasonType', 'startDate', 'startTimeTbd', 'team', 'teamId', 'teamSeed', 'tournament']
+  teamStats fields: ['assists', 'blocks', 'fieldGoals', 'fouls', 'fourFactors', 'freeThrows', 'gameScore', 'points', 'possessions', 'rating', 'rebounds', 'steals', 'threePointFieldGoals', 'trueShooting', 'turnovers', 'twoPointFieldGoals']
+--- season=2026 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 3000 | 2025-11-03 -> 2026-01-06 | types {'regular': 3000}
+  neutral 335 | conf games 486
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 2453 games with a line | spread 2453 | opener 2435 | total 2452 | ML 1990
+  providers: {'Bovada': 1988, 'ESPN BET': 1256, 'Draft Kings': 1206}
+  line coverage by month: 11 1244/1572, 12 960/1177, 01 249/251
+  Jan 10-17 window: 346 games via date range vs 0 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+  team box rows (1 wk): 692
+--- season=2027 ---
+  games: 3000  (ROUND NUMBER - likely capped) | with scores 2997 | 2026-11-01 -> 2027-01-02 | types {'regular': 3000}
+  neutral 289 | conf games 327
+  lines: 3000 rows  (ROUND NUMBER - likely capped), 121 games with a line | spread 121 | opener 121 | total 121 | ML 109
+  providers: {'Draft Kings': 121, 'Bovada': 64}
+  line coverage by month: 11 121/1588, 12 0/1313, 01 0/99
+  Jan 10-17 window: 334 games via date range vs 0 in the full-season pull  <- MISMATCH: full pull is truncated, backfill must go by date range
+API calls this run: 25 | quota headers: {'X-CallLimit-Remaining': '4953'}
