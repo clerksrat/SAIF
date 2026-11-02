@@ -80,7 +80,7 @@ def card(r, side_play, total_play):
     if play:
         tags += f'<span class="tag">Side &middot; {pick_text(r.home, r.away, se, r.entry_spread)}</span>'
     if tplay:
-        tags += f'<span class="tag exp">Total &middot; {"Over" if te > 0 else "Under"} {r.entry_total:g} (exp.)</span>'
+        tags += f'<span class="tag">Total &middot; {"Over" if te > 0 else "Under"} {r.entry_total:g}</span>'
     return (f'<div class="card{" play" if play else ""}"><div class="when">{t:%-I:%M %p}'
             f'<span class="src">{e(r.entry_src or "")}</span></div>'
             f'<div class="teams">{e(r.away)} <span class="at">{at}</span> {e(r.home)}</div>{side}{total}'
@@ -108,6 +108,7 @@ def render(board, graded, entries, today, now, side_play, total_play):
     s_play = stats(plays, 'side_result', 'side_clv') if plays is not None else None
     s_all = stats(g, 'side_result', 'side_clv') if g is not None else None
     t_play = stats(g[g.total_edge.abs() >= total_play], 'total_result', 'total_clv') if g is not None else None
+    n_tplays = int(((board.model_total - board.entry_total).abs() >= total_play).sum()) if len(board) else 0
     board = board.sort_values('tip') if len(board) else board
     cards = ''.join(card(r, side_play, total_play) for _, r in board.iterrows()) or \
         '<p class="muted">No D1 games on the board today.</p>'
@@ -137,7 +138,6 @@ h1{{font:600 28px/1.15 Fraunces,serif;margin:0}}h2{{font:600 19px Fraunces,serif
 .k{{display:block;color:var(--faint);font:11px 'IBM Plex Sans',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.04em}}
 .row b{{display:block;font:500 13px 'IBM Plex Mono',ui-monospace,monospace;color:var(--soft);overflow-wrap:anywhere}}.row b.hot{{color:var(--accent)}}
 .hot{{color:var(--accent)}}.tag{{display:inline-block;margin:8px 6px 0 0;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}}
-.tag.exp{{background:#1d2b33;color:#9fbfd6}}
 table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{text-align:left;padding:6px 4px;border-bottom:1px solid var(--rule)}}th{{color:var(--faint);font-weight:500}}
 td{{font-family:'IBM Plex Mono',monospace}}.w{{color:var(--win);font-weight:600}}.l{{color:var(--loss);font-weight:600}}
 footer{{color:var(--faint);font-size:12px;margin-top:28px}}
@@ -145,14 +145,16 @@ footer{{color:var(--faint);font-size:12px;margin-top:28px}}
 <h1>College Basketball</h1>
 <p class="sub">Board for {today:%a %b %-d} &middot; updated {now.astimezone(ET):%-I:%M %p ET} &middot; <a href="index.html">Football board &rarr;</a></p>
 <div class="banner"><b>Dry run.</b> Paper only &mdash; no SAIF capital until the gates below are met. Entry line = this morning&rsquo;s consensus; every game is graded against its closing line.</div>
-<h2>Go-wet gates <span class="muted" style="font:400 13px 'IBM Plex Sans'">sides, edge &ge; {side_play:g}</span></h2>
+<h2>Go-wet gates &middot; sides <span class="muted" style="font:400 13px 'IBM Plex Sans'">edge &ge; {side_play:g}</span></h2>
 <div class="gates">{gate_rows(s_play)}</div>
-{line(s_all, 'All games (any edge)')}{line(t_play, f'Totals, edge &ge; {total_play:g} (experimental)')}
+{line(s_all, 'All games (any edge)')}
 {bucket_table(g)}
-<h2>Today &middot; {len(board)} games &middot; {n_plays} plays</h2>
+<h2>Go-wet gates &middot; totals <span class="muted" style="font:400 13px 'IBM Plex Sans'">edge &ge; {total_play:g}</span></h2>
+<div class="gates">{gate_rows(t_play)}</div>
+<h2>Today &middot; {len(board)} games &middot; {n_plays} side plays &middot; {n_tplays} total plays</h2>
 {cards}
 {recent(g, side_play)}
 <footer>Model: opponent-adjusted efficiency + tempo, refit daily from this season&rsquo;s games with last season as a fading prior.
 Edge = model margin vs the entry line, in points. CLV = points the line moved toward our side between entry and close.
-Totals are experimental until the totals model passes its own backtest. Research tool, not betting advice.</footer>
+Totals use a separately tuned version that discounts hot and cold three-point shooting. Research tool, not betting advice.</footer>
 </main></html>'''

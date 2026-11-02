@@ -35,3 +35,10 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 - Grading is automatic on Mondays. By hand: `python grade_week.py N`, `python update_performance.py`.
 - CLV: `state/closing_lines.csv` holds the pre-kick snapshots; `grade_week.py` adds `close_spread_home` and `alpha_clv`/`beta_clv` (points vs the close for the side picked) and prints avg CLV and % beating the close.
 - Research tool, not betting advice. Injuries are display-only and not in either model.
+
+## College basketball (dry run)
+- `cbb/run_cbb.py --push` — daily 10:15 ET on the Pi: tops up 2027 CBBD data, refits ratings, logs a morning entry line per game (`cbb/state/entries.csv`), grades finals vs CBBD's closing line with CLV (`cbb/state/graded.csv`), publishes `docs/cbb.html`. Paper only.
+- `cbb/ratings.py` — efficiency + tempo ratings; `SIDES` and `TOTALS` are the production settings. `build_priors(season)` once a year.
+- `cbb/backtest.py` (sides) and `cbb/totals_backtest.py` — walk-forward backtests; reports in `cbb/*_report.md`.
+- `cbb/backfill_cbbd.py` — CBBD history by date window (the API caps responses at 3,000 rows). One gzipped file per season in `cbb/data/`.
+- Unmapped Odds API team names print in `logs/cbb.log`; add them to `cbb/odds_match.py`.

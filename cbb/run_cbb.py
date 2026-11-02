@@ -34,13 +34,12 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 from saif_pull_all import http_json  # noqa: E402  (also loads .env)
 from odds_match import Matcher  # noqa: E402
-from ratings import Params, load, load_prior, read, walk_forward  # noqa: E402
+from ratings import SIDES, TOTALS, load, load_prior, read, walk_forward  # noqa: E402
 import cbb_page  # noqa: E402
 
 SEASON = 2027
-PARAMS = Params(k_prior=6, carry=0.85, k_tempo=6)      # from the 2022-25 tuning grid
-SIDE_PLAY = 3.0          # |side edge| that counts as a play on the board
-TOTAL_PLAY = 6.0         # totals are experimental until the totals model passes its backtest
+SIDE_PLAY = 3.0          # |side edge| that counts as a play (backtest: line moves our way more as edge grows)
+TOTAL_PLAY = 4.0         # |total edge| that counts as a play (backtest vs openers: CLV +0.9 at 4+)
 ET = ZoneInfo('America/New_York')
 STATE = HERE / 'state'
 ENTRIES = STATE / 'entries.csv'
@@ -59,9 +58,13 @@ def pull_cbbd():
 
 
 def project(today):
-    """Ratings through yesterday's finals; projections for every game dated `today` (ET)."""
+    """Ratings through yesterday's finals; projections for every game dated `today` (ET).
+    Sides and totals come from two separately tuned versions of the same model."""
     g = load({SEASON})
-    pred, _ = walk_forward(g, PARAMS, prior=load_prior(SEASON), final_through=today - timedelta(days=1))
+    y = today - timedelta(days=1)
+    pred, _ = walk_forward(g, SIDES, prior=load_prior(SEASON), final_through=y)
+    tot, _ = walk_forward(g, TOTALS, prior=load_prior(SEASON, '_totals'), final_through=y)
+    pred['model_total'] = pred.game_id.map(tot.set_index('game_id').model_total)
     pred = pred.merge(g[['id', 'startDate', 'status', 'neutralSite']].rename(columns={'id': 'game_id'}),
                       on='game_id')
     pred['tip'] = pd.to_datetime(pred.startDate, utc=True)
