@@ -7,3 +7,6 @@ cfb_expanded_data/
 *.tmp
 
 .netlify
+
+# CBB raw API cache (rebuilt by cbb/ scripts)
+cbb_data/
