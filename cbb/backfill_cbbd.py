@@ -13,7 +13,7 @@ season, ~180 total the first time, out of the CFBD/CBBD shared quota (~4,950 lef
 Finished windows are cached in cbb_data/raw/ and never pulled again; windows that reach
 into the last 3 days are refetched, so rerunning later just tops up the current season.
 
-Writes cbb/data/games.csv.gz, lines.csv.gz, team_box.csv.gz (committed with --push so the
+Writes cbb/data/games_<season>.csv.gz, lines_<season>.csv.gz, team_box_<season>.csv.gz (committed with --push so the
 backtest can run anywhere) and cbb/backfill_report.txt.
 """
 import argparse
@@ -113,7 +113,7 @@ def pull_window(endpoint, season, start, end):
 
 
 def pull_season(endpoint, season, today):
-    start, last = date(season - 1, 11, 1), min(date(season, 4, 15), today + timedelta(days=1))
+    start, last = date(season - 1, 11, 1), min(date(season, 4, 15), today + timedelta(days=2))
     rows = []
     while start < last:
         end = min(start + timedelta(days=WINDOW_DAYS), last)
@@ -162,40 +162,41 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--seasons', default='2021,2022,2023,2024,2025,2026,2027')
     ap.add_argument('--push', action='store_true', help='commit + push cbb/data and the report')
+    ap.add_argument('--quiet', action='store_true', help='skip the column/provider dump (daily use)')
     a = ap.parse_args()
     today = datetime.now(timezone.utc).date()
     say(f'CBBD backfill {datetime.now(timezone.utc):%Y-%m-%d %H:%MZ}')
     G, L, B = [], [], []
+    OUT.mkdir(exist_ok=True)
     for s in [int(x) for x in a.seasons.split(',')]:
         g = [game_row(x) for x in pull_season('/games', s, today)]
         l = [r for x in pull_season('/lines', s, today) for r in line_rows(x)]
         b = [box_row(x) for x in pull_season('/games/teams', s, today)]
-        G += g; L += l; B += b
-        gd = dedupe(pd.DataFrame(g), ['id'])
+        gd, ld, bd = (dedupe(pd.DataFrame(g), ['id']), dedupe(pd.DataFrame(l), ['game_id', 'provider']),
+                      dedupe(pd.DataFrame(b), ['gameId', 'teamId']))
+        # one file per season: daily updates rewrite only the current season's (small) files
+        for name, df in (('games', gd), ('lines', ld), ('team_box', bd)):
+            if len(df):
+                df.to_csv(OUT / f'{name}_{s}.csv.gz', index=False)
+        G.append(gd); L.append(ld); B.append(bd)
         st = Counter(gd['status']) if len(gd) else {}
-        say(f'{s}: {len(gd)} games {dict(st)} | {len(gd.seasonType.value_counts()) if len(gd) else 0} season types | '
-            f'lines for {pd.DataFrame(l).game_id.nunique() if l else 0} games | box rows {len(b)} | '
-            f'calls so far {STATE["calls"]}')
-    games = dedupe(pd.DataFrame(G), ['id'])
-    lines = dedupe(pd.DataFrame(L), ['game_id', 'provider'])
-    box = dedupe(pd.DataFrame(B), ['gameId', 'teamId'])
-    OUT.mkdir(exist_ok=True)
-    games.to_csv(OUT / 'games.csv.gz', index=False)
-    lines.to_csv(OUT / 'lines.csv.gz', index=False)
-    box.to_csv(OUT / 'team_box.csv.gz', index=False)
-
+        say(f'{s}: {len(gd)} games {dict(st)} | lines for {ld.game_id.nunique() if len(ld) else 0} games | '
+            f'box rows {len(bd)} | calls so far {STATE["calls"]}')
+    games, lines, box = pd.concat(G), pd.concat(L), pd.concat(B)
     say(f'TOTAL games {len(games)} | line rows {len(lines)} ({lines.game_id.nunique()} games) | '
         f'box rows {len(box)} ({box.shape[1]} cols)')
     say(f'status values: {dict(Counter(games.status))}')
     say(f'season types: {dict(Counter(games.seasonType))}')
-    if len(lines):
+    if len(lines) and not a.quiet:
         say('line providers by season: ' + '; '.join(
             f'{s}: {dict(Counter(grp.provider))}' for s, grp in lines.groupby('season')))
         say(f'line fields: {[c for c in lines.columns]}')
         say(f'spreadOpen filled: {int(lines.spreadOpen.notna().sum()) if "spreadOpen" in lines else 0} of {len(lines)}')
-    say(f'box columns (first 60): {list(box.columns)[:60]}')
+    if not a.quiet:
+        say(f'box columns (first 60): {list(box.columns)[:60]}')
     say(f'API calls this run: {STATE["calls"]} (cache hits {STATE["cached"]}) | quota remaining {STATE["quota"]}')
-    REPORT.write_text('\n'.join(LOG) + '\n')
+    if not a.quiet:
+        REPORT.write_text('\n'.join(LOG) + '\n')
     if a.push:
         subprocess.run(['git', 'add', str(OUT), str(REPORT)], cwd=ROOT, check=True)
         subprocess.run(['git', 'commit', '-q', '-m', 'CBB backfill data'], cwd=ROOT, check=False)

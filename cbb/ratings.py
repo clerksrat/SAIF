@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import json
+
 import numpy as np
 import pandas as pd
 
@@ -32,10 +34,17 @@ class Params:
     h_start: float = 2.5      # home edge, points per 100 poss, for the first season
 
 
-def load():
-    """Final D1-vs-D1 games with possessions; one row per game."""
-    g = pd.read_csv(DATA / 'games.csv.gz')
-    b = pd.read_csv(DATA / 'team_box.csv.gz', low_memory=False)
+def read(name, seasons=None):
+    files = sorted(DATA.glob(f'{name}_*.csv.gz'))
+    if seasons is not None:
+        files = [f for f in files if int(f.name.split('_')[-1].split('.')[0]) in seasons]
+    return pd.concat([pd.read_csv(f, low_memory=False) for f in files], ignore_index=True)
+
+
+def load(seasons=None):
+    """D1-vs-D1 games (all statuses) with possessions; one row per game."""
+    g = read('games', seasons)
+    b = read('team_box', seasons)
     g = g[g.homeConference.notna() & g.awayConference.notna()].copy()   # D1 only (non-D1 have no conference)
     g['date'] = pd.to_datetime(g.startDate, utc=True).dt.tz_convert(ET).dt.date
     est = (b.team_fieldGoals_attempted - b.team_rebounds_offensive + b.team_turnovers_total
@@ -50,7 +59,7 @@ def load():
 
 def market_lines():
     """One market spread per game: median across the books CBBD has for it (spread = HOME spread)."""
-    l = pd.read_csv(DATA / 'lines.csv.gz')
+    l = read('lines')
     l = l[l.spread.notna()]
     agg = l.groupby('game_id').agg(spread=('spread', 'median'), total_line=('overUnder', 'median'),
                                    books=('provider', lambda s: ','.join(sorted(set(s)))))
@@ -128,9 +137,11 @@ class Season:
                 'mu': e[2 * n], 'h': e[2 * n + 1], 'tmu': t[n]}
 
 
-def walk_forward(games, p: Params, seasons=None):
-    """Predict every game using only games finished on EARLIER dates. Returns one row per game."""
-    out, prior = [], None
+def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None):
+    """Predict every game using only games finished on EARLIER dates. Returns one row per game.
+    prior: starting ratings for the first season in `games` (else it starts from scratch).
+    final_through: last date whose finals may be learned from (live use: yesterday)."""
+    out = []
     for s, sg in games.groupby('season'):
         teams = sorted(set(sg.homeTeam) | set(sg.awayTeam))
         S = Season(teams, p, prior)
@@ -140,8 +151,25 @@ def walk_forward(games, p: Params, seasons=None):
                     m, tot, poss = S.predict(r.homeTeam, r.awayTeam, r.loc)
                     out.append((r.id, s, d, r.homeTeam, r.awayTeam, r.loc, m, tot, poss,
                                 S.games[S.idx[r.homeTeam]], S.games[S.idx[r.awayTeam]]))
+            if final_through is not None and d > final_through:
+                continue
             for r in dg[dg.status == 'final'].itertuples():
                 S.add(r.homeTeam, r.awayTeam, r.homePoints, r.awayPoints, r.poss, r.minutes, r.loc)
         prior = S.export()
     return pd.DataFrame(out, columns=['game_id', 'season', 'date', 'home', 'away', 'loc', 'model_margin',
                                       'model_total', 'model_poss', 'home_games_before', 'away_games_before']), prior
+
+
+PRIORS = Path(__file__).resolve().parent / 'models'
+
+
+def save_prior(prior, season):
+    PRIORS.mkdir(exist_ok=True)
+    clean = {k: ({t: round(float(x), 4) for t, x in v.items()} if isinstance(v, dict) else round(float(v), 4))
+             for k, v in prior.items()}
+    (PRIORS / f'prior_{season}.json').write_text(json.dumps(clean, indent=0))
+
+
+def load_prior(season):
+    f = PRIORS / f'prior_{season}.json'
+    return json.loads(f.read_text()) if f.exists() else None

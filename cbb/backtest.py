@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ratings import DATA, Params, load, market_lines, walk_forward
+from ratings import DATA, Params, load, market_lines, read, walk_forward
 
 HERE = Path(__file__).resolve().parent
 TUNE = [2022, 2023, 2024, 2025]
@@ -130,7 +130,7 @@ def report(d, label):
 def open_test(d):
     """Seasons with opening lines (2025 ESPN BET partial, 2026 Bovada/DK/ESPN): edge vs the OPENER,
     then did the line move toward the model (CLV) and how did it do ATS at the opener."""
-    l = pd.read_csv(DATA / 'lines.csv.gz')
+    l = read('lines')
     l = l[l.spread.notna() & l.spreadOpen.notna()]
     o = l.groupby('game_id').agg(open=('spreadOpen', 'median'), close=('spread', 'median'))
     x = d.merge(o, left_on='game_id', right_index=True)
