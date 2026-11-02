@@ -101,7 +101,7 @@ Parameters (picked by the 2022-25 MAE grid: k_prior 6, carry 0.85 was best of 12
 |---|---|---|---|
 | 2026 | 1138-1106-11 | 50.7% ±1.1 | -71.5u |
 
-## Against opening lines (7,536 games, seasons [np.int64(2025), np.int64(2026)])
+## Against opening lines (7,536 games, seasons [2025, 2026])
 
 CLV = points the line moved toward the model’s side between open and close.
 
