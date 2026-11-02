@@ -5,17 +5,18 @@
   5,
   6,
   7,
-  8
+  8,
+  9
  ],
  "models": {
   "Verified": {
    "overall": {
-    "games": 287,
-    "wins": 144,
-    "losses": 133,
-    "pushes": 10,
-    "ats_pct": 0.5199,
-    "units": -2.09
+    "games": 343,
+    "wins": 172,
+    "losses": 158,
+    "pushes": 13,
+    "ats_pct": 0.5212,
+    "units": -1.64
    },
    "by_week": {
     "4": {
@@ -57,114 +58,122 @@
      "pushes": 0,
      "ats_pct": 0.4821,
      "units": -4.45
+    },
+    "9": {
+     "games": 56,
+     "wins": 28,
+     "losses": 25,
+     "pushes": 3,
+     "ats_pct": 0.5283,
+     "units": 0.45
     }
    },
    "by_tier": {
     "P4vP4": {
-     "games": 129,
-     "wins": 68,
-     "losses": 58,
-     "pushes": 3,
-     "ats_pct": 0.5397,
-     "units": 3.82
+     "games": 157,
+     "wins": 81,
+     "losses": 71,
+     "pushes": 5,
+     "ats_pct": 0.5329,
+     "units": 2.64
     },
     "G5vG5": {
-     "games": 122,
-     "wins": 63,
-     "losses": 55,
+     "games": 143,
+     "wins": 74,
+     "losses": 65,
      "pushes": 4,
-     "ats_pct": 0.5339,
+     "ats_pct": 0.5324,
      "units": 2.28
     },
     "CROSS": {
-     "games": 12,
+     "games": 13,
      "wins": 6,
-     "losses": 5,
+     "losses": 6,
      "pushes": 1,
-     "ats_pct": 0.5455,
-     "units": 0.46
+     "ats_pct": 0.5,
+     "units": -0.54
     },
     "OTHER": {
-     "games": 24,
-     "wins": 7,
-     "losses": 15,
-     "pushes": 2,
-     "ats_pct": 0.3182,
-     "units": -8.63
+     "games": 30,
+     "wins": 11,
+     "losses": 16,
+     "pushes": 3,
+     "ats_pct": 0.4074,
+     "units": -5.99
     }
    },
    "by_conference": {
     "Big Ten": {
-     "games": 38,
-     "wins": 21,
-     "losses": 17,
+     "games": 47,
+     "wins": 26,
+     "losses": 21,
      "pushes": 0,
-     "ats_pct": 0.5526,
-     "units": 2.08
+     "ats_pct": 0.5532,
+     "units": 2.63
     },
     "Mountain West": {
-     "games": 23,
-     "wins": 15,
-     "losses": 7,
+     "games": 30,
+     "wins": 21,
+     "losses": 8,
      "pushes": 1,
-     "ats_pct": 0.6818,
-     "units": 6.64
+     "ats_pct": 0.7241,
+     "units": 11.09
     },
     "American Athletic": {
-     "games": 28,
-     "wins": 11,
+     "games": 34,
+     "wins": 17,
      "losses": 16,
      "pushes": 1,
-     "ats_pct": 0.4074,
-     "units": -5.99
+     "ats_pct": 0.5152,
+     "units": -0.54
     },
     "Conference USA": {
-     "games": 22,
-     "wins": 12,
-     "losses": 9,
+     "games": 27,
+     "wins": 13,
+     "losses": 13,
      "pushes": 1,
-     "ats_pct": 0.5714,
-     "units": 1.91
+     "ats_pct": 0.5,
+     "units": -1.18
     },
     "Sun Belt": {
-     "games": 29,
+     "games": 35,
      "wins": 16,
-     "losses": 13,
+     "losses": 19,
      "pushes": 0,
-     "ats_pct": 0.5517,
-     "units": 1.55
+     "ats_pct": 0.4571,
+     "units": -4.45
     },
     "Mid-American": {
-     "games": 31,
-     "wins": 14,
+     "games": 32,
+     "wins": 15,
      "losses": 16,
      "pushes": 1,
-     "ats_pct": 0.4667,
-     "units": -3.26
+     "ats_pct": 0.4839,
+     "units": -2.35
     },
     "ACC": {
-     "games": 35,
-     "wins": 22,
-     "losses": 12,
+     "games": 43,
+     "wins": 27,
+     "losses": 15,
      "pushes": 1,
-     "ats_pct": 0.6471,
-     "units": 8.01
+     "ats_pct": 0.6429,
+     "units": 9.56
     },
     "Big 12": {
-     "games": 34,
-     "wins": 13,
-     "losses": 18,
-     "pushes": 3,
-     "ats_pct": 0.4194,
-     "units": -6.17
+     "games": 41,
+     "wins": 15,
+     "losses": 21,
+     "pushes": 5,
+     "ats_pct": 0.4167,
+     "units": -7.35
     },
     "SEC": {
-     "games": 35,
-     "wins": 18,
-     "losses": 17,
+     "games": 40,
+     "wins": 19,
+     "losses": 21,
      "pushes": 0,
-     "ats_pct": 0.5143,
-     "units": -0.62
+     "ats_pct": 0.475,
+     "units": -3.71
     },
     "Pac-12": {
      "games": 5,
@@ -1097,56 +1106,318 @@
        }
       }
      }
+    },
+    "9": {
+     "overall": {
+      "games": 56,
+      "wins": 28,
+      "losses": 25,
+      "pushes": 3,
+      "ats_pct": 0.5283,
+      "units": 0.45
+     },
+     "by_tier": {
+      "CROSS": {
+       "games": 1,
+       "wins": 0,
+       "losses": 1,
+       "pushes": 0,
+       "ats_pct": 0.0,
+       "units": -1.0
+      },
+      "G5vG5": {
+       "games": 21,
+       "wins": 11,
+       "losses": 10,
+       "pushes": 0,
+       "ats_pct": 0.5238,
+       "units": 0.0
+      },
+      "OTHER": {
+       "games": 6,
+       "wins": 4,
+       "losses": 1,
+       "pushes": 1,
+       "ats_pct": 0.8,
+       "units": 2.64
+      },
+      "P4vP4": {
+       "games": 28,
+       "wins": 13,
+       "losses": 13,
+       "pushes": 2,
+       "ats_pct": 0.5,
+       "units": -1.18
+      }
+     },
+     "by_conference": {
+      "ACC": {
+       "games": 8,
+       "wins": 5,
+       "losses": 3,
+       "pushes": 0,
+       "ats_pct": 0.625,
+       "units": 1.55
+      },
+      "American Athletic": {
+       "games": 6,
+       "wins": 6,
+       "losses": 0,
+       "pushes": 0,
+       "ats_pct": 1.0,
+       "units": 5.45
+      },
+      "Big 12": {
+       "games": 7,
+       "wins": 2,
+       "losses": 3,
+       "pushes": 2,
+       "ats_pct": 0.4,
+       "units": -1.18
+      },
+      "Big Ten": {
+       "games": 9,
+       "wins": 5,
+       "losses": 4,
+       "pushes": 0,
+       "ats_pct": 0.5556,
+       "units": 0.55
+      },
+      "Conference USA": {
+       "games": 5,
+       "wins": 1,
+       "losses": 4,
+       "pushes": 0,
+       "ats_pct": 0.2,
+       "units": -3.09
+      },
+      "Mid-American": {
+       "games": 1,
+       "wins": 1,
+       "losses": 0,
+       "pushes": 0,
+       "ats_pct": 1.0,
+       "units": 0.91
+      },
+      "Mountain West": {
+       "games": 7,
+       "wins": 6,
+       "losses": 1,
+       "pushes": 0,
+       "ats_pct": 0.8571,
+       "units": 4.45
+      },
+      "SEC": {
+       "games": 5,
+       "wins": 1,
+       "losses": 4,
+       "pushes": 0,
+       "ats_pct": 0.2,
+       "units": -3.09
+      },
+      "Sun Belt": {
+       "games": 6,
+       "wins": 0,
+       "losses": 6,
+       "pushes": 0,
+       "ats_pct": 0.0,
+       "units": -6.0
+      }
+     },
+     "by_edge": {
+      "No play (<1.5)": {
+       "games": 19,
+       "wins": 9,
+       "losses": 8,
+       "pushes": 2,
+       "ats_pct": 0.5294,
+       "units": 0.18
+      },
+      "1.5\u20133": {
+       "games": 18,
+       "wins": 9,
+       "losses": 9,
+       "pushes": 0,
+       "ats_pct": 0.5,
+       "units": -0.82
+      },
+      "3\u20136": {
+       "games": 12,
+       "wins": 7,
+       "losses": 5,
+       "pushes": 0,
+       "ats_pct": 0.5833,
+       "units": 1.36
+      },
+      "6+": {
+       "games": 7,
+       "wins": 3,
+       "losses": 3,
+       "pushes": 1,
+       "ats_pct": 0.5,
+       "units": -0.27
+      }
+     },
+     "plays": {
+      "games": 37,
+      "wins": 19,
+      "losses": 17,
+      "pushes": 1,
+      "ats_pct": 0.5278,
+      "units": 0.27
+     },
+     "by_side": {
+      "plays": {
+       "Favorite": {
+        "games": 13,
+        "wins": 8,
+        "losses": 5,
+        "pushes": 0,
+        "ats_pct": 0.6154,
+        "units": 2.27
+       },
+       "Underdog": {
+        "games": 23,
+        "wins": 10,
+        "losses": 12,
+        "pushes": 1,
+        "ats_pct": 0.4545,
+        "units": -2.91
+       },
+       "Underdog +10 or more": {
+        "games": 10,
+        "wins": 6,
+        "losses": 4,
+        "pushes": 0,
+        "ats_pct": 0.6,
+        "units": 1.45
+       },
+       "Pick'em": {
+        "games": 1,
+        "wins": 1,
+        "losses": 0,
+        "pushes": 0,
+        "ats_pct": 1.0,
+        "units": 0.91
+       },
+       "Home team": {
+        "games": 25,
+        "wins": 15,
+        "losses": 10,
+        "pushes": 0,
+        "ats_pct": 0.6,
+        "units": 3.64
+       },
+       "Away team": {
+        "games": 12,
+        "wins": 4,
+        "losses": 7,
+        "pushes": 1,
+        "ats_pct": 0.3636,
+        "units": -3.36
+       }
+      },
+      "all": {
+       "Favorite": {
+        "games": 20,
+        "wins": 12,
+        "losses": 7,
+        "pushes": 1,
+        "ats_pct": 0.6316,
+        "units": 3.91
+       },
+       "Underdog": {
+        "games": 35,
+        "wins": 15,
+        "losses": 18,
+        "pushes": 2,
+        "ats_pct": 0.4545,
+        "units": -4.36
+       },
+       "Underdog +10 or more": {
+        "games": 15,
+        "wins": 9,
+        "losses": 6,
+        "pushes": 0,
+        "ats_pct": 0.6,
+        "units": 2.18
+       },
+       "Pick'em": {
+        "games": 1,
+        "wins": 1,
+        "losses": 0,
+        "pushes": 0,
+        "ats_pct": 1.0,
+        "units": 0.91
+       },
+       "Home team": {
+        "games": 32,
+        "wins": 19,
+        "losses": 12,
+        "pushes": 1,
+        "ats_pct": 0.6129,
+        "units": 5.27
+       },
+       "Away team": {
+        "games": 24,
+        "wins": 9,
+        "losses": 13,
+        "pushes": 2,
+        "ats_pct": 0.4091,
+        "units": -4.82
+       }
+      }
+     }
     }
    },
    "plays": {
-    "games": 124,
-    "wins": 67,
-    "losses": 53,
-    "pushes": 4,
-    "ats_pct": 0.5583,
-    "units": 7.91
+    "games": 161,
+    "wins": 86,
+    "losses": 70,
+    "pushes": 5,
+    "ats_pct": 0.5513,
+    "units": 8.18
    },
    "plays_all_games": {
-    "games": 173,
-    "wins": 94,
-    "losses": 74,
-    "pushes": 5,
-    "ats_pct": 0.5595,
-    "units": 11.46
+    "games": 229,
+    "wins": 122,
+    "losses": 99,
+    "pushes": 8,
+    "ats_pct": 0.552,
+    "units": 11.91
    },
    "by_edge": {
     "No play (<1.5)": {
-     "games": 49,
-     "wins": 27,
-     "losses": 21,
-     "pushes": 1,
-     "ats_pct": 0.5625,
-     "units": 3.54
+     "games": 68,
+     "wins": 36,
+     "losses": 29,
+     "pushes": 3,
+     "ats_pct": 0.5538,
+     "units": 3.72
     },
     "1.5\u20133": {
-     "games": 45,
-     "wins": 29,
-     "losses": 16,
+     "games": 63,
+     "wins": 38,
+     "losses": 25,
      "pushes": 0,
-     "ats_pct": 0.6444,
-     "units": 10.36
+     "ats_pct": 0.6032,
+     "units": 9.54
     },
     "3\u20136": {
-     "games": 47,
-     "wins": 22,
-     "losses": 23,
+     "games": 59,
+     "wins": 29,
+     "losses": 28,
      "pushes": 2,
-     "ats_pct": 0.4889,
-     "units": -3.01
+     "ats_pct": 0.5088,
+     "units": -1.65
     },
     "6+": {
-     "games": 32,
-     "wins": 16,
-     "losses": 14,
-     "pushes": 2,
-     "ats_pct": 0.5333,
-     "units": 0.55
+     "games": 39,
+     "wins": 19,
+     "losses": 17,
+     "pushes": 3,
+     "ats_pct": 0.5278,
+     "units": 0.28
     }
    },
    "plays_by_week": {
@@ -1173,103 +1444,127 @@
      "pushes": 0,
      "ats_pct": 0.525,
      "units": 0.09
+    },
+    "9": {
+     "games": 37,
+     "wins": 19,
+     "losses": 17,
+     "pushes": 1,
+     "ats_pct": 0.5278,
+     "units": 0.27
     }
    },
    "by_side": {
     "plays": {
      "Favorite": {
-      "games": 36,
-      "wins": 15,
-      "losses": 21,
+      "games": 49,
+      "wins": 23,
+      "losses": 26,
       "pushes": 0,
-      "ats_pct": 0.4167,
-      "units": -7.36
+      "ats_pct": 0.4694,
+      "units": -5.09
      },
      "Underdog": {
-      "games": 88,
-      "wins": 52,
-      "losses": 32,
-      "pushes": 4,
-      "ats_pct": 0.619,
-      "units": 15.28
+      "games": 111,
+      "wins": 62,
+      "losses": 44,
+      "pushes": 5,
+      "ats_pct": 0.5849,
+      "units": 12.37
      },
      "Underdog +10 or more": {
-      "games": 38,
-      "wins": 21,
-      "losses": 15,
+      "games": 48,
+      "wins": 27,
+      "losses": 19,
       "pushes": 2,
-      "ats_pct": 0.5833,
-      "units": 4.08
+      "ats_pct": 0.587,
+      "units": 5.53
+     },
+     "Pick'em": {
+      "games": 1,
+      "wins": 1,
+      "losses": 0,
+      "pushes": 0,
+      "ats_pct": 1.0,
+      "units": 0.91
      },
      "Home team": {
-      "games": 59,
-      "wins": 36,
-      "losses": 21,
+      "games": 84,
+      "wins": 51,
+      "losses": 31,
       "pushes": 2,
-      "ats_pct": 0.6316,
-      "units": 11.73
+      "ats_pct": 0.622,
+      "units": 15.37
      },
      "Away team": {
-      "games": 65,
-      "wins": 31,
-      "losses": 32,
-      "pushes": 2,
-      "ats_pct": 0.4921,
-      "units": -3.82
+      "games": 77,
+      "wins": 35,
+      "losses": 39,
+      "pushes": 3,
+      "ats_pct": 0.473,
+      "units": -7.18
      }
     },
     "all": {
      "Favorite": {
-      "games": 54,
-      "wins": 28,
-      "losses": 26,
-      "pushes": 0,
-      "ats_pct": 0.5185,
-      "units": -0.55
+      "games": 74,
+      "wins": 40,
+      "losses": 33,
+      "pushes": 1,
+      "ats_pct": 0.5479,
+      "units": 3.36
      },
      "Underdog": {
-      "games": 119,
-      "wins": 66,
-      "losses": 48,
-      "pushes": 5,
-      "ats_pct": 0.5789,
-      "units": 12.0
+      "games": 154,
+      "wins": 81,
+      "losses": 66,
+      "pushes": 7,
+      "ats_pct": 0.551,
+      "units": 7.64
      },
      "Underdog +10 or more": {
-      "games": 50,
-      "wins": 25,
-      "losses": 23,
+      "games": 65,
+      "wins": 34,
+      "losses": 29,
       "pushes": 2,
-      "ats_pct": 0.5208,
-      "units": -0.28
+      "ats_pct": 0.5397,
+      "units": 1.9
+     },
+     "Pick'em": {
+      "games": 1,
+      "wins": 1,
+      "losses": 0,
+      "pushes": 0,
+      "ats_pct": 1.0,
+      "units": 0.91
      },
      "Home team": {
-      "games": 90,
-      "wins": 54,
-      "losses": 34,
-      "pushes": 2,
-      "ats_pct": 0.6136,
-      "units": 15.08
+      "games": 122,
+      "wins": 73,
+      "losses": 46,
+      "pushes": 3,
+      "ats_pct": 0.6134,
+      "units": 20.35
      },
      "Away team": {
-      "games": 83,
-      "wins": 40,
-      "losses": 40,
-      "pushes": 3,
-      "ats_pct": 0.5,
-      "units": -3.64
+      "games": 107,
+      "wins": 49,
+      "losses": 53,
+      "pushes": 5,
+      "ats_pct": 0.4804,
+      "units": -8.46
      }
     }
    }
   },
   "Flat-corrected": {
    "overall": {
-    "games": 287,
-    "wins": 150,
-    "losses": 127,
-    "pushes": 10,
-    "ats_pct": 0.5415,
-    "units": 9.36
+    "games": 343,
+    "wins": 177,
+    "losses": 153,
+    "pushes": 13,
+    "ats_pct": 0.5364,
+    "units": 7.91
    },
    "by_week": {
     "4": {
@@ -1311,114 +1606,122 @@
      "pushes": 0,
      "ats_pct": 0.5714,
      "units": 5.09
+    },
+    "9": {
+     "games": 56,
+     "wins": 27,
+     "losses": 26,
+     "pushes": 3,
+     "ats_pct": 0.5094,
+     "units": -1.45
     }
    },
    "by_tier": {
     "P4vP4": {
-     "games": 129,
-     "wins": 72,
-     "losses": 54,
-     "pushes": 3,
-     "ats_pct": 0.5714,
-     "units": 11.45
+     "games": 157,
+     "wins": 85,
+     "losses": 67,
+     "pushes": 5,
+     "ats_pct": 0.5592,
+     "units": 10.27
     },
     "G5vG5": {
-     "games": 122,
-     "wins": 65,
-     "losses": 53,
+     "games": 143,
+     "wins": 75,
+     "losses": 64,
      "pushes": 4,
-     "ats_pct": 0.5508,
-     "units": 6.09
+     "ats_pct": 0.5396,
+     "units": 4.18
     },
     "CROSS": {
-     "games": 12,
+     "games": 13,
      "wins": 6,
-     "losses": 5,
+     "losses": 6,
      "pushes": 1,
-     "ats_pct": 0.5455,
-     "units": 0.46
+     "ats_pct": 0.5,
+     "units": -0.54
     },
     "OTHER": {
-     "games": 24,
-     "wins": 7,
-     "losses": 15,
-     "pushes": 2,
-     "ats_pct": 0.3182,
-     "units": -8.63
+     "games": 30,
+     "wins": 11,
+     "losses": 16,
+     "pushes": 3,
+     "ats_pct": 0.4074,
+     "units": -5.99
     }
    },
    "by_conference": {
     "Big Ten": {
-     "games": 38,
-     "wins": 21,
-     "losses": 17,
+     "games": 47,
+     "wins": 26,
+     "losses": 21,
      "pushes": 0,
-     "ats_pct": 0.5526,
-     "units": 2.09
+     "ats_pct": 0.5532,
+     "units": 2.64
     },
     "Mountain West": {
-     "games": 23,
-     "wins": 11,
-     "losses": 11,
-     "pushes": 1,
-     "ats_pct": 0.5,
-     "units": -1.0
-    },
-    "American Athletic": {
-     "games": 28,
-     "wins": 14,
-     "losses": 13,
-     "pushes": 1,
-     "ats_pct": 0.5185,
-     "units": -0.26
-    },
-    "Conference USA": {
-     "games": 22,
-     "wins": 12,
-     "losses": 9,
-     "pushes": 1,
-     "ats_pct": 0.5714,
-     "units": 1.92
-    },
-    "Sun Belt": {
-     "games": 29,
+     "games": 30,
      "wins": 16,
      "losses": 13,
-     "pushes": 0,
+     "pushes": 1,
      "ats_pct": 0.5517,
      "units": 1.55
     },
-    "Mid-American": {
-     "games": 31,
-     "wins": 14,
-     "losses": 16,
+    "American Athletic": {
+     "games": 34,
+     "wins": 19,
+     "losses": 14,
      "pushes": 1,
-     "ats_pct": 0.4667,
-     "units": -3.26
+     "ats_pct": 0.5758,
+     "units": 3.29
     },
-    "ACC": {
-     "games": 35,
-     "wins": 22,
+    "Conference USA": {
+     "games": 27,
+     "wins": 14,
      "losses": 12,
      "pushes": 1,
-     "ats_pct": 0.6471,
-     "units": 8.01
+     "ats_pct": 0.5385,
+     "units": 0.74
+    },
+    "Sun Belt": {
+     "games": 35,
+     "wins": 16,
+     "losses": 19,
+     "pushes": 0,
+     "ats_pct": 0.4571,
+     "units": -4.45
+    },
+    "Mid-American": {
+     "games": 32,
+     "wins": 15,
+     "losses": 16,
+     "pushes": 1,
+     "ats_pct": 0.4839,
+     "units": -2.35
+    },
+    "ACC": {
+     "games": 43,
+     "wins": 27,
+     "losses": 15,
+     "pushes": 1,
+     "ats_pct": 0.6429,
+     "units": 9.56
     },
     "Big 12": {
-     "games": 34,
-     "wins": 17,
-     "losses": 14,
-     "pushes": 3,
-     "ats_pct": 0.5484,
-     "units": 1.46
+     "games": 41,
+     "wins": 19,
+     "losses": 17,
+     "pushes": 5,
+     "ats_pct": 0.5278,
+     "units": 0.28
     },
     "SEC": {
-     "games": 35,
-     "wins": 20,
-     "losses": 15,
+     "games": 40,
+     "wins": 21,
+     "losses": 19,
      "pushes": 0,
-     "ats_pct": 0.5714,
-     "units": 3.18
+     "ats_pct": 0.525,
+     "units": 0.09
     },
     "Pac-12": {
      "games": 5,
@@ -2351,56 +2654,318 @@
        }
       }
      }
+    },
+    "9": {
+     "overall": {
+      "games": 56,
+      "wins": 27,
+      "losses": 26,
+      "pushes": 3,
+      "ats_pct": 0.5094,
+      "units": -1.45
+     },
+     "by_tier": {
+      "CROSS": {
+       "games": 1,
+       "wins": 0,
+       "losses": 1,
+       "pushes": 0,
+       "ats_pct": 0.0,
+       "units": -1.0
+      },
+      "G5vG5": {
+       "games": 21,
+       "wins": 10,
+       "losses": 11,
+       "pushes": 0,
+       "ats_pct": 0.4762,
+       "units": -1.91
+      },
+      "OTHER": {
+       "games": 6,
+       "wins": 4,
+       "losses": 1,
+       "pushes": 1,
+       "ats_pct": 0.8,
+       "units": 2.64
+      },
+      "P4vP4": {
+       "games": 28,
+       "wins": 13,
+       "losses": 13,
+       "pushes": 2,
+       "ats_pct": 0.5,
+       "units": -1.18
+      }
+     },
+     "by_conference": {
+      "ACC": {
+       "games": 8,
+       "wins": 5,
+       "losses": 3,
+       "pushes": 0,
+       "ats_pct": 0.625,
+       "units": 1.55
+      },
+      "American Athletic": {
+       "games": 6,
+       "wins": 5,
+       "losses": 1,
+       "pushes": 0,
+       "ats_pct": 0.8333,
+       "units": 3.55
+      },
+      "Big 12": {
+       "games": 7,
+       "wins": 2,
+       "losses": 3,
+       "pushes": 2,
+       "ats_pct": 0.4,
+       "units": -1.18
+      },
+      "Big Ten": {
+       "games": 9,
+       "wins": 5,
+       "losses": 4,
+       "pushes": 0,
+       "ats_pct": 0.5556,
+       "units": 0.55
+      },
+      "Conference USA": {
+       "games": 5,
+       "wins": 2,
+       "losses": 3,
+       "pushes": 0,
+       "ats_pct": 0.4,
+       "units": -1.18
+      },
+      "Mid-American": {
+       "games": 1,
+       "wins": 1,
+       "losses": 0,
+       "pushes": 0,
+       "ats_pct": 1.0,
+       "units": 0.91
+      },
+      "Mountain West": {
+       "games": 7,
+       "wins": 5,
+       "losses": 2,
+       "pushes": 0,
+       "ats_pct": 0.7143,
+       "units": 2.55
+      },
+      "SEC": {
+       "games": 5,
+       "wins": 1,
+       "losses": 4,
+       "pushes": 0,
+       "ats_pct": 0.2,
+       "units": -3.09
+      },
+      "Sun Belt": {
+       "games": 6,
+       "wins": 0,
+       "losses": 6,
+       "pushes": 0,
+       "ats_pct": 0.0,
+       "units": -6.0
+      }
+     },
+     "by_edge": {
+      "No play (<1.5)": {
+       "games": 21,
+       "wins": 9,
+       "losses": 11,
+       "pushes": 1,
+       "ats_pct": 0.45,
+       "units": -2.82
+      },
+      "1.5\u20133": {
+       "games": 18,
+       "wins": 11,
+       "losses": 6,
+       "pushes": 1,
+       "ats_pct": 0.6471,
+       "units": 4.0
+      },
+      "3\u20136": {
+       "games": 11,
+       "wins": 4,
+       "losses": 7,
+       "pushes": 0,
+       "ats_pct": 0.3636,
+       "units": -3.36
+      },
+      "6+": {
+       "games": 6,
+       "wins": 3,
+       "losses": 2,
+       "pushes": 1,
+       "ats_pct": 0.6,
+       "units": 0.73
+      }
+     },
+     "plays": {
+      "games": 35,
+      "wins": 18,
+      "losses": 15,
+      "pushes": 2,
+      "ats_pct": 0.5455,
+      "units": 1.36
+     },
+     "by_side": {
+      "plays": {
+       "Favorite": {
+        "games": 14,
+        "wins": 8,
+        "losses": 6,
+        "pushes": 0,
+        "ats_pct": 0.5714,
+        "units": 1.27
+       },
+       "Underdog": {
+        "games": 20,
+        "wins": 9,
+        "losses": 9,
+        "pushes": 2,
+        "ats_pct": 0.5,
+        "units": -0.82
+       },
+       "Underdog +10 or more": {
+        "games": 11,
+        "wins": 6,
+        "losses": 5,
+        "pushes": 0,
+        "ats_pct": 0.5455,
+        "units": 0.45
+       },
+       "Pick'em": {
+        "games": 1,
+        "wins": 1,
+        "losses": 0,
+        "pushes": 0,
+        "ats_pct": 1.0,
+        "units": 0.91
+       },
+       "Home team": {
+        "games": 22,
+        "wins": 15,
+        "losses": 7,
+        "pushes": 0,
+        "ats_pct": 0.6818,
+        "units": 6.64
+       },
+       "Away team": {
+        "games": 13,
+        "wins": 3,
+        "losses": 8,
+        "pushes": 2,
+        "ats_pct": 0.2727,
+        "units": -5.27
+       }
+      },
+      "all": {
+       "Favorite": {
+        "games": 23,
+        "wins": 13,
+        "losses": 9,
+        "pushes": 1,
+        "ats_pct": 0.5909,
+        "units": 2.82
+       },
+       "Underdog": {
+        "games": 32,
+        "wins": 13,
+        "losses": 17,
+        "pushes": 2,
+        "ats_pct": 0.4333,
+        "units": -5.18
+       },
+       "Underdog +10 or more": {
+        "games": 13,
+        "wins": 8,
+        "losses": 5,
+        "pushes": 0,
+        "ats_pct": 0.6154,
+        "units": 2.27
+       },
+       "Pick'em": {
+        "games": 1,
+        "wins": 1,
+        "losses": 0,
+        "pushes": 0,
+        "ats_pct": 1.0,
+        "units": 0.91
+       },
+       "Home team": {
+        "games": 33,
+        "wins": 19,
+        "losses": 13,
+        "pushes": 1,
+        "ats_pct": 0.5938,
+        "units": 4.27
+       },
+       "Away team": {
+        "games": 23,
+        "wins": 8,
+        "losses": 13,
+        "pushes": 2,
+        "ats_pct": 0.381,
+        "units": -5.73
+       }
+      }
+     }
     }
    },
    "plays": {
-    "games": 123,
-    "wins": 65,
-    "losses": 54,
-    "pushes": 4,
-    "ats_pct": 0.5462,
-    "units": 5.09
+    "games": 158,
+    "wins": 83,
+    "losses": 69,
+    "pushes": 6,
+    "ats_pct": 0.5461,
+    "units": 6.45
    },
    "plays_all_games": {
-    "games": 173,
-    "wins": 98,
-    "losses": 70,
-    "pushes": 5,
-    "ats_pct": 0.5833,
-    "units": 19.09
+    "games": 229,
+    "wins": 125,
+    "losses": 96,
+    "pushes": 8,
+    "ats_pct": 0.5656,
+    "units": 17.64
    },
    "by_edge": {
     "No play (<1.5)": {
-     "games": 50,
-     "wins": 33,
-     "losses": 16,
-     "pushes": 1,
-     "ats_pct": 0.6735,
-     "units": 14.0
+     "games": 71,
+     "wins": 42,
+     "losses": 27,
+     "pushes": 2,
+     "ats_pct": 0.6087,
+     "units": 11.18
     },
     "1.5\u20133": {
-     "games": 40,
-     "wins": 25,
-     "losses": 15,
-     "pushes": 0,
-     "ats_pct": 0.625,
-     "units": 7.72
+     "games": 58,
+     "wins": 36,
+     "losses": 21,
+     "pushes": 1,
+     "ats_pct": 0.6316,
+     "units": 11.72
     },
     "3\u20136": {
-     "games": 60,
-     "wins": 29,
-     "losses": 27,
+     "games": 71,
+     "wins": 33,
+     "losses": 34,
      "pushes": 4,
-     "ats_pct": 0.5179,
-     "units": -0.64
+     "ats_pct": 0.4925,
+     "units": -4.0
     },
     "6+": {
-     "games": 23,
-     "wins": 11,
-     "losses": 12,
-     "pushes": 0,
-     "ats_pct": 0.4783,
-     "units": -1.99
+     "games": 29,
+     "wins": 14,
+     "losses": 14,
+     "pushes": 1,
+     "ats_pct": 0.5,
+     "units": -1.26
     }
    },
    "plays_by_week": {
@@ -2427,91 +2992,115 @@
      "pushes": 0,
      "ats_pct": 0.5128,
      "units": -0.82
+    },
+    "9": {
+     "games": 35,
+     "wins": 18,
+     "losses": 15,
+     "pushes": 2,
+     "ats_pct": 0.5455,
+     "units": 1.36
     }
    },
    "by_side": {
     "plays": {
      "Favorite": {
-      "games": 37,
-      "wins": 18,
-      "losses": 19,
+      "games": 51,
+      "wins": 26,
+      "losses": 25,
       "pushes": 0,
-      "ats_pct": 0.4865,
-      "units": -2.64
+      "ats_pct": 0.5098,
+      "units": -1.37
      },
      "Underdog": {
-      "games": 86,
-      "wins": 47,
-      "losses": 35,
-      "pushes": 4,
-      "ats_pct": 0.5732,
-      "units": 7.73
+      "games": 106,
+      "wins": 56,
+      "losses": 44,
+      "pushes": 6,
+      "ats_pct": 0.56,
+      "units": 6.91
      },
      "Underdog +10 or more": {
-      "games": 40,
-      "wins": 20,
-      "losses": 18,
+      "games": 51,
+      "wins": 26,
+      "losses": 23,
       "pushes": 2,
-      "ats_pct": 0.5263,
-      "units": 0.17
+      "ats_pct": 0.5306,
+      "units": 0.62
+     },
+     "Pick'em": {
+      "games": 1,
+      "wins": 1,
+      "losses": 0,
+      "pushes": 0,
+      "ats_pct": 1.0,
+      "units": 0.91
      },
      "Home team": {
-      "games": 51,
-      "wins": 30,
-      "losses": 19,
+      "games": 73,
+      "wins": 45,
+      "losses": 26,
       "pushes": 2,
-      "ats_pct": 0.6122,
-      "units": 8.27
+      "ats_pct": 0.6338,
+      "units": 14.91
      },
      "Away team": {
-      "games": 72,
-      "wins": 35,
-      "losses": 35,
-      "pushes": 2,
-      "ats_pct": 0.5,
-      "units": -3.18
+      "games": 85,
+      "wins": 38,
+      "losses": 43,
+      "pushes": 4,
+      "ats_pct": 0.4691,
+      "units": -8.45
      }
     },
     "all": {
      "Favorite": {
-      "games": 62,
-      "wins": 34,
-      "losses": 28,
-      "pushes": 0,
-      "ats_pct": 0.5484,
-      "units": 2.91
+      "games": 85,
+      "wins": 47,
+      "losses": 37,
+      "pushes": 1,
+      "ats_pct": 0.5595,
+      "units": 5.73
      },
      "Underdog": {
-      "games": 111,
-      "wins": 64,
-      "losses": 42,
-      "pushes": 5,
-      "ats_pct": 0.6038,
-      "units": 16.18
+      "games": 143,
+      "wins": 77,
+      "losses": 59,
+      "pushes": 7,
+      "ats_pct": 0.5662,
+      "units": 11.0
      },
      "Underdog +10 or more": {
-      "games": 47,
-      "wins": 24,
-      "losses": 21,
+      "games": 60,
+      "wins": 32,
+      "losses": 26,
       "pushes": 2,
-      "ats_pct": 0.5333,
-      "units": 0.81
+      "ats_pct": 0.5517,
+      "units": 3.08
+     },
+     "Pick'em": {
+      "games": 1,
+      "wins": 1,
+      "losses": 0,
+      "pushes": 0,
+      "ats_pct": 1.0,
+      "units": 0.91
      },
      "Home team": {
-      "games": 74,
-      "wins": 48,
-      "losses": 24,
-      "pushes": 2,
-      "ats_pct": 0.6667,
-      "units": 19.64
+      "games": 107,
+      "wins": 67,
+      "losses": 37,
+      "pushes": 3,
+      "ats_pct": 0.6442,
+      "units": 23.91
      },
      "Away team": {
-      "games": 99,
-      "wins": 50,
-      "losses": 46,
-      "pushes": 3,
-      "ats_pct": 0.5208,
-      "units": -0.55
+      "games": 122,
+      "wins": 58,
+      "losses": 59,
+      "pushes": 5,
+      "ats_pct": 0.4957,
+      "units": -6.28
      }
     }
    }
@@ -2524,7 +3113,8 @@
  "edge_weeks": [
   6,
   7,
-  8
+  8,
+  9
  ],
  "min_edge": 1.5,
  "bench_detail": {
@@ -2629,40 +3219,74 @@
     "ats_pct": 0.625,
     "units": 10.82
    }
+  },
+  "9": {
+   "Every underdog": {
+    "games": 55,
+    "wins": 22,
+    "losses": 30,
+    "pushes": 3,
+    "ats_pct": 0.4231,
+    "units": -10.0
+   },
+   "Every underdog +10 or more": {
+    "games": 21,
+    "wins": 11,
+    "losses": 9,
+    "pushes": 1,
+    "ats_pct": 0.55,
+    "units": 1.0
+   },
+   "Every favorite": {
+    "games": 55,
+    "wins": 30,
+    "losses": 22,
+    "pushes": 3,
+    "ats_pct": 0.5769,
+    "units": 5.27
+   },
+   "Every home team": {
+    "games": 56,
+    "wins": 32,
+    "losses": 21,
+    "pushes": 3,
+    "ats_pct": 0.6038,
+    "units": 8.09
+   }
   }
  },
  "benchmarks": {
   "Every underdog": {
-   "games": 173,
-   "wins": 92,
-   "losses": 76,
-   "pushes": 5,
-   "ats_pct": 0.5476,
-   "units": 7.63
+   "games": 228,
+   "wins": 114,
+   "losses": 106,
+   "pushes": 8,
+   "ats_pct": 0.5182,
+   "units": -2.37
   },
   "Every underdog +10 or more": {
-   "games": 61,
-   "wins": 30,
-   "losses": 29,
-   "pushes": 2,
-   "ats_pct": 0.5085,
-   "units": -1.73
+   "games": 82,
+   "wins": 41,
+   "losses": 38,
+   "pushes": 3,
+   "ats_pct": 0.519,
+   "units": -0.73
   },
   "Every favorite": {
-   "games": 173,
-   "wins": 76,
-   "losses": 92,
-   "pushes": 5,
-   "ats_pct": 0.4524,
-   "units": -22.91
+   "games": 228,
+   "wins": 106,
+   "losses": 114,
+   "pushes": 8,
+   "ats_pct": 0.4818,
+   "units": -17.64
   },
   "Every home team": {
-   "games": 173,
-   "wins": 94,
-   "losses": 74,
-   "pushes": 5,
-   "ats_pct": 0.5595,
-   "units": 11.46
+   "games": 229,
+   "wins": 126,
+   "losses": 95,
+   "pushes": 8,
+   "ats_pct": 0.5701,
+   "units": 19.55
   }
  }
 }
