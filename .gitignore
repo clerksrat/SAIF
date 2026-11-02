@@ -10,3 +10,5 @@ cfb_expanded_data/
 
 # CBB raw API cache (rebuilt by cbb/ scripts)
 cbb_data/
+cbb/data/backtest_predictions.csv.gz
+cbb/__pycache__/
