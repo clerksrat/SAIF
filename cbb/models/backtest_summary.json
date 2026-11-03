@@ -1,0 +1,212 @@
+{
+ "built": "2026-11-03",
+ "grading": "flat -110; close = CBBD stored line (median across books)",
+ "sides": {
+  "params": {
+   "k_prior": 6,
+   "carry": 0.85,
+   "k_tempo": 6,
+   "lam3": 0.0
+  },
+  "vs_close": {
+   "tune": {
+    "seasons": "2022-2025",
+    "games": 21910,
+    "mae_model": 9.05,
+    "mae_market": 8.79,
+    "all": {
+     "w": 10910,
+     "l": 10863,
+     "p": 137,
+     "pct": 0.5011,
+     "units": -944.8
+    }
+   },
+   "holdout": {
+    "seasons": "2026",
+    "games": 5748,
+    "mae_model": 9.24,
+    "mae_market": 9.01,
+    "all": {
+     "w": 2884,
+     "l": 2843,
+     "p": 21,
+     "pct": 0.5036,
+     "units": -221.2
+    }
+   }
+  },
+  "vs_open": {
+   "seasons": [
+    2025,
+    2026
+   ],
+   "by_edge": [
+    {
+     "min_edge": 0,
+     "games": 7536,
+     "clv": 0.16,
+     "toward": 0.431,
+     "against": 0.362,
+     "w": 3806,
+     "l": 3703,
+     "p": 27,
+     "pct": 0.5069,
+     "units": -243.0
+    },
+    {
+     "min_edge": 2,
+     "games": 2423,
+     "clv": 0.32,
+     "toward": 0.478,
+     "against": 0.351,
+     "w": 1225,
+     "l": 1187,
+     "p": 11,
+     "pct": 0.5079,
+     "units": -73.4
+    },
+    {
+     "min_edge": 3,
+     "games": 1216,
+     "clv": 0.39,
+     "toward": 0.475,
+     "against": 0.372,
+     "w": 615,
+     "l": 597,
+     "p": 4,
+     "pct": 0.5074,
+     "units": -37.9
+    },
+    {
+     "min_edge": 4,
+     "games": 675,
+     "clv": 0.55,
+     "toward": 0.476,
+     "against": 0.379,
+     "w": 351,
+     "l": 321,
+     "p": 3,
+     "pct": 0.5223,
+     "units": -1.9
+    },
+    {
+     "min_edge": 6,
+     "games": 274,
+     "clv": 0.98,
+     "toward": 0.489,
+     "against": 0.416,
+     "w": 149,
+     "l": 124,
+     "p": 1,
+     "pct": 0.5458,
+     "units": 11.5
+    }
+   ]
+  }
+ },
+ "totals": {
+  "params": {
+   "k_prior": 12,
+   "carry": 0.85,
+   "k_tempo": 6,
+   "lam3": 0.5
+  },
+  "vs_close": {
+   "tune": {
+    "seasons": "2022-2025",
+    "games": 21923,
+    "mae_model": 13.08,
+    "mae_market": 12.87,
+    "all": {
+     "w": 10947,
+     "l": 10907,
+     "p": 69,
+     "pct": 0.5009,
+     "units": -955.2
+    }
+   },
+   "holdout": {
+    "seasons": "2026",
+    "games": 5747,
+    "mae_model": 13.73,
+    "mae_market": 13.37,
+    "all": {
+     "w": 2853,
+     "l": 2876,
+     "p": 18,
+     "pct": 0.498,
+     "units": -282.4
+    }
+   }
+  },
+  "vs_open": {
+   "seasons": [
+    2025,
+    2026
+   ],
+   "by_edge": [
+    {
+     "min_edge": 0,
+     "games": 7453,
+     "clv": 0.43,
+     "toward": 0.522,
+     "against": 0.353,
+     "w": 3835,
+     "l": 3584,
+     "p": 34,
+     "pct": 0.5169,
+     "units": -97.6
+    },
+    {
+     "min_edge": 2,
+     "games": 3801,
+     "clv": 0.66,
+     "toward": 0.572,
+     "against": 0.314,
+     "w": 1980,
+     "l": 1804,
+     "p": 17,
+     "pct": 0.5233,
+     "units": -4.0
+    },
+    {
+     "min_edge": 4,
+     "games": 1524,
+     "clv": 0.89,
+     "toward": 0.602,
+     "against": 0.296,
+     "w": 813,
+     "l": 704,
+     "p": 7,
+     "pct": 0.5359,
+     "units": 35.1
+    },
+    {
+     "min_edge": 6,
+     "games": 535,
+     "clv": 1.04,
+     "toward": 0.622,
+     "against": 0.301,
+     "w": 277,
+     "l": 255,
+     "p": 3,
+     "pct": 0.5207,
+     "units": -3.2
+    },
+    {
+     "min_edge": 9,
+     "games": 116,
+     "clv": 0.71,
+     "toward": 0.534,
+     "against": 0.397,
+     "w": 57,
+     "l": 59,
+     "p": 0,
+     "pct": 0.4914,
+     "units": -7.2
+    }
+   ]
+  }
+ }
+}

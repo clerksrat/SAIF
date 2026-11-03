@@ -207,6 +207,58 @@ def plays_list(board, now, side_play, total_play):
     return items, lis
 
 
+
+# ------------------------------------------------------------------ backtest + daily log
+def backtest_block(side_play, total_play):
+    f = ROOT / 'cbb' / 'models' / 'backtest_summary.json'
+    if not f.exists():
+        return ''
+    bt = json.loads(f.read_text())
+    cards_ = []
+    for kind, title, play in (('sides', 'Sides', side_play), ('totals', 'Totals', total_play)):
+        b = bt[kind]
+        t, h = b['vs_close']['tune'], b['vs_close']['holdout']
+        rows = ''.join(
+            f'<tr class="{"hl" if r["min_edge"] == play else ""}"><td>{r["min_edge"]:g}+</td><td>{r["games"]:,}</td>'
+            f'<td class="{"pos" if r["clv"] > 0 else "neg"}">{r["clv"]:+.2f}</td>'
+            f'<td>{r["toward"]*100:.0f}% / {r["against"]*100:.0f}%</td>'
+            f'<td>{r["pct"]*100:.1f}% <small class="rec">{r["w"]}-{r["l"]}</small></td></tr>' for r in b['vs_open']['by_edge'])
+        seasons = b['vs_open']['seasons']
+        unit = 'ATS' if kind == 'sides' else 'O/U'
+        cards_.append(f'''<div class="sc"><div class="sc-head"><h3>{title}</h3><span class="sc-th">walk-forward, no peeking</span></div>
+<p class="bt-close"><b>vs closing line:</b> {t['all']['pct']*100:.1f}% {unit} on {t['games']:,} games ({t['seasons']}), {h['all']['pct']*100:.1f}% on the {h['seasons']} holdout ({h['games']:,}). Average miss {t['mae_model']:.2f} pts vs the market&rsquo;s {t['mae_market']:.2f}.</p>
+<p class="bt-close"><b>vs opening line</b> ({seasons[0]}&ndash;{str(seasons[-1])[2:]}, the seasons with openers) &mdash; did the line move our way before tip?</p>
+<div class="tablewrap"><table class="bt"><tr><th>Edge</th><th>Games</th><th>Avg CLV</th><th>Toward / against</th><th>At open</th></tr>{rows}</table></div>
+</div>''')
+    return (f'<h2 class="sec" id="backtest">Backtest</h2><p class="legend" style="margin-top:0">Same model, replayed over past seasons using only '
+            f'games played before each date. Highlighted row = the play threshold used live. Built {bt["built"]}.</p>'
+            f'<div class="sc-wrap" style="margin-top:8px">{"".join(cards_)}</div>')
+
+
+def daily_block(g, side_play, total_play):
+    head = '<h2 class="sec">Live results by day</h2>'
+    if g is None or not len(g):
+        return head + ('<p class="legend" style="margin-top:0">Logged, not yet graded: each day&rsquo;s games are graded '
+                       'the next morning at 10:15 ET against their closing lines.</p>')
+    def cell(d, ecol, res, clv, play):
+        s = stats(d[d[ecol].abs() >= play], res, clv)
+        if not s:
+            return '<td>&mdash;</td>'
+        c = '' if math.isnan(s['clv']) else f' &middot; <span class="{"pos" if s["clv"] > 0 else "neg"}">{s["clv"]:+.2f}</span>'
+        return f'<td>{s["w"]}-{s["l"]}-{s["p"]}{c}</td>'
+    rows = []
+    for day, d in sorted(g.groupby('date'), reverse=True):
+        a = stats(d, 'side_result', 'side_clv')
+        all_clv = '' if not a or math.isnan(a['clv']) else f"{a['clv']:+.2f}"
+        rows.append(f'<tr><td>{pd.Timestamp(day):%b %-d}</td><td>{len(d)}</td>{cell(d, "side_edge", "side_result", "side_clv", side_play)}'
+                    f'{cell(d, "total_edge", "total_result", "total_clv", total_play)}'
+                    f'<td>{all_clv}</td></tr>')
+    return (head + '<p class="legend" style="margin-top:0">Every logged game, graded at the morning entry line; CLV vs the closing line. '
+            'Full log: <code>cbb/state/graded.csv</code> in the repo.</p>'
+            '<div class="tablewrap"><table class="bt"><tr><th>Date</th><th>Games</th><th>Side plays &middot; CLV</th>'
+            '<th>Total plays &middot; CLV</th><th>All sides CLV</th></tr>' + ''.join(rows) + '</table></div>')
+
+
 # ------------------------------------------------------------------ page
 LIVE_JS = r'''// ---------- live + final scores: /api/cbb-scores (Netlify function, cached 10 min) ----------
 const DATE=$('cards').dataset.date;
@@ -254,7 +306,17 @@ EXTRA_CSS = '''
 .plays-tabs button{width:auto;min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:999px}
 .plays-tabs button.on{background:var(--accent);color:#14261D;border-color:var(--accent)}
 .filters.cbb{grid-template-columns:2fr 1fr 1fr 1fr 1fr auto}
-.livetag{background:#3A2321;color:var(--loss)}.play .res{margin-left:0}
+.livetag{background:#3A2321;color:var(--loss)}
+h2.sec{font-size:22px;margin:26px 0 6px}
+.bt-close{font-size:13px;color:var(--ink-soft);margin:10px 0 0;line-height:1.5}.bt-close b{color:var(--ink)}
+table.bt{border-collapse:collapse;width:100%;margin-top:8px}
+table.bt th,table.bt td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--rule);font-size:12.5px}
+table.bt th{color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+table.bt td{font-family:'IBM Plex Mono',monospace;color:var(--ink)}
+table.bt tr.hl td{background:var(--accent-soft);color:var(--accent)}
+table.bt .rec{display:block;color:var(--ink-faint);font-size:11px;white-space:nowrap}table.bt tr.hl .rec{color:var(--accent)}
+table.bt .pos{color:var(--win)}table.bt .neg{color:var(--loss)}
+code{font-size:12px;color:var(--ink-soft)}.play .res{margin-left:0}
 .play-res{grid-column:2;text-align:right}
 @media(max-width:900px){.sc-wrap{grid-template-columns:1fr}.filters.cbb{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.sc-stats b{font-size:15px}.sc{padding:12px}}
@@ -297,6 +359,8 @@ def render(board, graded, entries, today, now, side_play, total_play):
 <div class="warn"><b>No SAIF capital until the gates are met.</b> Every game is logged at this morning&rsquo;s line and graded the next day against its closing line. The test is whether the line moves our way (CLV), not the win&ndash;loss record.</div>
 
 <div class="sc-wrap">{scorecard('Sides', s_side, side_play)}{scorecard('Totals', s_tot, total_play)}</div>
+{daily_block(g, side_play, total_play)}
+<p class="legend"><a href="#backtest">Backtest results (2022&ndash;26) &darr;</a></p>
 <details class="about"><summary>Gates, results by edge &amp; recent plays</summary>
 <p><b>Go-wet gates</b> (sides and totals separately): {GATE_N} graded plays, average CLV above zero, and the line moving our way more often than against us. CLV = points the line moved toward our side between this morning and tip.</p>
 {bucket_table(g)}
@@ -321,6 +385,7 @@ def render(board, graded, entries, today, now, side_play, total_play):
 <p id="count" role="status" aria-live="polite">{n} of {n} games shown</p>
 <div id="cards" class="grid" data-date="{today.isoformat()}">{cards}</div>
 <p id="empty" hidden>No matching games. Change the filters or reset.</p>
+{backtest_block(side_play, total_play)}
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
 function render(){{const q=$('search').value.trim().toLowerCase(),show=$('show').value,sort=$('sort').value,conf=$('conf').value,win=$('win').value;let n=0;

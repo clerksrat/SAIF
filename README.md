@@ -39,6 +39,7 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 ## College basketball (dry run)
 - `cbb/run_cbb.py --push` — daily 10:15 ET on the Pi: tops up 2027 CBBD data, refits ratings, logs a morning entry line per game (`cbb/state/entries.csv`), grades finals vs CBBD's closing line with CLV (`cbb/state/graded.csv`), publishes `docs/cbb.html`. Paper only.
 - `cbb/ratings.py` — efficiency + tempo ratings; `SIDES` and `TOTALS` are the production settings. `build_priors(season)` once a year.
-- `cbb/backtest.py` (sides) and `cbb/totals_backtest.py` — walk-forward backtests; reports in `cbb/*_report.md`.
+- `cbb/backtest.py` (sides) and `cbb/totals_backtest.py` — walk-forward backtests with tuning; reports in `cbb/*_report.md`. `cbb/backtest_summary.py` writes `cbb/models/backtest_summary.json`, the numbers shown on the page (rerun after changing settings).
+- Live results log: `cbb/state/entries.csv` (every game at its morning line) and `cbb/state/graded.csv` (results + CLV), committed daily by the Pi.
 - `cbb/backfill_cbbd.py` — CBBD history by date window (the API caps responses at 3,000 rows). One gzipped file per season in `cbb/data/`.
 - Unmapped Odds API team names print in `logs/cbb.log`; add them to `cbb/odds_match.py`.
