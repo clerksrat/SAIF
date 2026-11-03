@@ -133,7 +133,8 @@ def pill(text, edge, play, strong):
 
 def card(r, i, now, side_play, total_play):
     t = r.tip.tz_convert(ET)
-    done = r.tip <= now or r.status in ('final', 'in_progress')
+    done = r.status == 'final'
+    tipped = r.tip <= now and not done
     neutral = r['loc'] == 0
     has_side = not pd.isna(r.entry_spread)
     has_total = not pd.isna(r.entry_total)
@@ -146,8 +147,8 @@ def card(r, i, now, side_play, total_play):
         meta.append(f'<span class="tiertag">{e(conf_txt)}</span>')
     if neutral:
         meta.append('<span class="finaltag">Neutral</span>')
-    if done:
-        meta.append('<span class="finaltag">Tipped</span>')
+    if tipped:
+        meta.append('<span class="finaltag livetag">Tipped</span>')
     model_line = round(-r.model_margin * 2) / 2
     side_tile = (f'<div class="mtile"><div class="mlabel">Side</div>'
                  f'{pill(side_pick(r.home, r.away, se, r.entry_spread), se, side_play, STRONG_SIDE)}'
@@ -170,11 +171,17 @@ def card(r, i, now, side_play, total_play):
         'time': int(r.tip.timestamp()), 'hour': t.hour + t.minute / 60, 'done': int(done),
         'search': f'{r.away} {r.home}'.lower(), 'conf': '|'.join(confs),
         'se': round(abs(se), 2) if has_side else 0, 'te': round(abs(te), 2) if has_total else 0,
-        'splay': int(has_side and abs(se) >= side_play), 'tplay': int(has_total and abs(te) >= total_play)}
+        'splay': int(has_side and abs(se) >= side_play), 'tplay': int(has_total and abs(te) >= total_play),
+        'gid': int(r.game_id), 'home': r.home, 'away': r.away}
+    if data['splay']:      # pick side and the number taken, from the picked team's side
+        data['sside'], data['sline'] = ('home', r.entry_spread) if se > 0 else ('away', -r.entry_spread)
+    if data['tplay']:
+        data['tside'], data['tline'] = ('over' if te > 0 else 'under'), r.entry_total
     attrs = ' '.join(f'data-{k}="{e(str(v))}"' for k, v in data.items())
     return (f'<article class="game{" done" if done else ""}" id="g{i}" {attrs}><div class="meta">{"".join(meta)}</div>'
             f'<h2>{e(r.away)} <small>{"vs" if neutral else "at"}</small> {e(r.home)}</h2>{line}'
-            f'<div class="models">{side_tile}{total_tile}</div></article>')
+            f'<div class="models">{side_tile.replace("class=\"mtile\"", "class=\"mtile\" data-k=\"side\"", 1)}'
+            f'{total_tile.replace("class=\"mtile\"", "class=\"mtile\" data-k=\"total\"", 1)}</div></article>')
 
 
 def plays_list(board, now, side_play, total_play):
@@ -201,6 +208,30 @@ def plays_list(board, now, side_play, total_play):
 
 
 # ------------------------------------------------------------------ page
+LIVE_JS = r'''// ---------- live + final scores: /api/cbb-scores (Netlify function, cached 10 min) ----------
+const DATE=$('cards').dataset.date;
+function grade(c,g){const d=c.dataset,margin=g.hp-g.ap,total=g.hp+g.ap,out={};
+ if(d.sside){const cov=(d.sside==='home'?margin:-margin)+Number(d.sline);out.side=cov>0?'W':cov<0?'L':'P'}
+ if(d.tside){const diff=total-Number(d.tline),v=d.tside==='over'?diff:-diff;out.total=v>0?'W':v<0?'L':'P'}
+ return out}
+function badge(r){const b=document.createElement('span');b.className='res res-'+r;b.textContent={W:'Won',L:'Lost',P:'Push'}[r];return b}
+function applyScores(data){const by={};(data.games||[]).forEach(g=>by[g.id]=g);let changed=false;
+ cards.forEach(c=>{const d=c.dataset,g=by[d.gid];if(!g||d.graded==='1'||g.hp==null)return;
+  const meta=c.querySelector('.meta');let tag=meta.querySelector('.livetag,.scoretag');
+  if(!tag){tag=document.createElement('span');meta.appendChild(tag)}
+  if(g.status!=='final'){tag.className='finaltag livetag';tag.textContent=`Live: ${d.away} ${g.ap}, ${d.home} ${g.hp}`;return}
+  tag.className='finaltag scoretag';tag.textContent=`Final: ${d.away} ${g.ap}, ${d.home} ${g.hp}`;
+  d.graded='1';d.done='1';c.classList.add('done');changed=true;const res=grade(c,g);
+  ['side','total'].forEach(k=>{if(!res[k])return;const p=c.querySelector(`.mtile[data-k=${k}] .pick`);if(p)p.after(badge(res[k]));
+   document.querySelectorAll(`.play[data-go="${c.id}"][data-kind="${k}"]`).forEach(b=>{const s=document.createElement('span');s.className='play-res';s.append(badge(res[k]));b.append(s)})})});
+ if(changed)render()}
+async function pollScores(){try{const r=await fetch('/api/cbb-scores?date='+DATE);if(r.ok)applyScores(await r.json())}catch(e){}}
+const pending=()=>{const now=Date.now()/1000;return cards.some(c=>c.dataset.done!=='1'&&now>Number(c.dataset.time))};
+if(DATE&&/^https?:/.test(location.protocol)){pollScores();
+ setInterval(()=>{if(!document.hidden&&pending())pollScores()},5*60*1000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&pending())pollScores()})}
+'''
+
 EXTRA_CSS = '''
 .sc-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
 .sc{background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:14px 16px;min-width:0}
@@ -223,6 +254,8 @@ EXTRA_CSS = '''
 .plays-tabs button{width:auto;min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:999px}
 .plays-tabs button.on{background:var(--accent);color:#14261D;border-color:var(--accent)}
 .filters.cbb{grid-template-columns:2fr 1fr 1fr 1fr 1fr auto}
+.livetag{background:#3A2321;color:var(--loss)}.play .res{margin-left:0}
+.play-res{grid-column:2;text-align:right}
 @media(max-width:900px){.sc-wrap{grid-template-columns:1fr}.filters.cbb{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.sc-stats b{font-size:15px}.sc{padding:12px}}
 '''
@@ -286,7 +319,7 @@ def render(board, graded, entries, today, now, side_play, total_play):
 </div>
 
 <p id="count" role="status" aria-live="polite">{n} of {n} games shown</p>
-<div id="cards" class="grid">{cards}</div>
+<div id="cards" class="grid" data-date="{today.isoformat()}">{cards}</div>
 <p id="empty" hidden>No matching games. Change the filters or reset.</p>
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
@@ -307,4 +340,5 @@ more.hidden=vis.length<=6;more.textContent=all?'Show fewer':'Show all '+vis.leng
 document.querySelectorAll('.plays-tabs button').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.plays-tabs button').forEach(x=>x.classList.toggle('on',x===b));kind=b.dataset.k;all=false;draw()}}));
 more.addEventListener('click',()=>{{all=!all;draw()}});
 list.addEventListener('click',ev=>{{const b=ev.target.closest('.play');if(!b)return;const c=$(b.dataset.go);if(c.hidden){{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()}}c.scrollIntoView({{behavior:'smooth',block:'center'}});c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});draw()}}
+{LIVE_JS}
 </script></html>'''
