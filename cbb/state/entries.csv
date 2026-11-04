@@ -133,3 +133,13 @@ date,logged_utc,game_id,tip_utc,home,away,neutral,model_margin,model_total,entry
 2026-11-03,2026-11-03T15:15:02+00:00,374611,2026-11-04T00:00Z,Rhode Island,Holy Cross,False,15.44,140.6,-20.5,147.5,Odds API (6 books),-5.06,-6.86
 2026-11-03,2026-11-03T15:15:02+00:00,374615,2026-11-04T03:00Z,California Baptist,North Florida,False,17.15,154.4,-11.5,157.5,Odds API (6 books),5.65,-3.07
 2026-11-03,2026-11-03T15:15:02+00:00,377937,2026-11-04T01:00Z,Arkansas,Arkansas-Pine Bluff,False,32.38,165.8,-41.5,167.5,Odds API (6 books),-9.12,-1.67
+2026-11-04,2026-11-04T15:15:02+00:00,372675,2026-11-05T00:00Z,Butler,Fairleigh Dickinson,False,27.71,153.4,-26.5,156.5,Odds API (7 books),1.21,-3.06
+2026-11-04,2026-11-04T15:15:02+00:00,374619,2026-11-05T01:00Z,Auburn,SE Louisiana,False,24.03,147.5,-29.5,151.5,Odds API (7 books),-5.47,-4.03
+2026-11-04,2026-11-04T15:15:02+00:00,374620,2026-11-05T02:00Z,California,Radford,False,15.97,152.6,-16.0,157.5,Odds API (7 books),-0.03,-4.85
+2026-11-04,2026-11-04T15:15:02+00:00,374621,2026-11-05T03:00Z,Santa Clara,Milwaukee,False,23.32,159.5,-16.5,160.0,Odds API (8 books),6.82,-0.5
+2026-11-04,2026-11-04T15:15:02+00:00,374622,2026-11-05T03:00Z,Saint Mary's,North Dakota State,False,13.87,141.2,-13.5,148.25,Odds API (8 books),0.37,-7.06
+2026-11-04,2026-11-04T15:15:02+00:00,374627,2026-11-05T00:00Z,High Point,Maryland Eastern Shore,False,25.34,144.7,-34.5,148.0,Odds API (7 books),-9.16,-3.3
+2026-11-04,2026-11-04T15:15:02+00:00,374628,2026-11-05T00:00Z,Saint Joseph's,Longwood,False,12.79,148.1,-10.5,151.0,Odds API (7 books),2.29,-2.94
+2026-11-04,2026-11-04T15:15:02+00:00,374633,2026-11-05T00:30Z,Wichita State,Cal State Northridge,False,13.57,155.9,-14.5,160.5,Odds API (8 books),-0.93,-4.64
+2026-11-04,2026-11-04T15:15:02+00:00,374634,2026-11-05T03:00Z,Loyola Marymount,Queens University,False,6.25,156.9,-8.5,161.0,Odds API (7 books),-2.25,-4.14
+2026-11-04,2026-11-04T15:15:02+00:00,377944,2026-11-05T01:00Z,South Dakota,Northern Kentucky,False,-0.41,162.1,2.5,162.5,Odds API (8 books),2.09,-0.37
