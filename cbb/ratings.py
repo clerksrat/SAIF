@@ -140,6 +140,21 @@ class Season:
             self.sol = (e, t)
         return self.sol
 
+    def var_terms(self, home, away, loc, Ainv):
+        """g' A^-1 g for the efficiency MARGIN and TOTAL of a game (per-100 units, before x sigma_e^2).
+        Under the Gaussian reading of this ridge fit (row noise sd sigma_e, team-rating prior variance
+        sigma_e^2 / k_prior), sigma_e^2 * A^-1 is the posterior covariance of [O, D, mu, h].
+        Tempo uncertainty is ignored (second order)."""
+        n, i, j = self.n, self.idx[home], self.idx[away]
+        gm = {i: 1.0, j: -1.0, n + i: 1.0, n + j: -1.0, 2 * n + 1: 2.0 * loc}      # (eh - ea)
+        gt = {i: 1.0, j: 1.0, n + i: -1.0, n + j: -1.0, 2 * n: 2.0}                  # (eh + ea)
+        q = []
+        for gvec in (gm, gt):
+            ks = list(gvec)
+            v = np.array([gvec[k] for k in ks])
+            q.append(float(v @ Ainv[np.ix_(ks, ks)] @ v))
+        return q
+
     def predict(self, home, away, loc):
         e, t = self.solve()
         n, i, j = self.n, self.idx[home], self.idx[away]
@@ -167,17 +182,21 @@ def adjusted(r, side, p):
     return pts
 
 
-def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None):
+def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None, with_var=False):
     """Predict every game using only games finished on EARLIER dates. Returns one row per game.
     prior: starting ratings for the first season in `games` (else it starts from scratch).
-    final_through: last date whose finals may be learned from (live use: yesterday)."""
-    out = []
+    final_through: last date whose finals may be learned from (live use: yesterday).
+    with_var: also return q_margin / q_total (see Season.var_terms) -- additive, same projections."""
+    out, qs = [], []
     for s, sg in games.groupby('season'):
         teams = sorted(set(sg.homeTeam) | set(sg.awayTeam))
         S = Season(teams, p, prior)
         for d, dg in sg.groupby('date', sort=True):
             if seasons is None or s in seasons:
+                Ainv = np.linalg.inv(S.A) if with_var else None
                 for r in dg.itertuples():
+                    if with_var:
+                        qs.append(S.var_terms(r.homeTeam, r.awayTeam, r.loc, Ainv))
                     m, tot, poss = S.predict(r.homeTeam, r.awayTeam, r.loc)
                     out.append((r.id, s, d, r.homeTeam, r.awayTeam, r.loc, m, tot, poss,
                                 S.games[S.idx[r.homeTeam]], S.games[S.idx[r.awayTeam]]))
@@ -186,8 +205,11 @@ def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None)
             for r in dg[dg.status == 'final'].itertuples():
                 S.add(r.homeTeam, r.awayTeam, adjusted(r, 'h', p), adjusted(r, 'a', p), r.poss, r.minutes, r.loc)
         prior = S.export()
-    return pd.DataFrame(out, columns=['game_id', 'season', 'date', 'home', 'away', 'loc', 'model_margin',
-                                      'model_total', 'model_poss', 'home_games_before', 'away_games_before']), prior
+    df = pd.DataFrame(out, columns=['game_id', 'season', 'date', 'home', 'away', 'loc', 'model_margin',
+                                    'model_total', 'model_poss', 'home_games_before', 'away_games_before'])
+    if with_var:
+        df[['q_margin', 'q_total']] = np.array(qs) if qs else np.empty((0, 2))
+    return df, prior
 
 
 PRIORS = Path(__file__).resolve().parent / 'models'
