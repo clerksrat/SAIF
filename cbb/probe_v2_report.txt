@@ -1,0 +1,148 @@
+CBBD probe v2 2026-11-06T16:56:12+00:00
+=== Part 1: lines audit (D1-vs-D1 finals) ===
+2014: 5503 D1 finals | spread on 3894 (71%) | opener on 0 (0%)
+    consensus      3595 (65%) | open     0 | tot     0 | totOpen     0 | ML     0 | MAE close 8.38 open None | open==close None | move None | vs other books 1.23 (n=3586) | push 0.024
+    numberfire     3872 (70%) | open     0 | tot  3452 | totOpen     0 | ML  3751 | MAE close 8.27 open None | open==close None | move None | vs other books 0.65 (n=3861) | push 0.024
+    teamrankings   3833 (70%) | open     0 | tot  3772 | totOpen     0 | ML  3522 | MAE close 8.22 open None | open==close None | move None | vs other books 0.68 (n=3831) | push 0.025
+    [calls so far 12, cache hits 0]
+2015: 5494 D1 finals | spread on 3989 (73%) | opener on 0 (0%)
+    consensus      3745 (68%) | open     0 | tot     0 | totOpen     0 | ML     0 | MAE close 8.29 open None | open==close None | move None | vs other books 1.27 (n=3732) | push 0.028
+    numberfire     3923 (71%) | open     0 | tot  1602 | totOpen     0 | ML  3361 | MAE close 8.2 open None | open==close None | move None | vs other books 0.63 (n=3918) | push 0.022
+    teamrankings   3966 (72%) | open     0 | tot  3300 | totOpen     0 | ML  3642 | MAE close 8.17 open None | open==close None | move None | vs other books 0.68 (n=3955) | push 0.024
+    [calls so far 24, cache hits 0]
+2016: 5514 D1 finals | spread on 3995 (72%) | opener on 0 (0%)
+    consensus      3606 (65%) | open     0 | tot     0 | totOpen     0 | ML     0 | MAE close 8.53 open None | open==close None | move None | vs other books 1.32 (n=3587) | push 0.024
+    numberfire     3831 (70%) | open     0 | tot  3872 | totOpen     0 | ML  3432 | MAE close 8.38 open None | open==close None | move None | vs other books 0.64 (n=3825) | push 0.019
+    teamrankings   3954 (72%) | open     0 | tot  3986 | totOpen     0 | ML  3614 | MAE close 8.35 open None | open==close None | move None | vs other books 0.68 (n=3925) | push 0.019
+    [calls so far 36, cache hits 0]
+2017: 5520 D1 finals | spread on 3976 (72%) | opener on 0 (0%)
+    consensus      3384 (61%) | open     0 | tot     0 | totOpen     0 | ML     0 | MAE close 8.85 open None | open==close None | move None | vs other books 1.3 (n=3383) | push 0.029
+    numberfire     3887 (70%) | open     0 | tot  3867 | totOpen     0 | ML  3457 | MAE close 8.73 open None | open==close None | move None | vs other books 0.68 (n=3880) | push 0.02
+    teamrankings   3939 (71%) | open     0 | tot  3974 | totOpen     0 | ML  3577 | MAE close 8.69 open None | open==close None | move None | vs other books 0.7 (n=3864) | push 0.024
+    [calls so far 48, cache hits 0]
+2018: 5501 D1 finals | spread on 4033 (73%) | opener on 0 (0%)
+    consensus      3889 (71%) | open     0 | tot  3889 | totOpen     0 | ML  3802 | MAE close 8.77 open None | open==close None | move None | vs other books 0.43 (n=3879) | push 0.018
+    numberfire     3587 (65%) | open     0 | tot  3569 | totOpen     0 | ML  3052 | MAE close 8.78 open None | open==close None | move None | vs other books 0.46 (n=3582) | push 0.02
+    teamrankings   3972 (72%) | open     0 | tot  4009 | totOpen     0 | ML  3582 | MAE close 8.68 open None | open==close None | move None | vs other books 0.53 (n=3955) | push 0.021
+    [calls so far 60, cache hits 0]
+2019: 5597 D1 finals | spread on 5537 (99%) | opener on 0 (0%)
+    consensus      2033 (36%) | open     0 | tot  2054 | totOpen     0 | ML  1993 | MAE close 8.8 open None | open==close None | move None | vs other books 0.47 (n=2031) | push 0.015
+    numberfire     5403 (96%) | open     0 | tot  5424 | totOpen     0 | ML  4975 | MAE close 8.79 open None | open==close None | move None | vs other books 0.33 (n=5317) | push 0.02
+    teamrankings   5411 (97%) | open     0 | tot  5509 | totOpen     0 | ML  4115 | MAE close 8.77 open None | open==close None | move None | vs other books 0.33 (n=5322) | push 0.018
+    [calls so far 72, cache hits 0]
+2020: 5328 D1 finals | spread on 5322 (100%) | opener on 0 (0%)
+    consensus      5279 (99%) | open     0 | tot  5279 | totOpen     0 | ML  5245 | MAE close 8.89 open None | open==close None | move None | vs other books 0.56 (n=5262) | push 0.015
+    numberfire     4861 (91%) | open     0 | tot  4883 | totOpen     0 | ML  3529 | MAE close 8.82 open None | open==close None | move None | vs other books 0.41 (n=4860) | push 0.021
+    teamrankings   5252 (99%) | open     0 | tot  5315 | totOpen     0 | ML  5164 | MAE close 8.75 open None | open==close None | move None | vs other books 0.45 (n=5250) | push 0.019
+    [calls so far 84, cache hits 0]
+2021: 3944 D1 finals | spread on 3930 (100%) | opener on 0 (0%)
+    consensus      3804 (96%) | open     0 | tot  3811 | totOpen     0 | ML  3778 | MAE close 9.16 open None | open==close None | move None | vs other books 0.46 (n=3798) | push 0.017
+    numberfire     3834 (97%) | open     0 | tot  3836 | totOpen     0 | ML  3816 | MAE close 9.11 open None | open==close None | move None | vs other books 0.4 (n=3824) | push 0.005
+    teamrankings   3797 (96%) | open     0 | tot  3816 | totOpen     0 | ML  3796 | MAE close 9.05 open None | open==close None | move None | vs other books 0.36 (n=3779) | push 0.013
+    [calls so far 84, cache hits 12]
+2022: 5475 D1 finals | spread on 5454 (100%) | opener on 0 (0%)
+    consensus      5048 (92%) | open     0 | tot  5066 | totOpen     0 | ML  5065 | MAE close 8.78 open None | open==close None | move None | vs other books 0.45 (n=4979) | push 0.013
+    teamrankings   5385 (98%) | open     0 | tot  5430 | totOpen     0 | ML  5430 | MAE close 8.66 open None | open==close None | move None | vs other books 0.45 (n=4979) | push 0.021
+    [calls so far 84, cache hits 24]
+2023: 5715 D1 finals | spread on 5715 (100%) | opener on 0 (0%)
+    ESPN BET       5710 (100%) | open     0 | tot  5565 | totOpen     0 | ML  5598 | MAE close 8.81 open None | open==close None | move None | vs other books 0.55 (n=5698) | push 0.001
+    consensus      5574 (98%) | open     0 | tot  5598 | totOpen     0 | ML  5561 | MAE close 8.92 open None | open==close None | move None | vs other books 0.54 (n=5574) | push 0.015
+    teamrankings   5644 (99%) | open     0 | tot  5705 | totOpen     0 | ML  5705 | MAE close 8.87 open None | open==close None | move None | vs other books 0.49 (n=5642) | push 0.018
+    [calls so far 84, cache hits 36]
+2024: 5726 D1 finals | spread on 5304 (93%) | opener on 0 (0%)
+    ESPN BET       5304 (93%) | open     0 | tot  5304 | totOpen     0 | ML  5285 | MAE close 8.87 open None | open==close None | move None | vs other books None (n=0) | push 0.0
+    [calls so far 84, cache hits 48]
+2025: 5764 D1 finals | spread on 5437 (94%) | opener on 1810 (31%)
+    ESPN BET       5437 (94%) | open  1810 | tot  5436 | totOpen  1746 | ML  5283 | MAE close 8.76 open 8.53 | open==close 0.397 | move 0.83 | vs other books None (n=0) | push 0.0
+    [calls so far 84, cache hits 60]
+2026: 5752 D1 finals | spread on 5748 (100%) | opener on 5726 (100%)
+    Bovada         4925 (86%) | open  4922 | tot  4925 | totOpen  4925 | ML  4446 | MAE close 9.04 open 9.09 | open==close 0.201 | move 0.97 | vs other books 0.46 (n=4913) | push 0.021
+    Draft Kings    4498 (78%) | open  4417 | tot  4500 | totOpen  4429 | ML  1632 | MAE close 8.81 open 8.87 | open==close 0.354 | move 1.01 | vs other books 0.42 (n=4022) | push 0.0
+    ESPN BET       1255 (22%) | open  1227 | tot  1254 | totOpen  1141 | ML   978 | MAE close 9.71 open 9.9 | open==close 0.258 | move 1.5 | vs other books 0.66 (n=908) | push 0.0
+    [calls so far 84, cache hits 72]
+2027: 193 D1 finals | spread on 193 (100%) | opener on 193 (100%)
+    Bovada          144 (75%) | open   144 | tot   152 | totOpen   152 | ML   160 | MAE close 9.32 open 9.59 | open==close 0.333 | move 1.01 | vs other books 0.48 (n=144) | push 0.035
+    Draft Kings     193 (100%) | open   193 | tot   193 | totOpen   193 | ML   171 | MAE close 9.35 open 9.42 | open==close 0.29 | move 1.47 | vs other books 0.48 (n=144) | push 0.0
+    [calls so far 86, cache hits 72]
+
+=== Part 2: unused endpoints ===
+  sample games: 2026 id 214273, 2015 id 62761
+  player box 2026 (1 day)            rows   284 | fields ['conference', 'conferenceGame', 'gameId', 'gameMinutes', 'gamePace', 'gameType', 'isHome', 'neutralSite', 'notes', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'players', 'season', 'seasonLabel', 'seasonType', 'startDate', 'startTimeTbd', 'team', 'teamId', 'teamSeed', 'tournament']
+                                       players[]: ['assists', 'assistsTurnoverRatio', 'athleteId', 'athleteSourceId', 'blocks', 'defensiveRating', 'effectiveFieldGoalPct', 'ejected', 'fieldGoals', 'fouls', 'freeThrowRate', 'freeThrows', 'gameScore', 'minutes', 'name', 'netRating', 'offensiveRating', 'offensiveReboundPct', 'points', 'position', 'rebounds', 'starter', 'steals', 'threePointFieldGoals', 'trueShootingPct', 'turnovers', 'twoPointFieldGoals', 'usage']
+                                       players rows: 2752
+                                       players.fieldGoals: ['attempted', 'made', 'pct']
+                                       players.twoPointFieldGoals: ['attempted', 'made', 'pct']
+                                       players.threePointFieldGoals: ['attempted', 'made', 'pct']
+                                       players.freeThrows: ['attempted', 'made', 'pct']
+                                       players.rebounds: ['defensive', 'offensive', 'total']
+  player box 2015 (1 day)            rows   230 | fields ['conference', 'conferenceGame', 'gameId', 'gameMinutes', 'gamePace', 'gameType', 'isHome', 'neutralSite', 'notes', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'players', 'season', 'seasonLabel', 'seasonType', 'startDate', 'startTimeTbd', 'team', 'teamId', 'teamSeed', 'tournament']
+                                       players[]: ['assists', 'assistsTurnoverRatio', 'athleteId', 'athleteSourceId', 'blocks', 'defensiveRating', 'effectiveFieldGoalPct', 'ejected', 'fieldGoals', 'fouls', 'freeThrowRate', 'freeThrows', 'gameScore', 'minutes', 'name', 'netRating', 'offensiveRating', 'offensiveReboundPct', 'points', 'position', 'rebounds', 'starter', 'steals', 'threePointFieldGoals', 'trueShootingPct', 'turnovers', 'twoPointFieldGoals', 'usage']
+                                       players rows: 2334
+                                       players.fieldGoals: ['attempted', 'made', 'pct']
+                                       players.twoPointFieldGoals: ['attempted', 'made', 'pct']
+                                       players.threePointFieldGoals: ['attempted', 'made', 'pct']
+                                       players.freeThrows: ['attempted', 'made', 'pct']
+                                       players.rebounds: ['defensive', 'offensive', 'total']
+  roster Duke 2027                   rows     1 | fields ['conference', 'players', 'season', 'team', 'teamId', 'teamSourceId']
+                                       players[]: ['dateOfBirth', 'endSeason', 'firstName', 'height', 'hometown', 'id', 'jersey', 'lastName', 'name', 'position', 'sourceId', 'startSeason', 'weight']
+                                       players rows: 15
+                                       players.hometown: ['city', 'country', 'countyFips', 'latitude', 'longitude', 'state']
+  roster Duke 2016                   rows     1 | fields ['conference', 'players', 'season', 'team', 'teamId', 'teamSourceId']
+                                       players[]: ['dateOfBirth', 'endSeason', 'firstName', 'height', 'hometown', 'id', 'jersey', 'lastName', 'name', 'position', 'sourceId', 'startSeason', 'weight']
+                                       players rows: 13
+                                       players.hometown: ['city', 'country', 'countyFips', 'latitude', 'longitude', 'state']
+  recruits 2026 class                rows   396 | fields ['athleteId', 'committedTo', 'heightInches', 'hometown', 'id', 'name', 'position', 'ranking', 'rating', 'school', 'schoolId', 'sourceId', 'stars', 'weightPounds', 'year']
+                                       hometown: ['city', 'country', 'countyFips', 'latitude', 'longitude', 'state']
+                                       committedTo: ['conference', 'id', 'name']
+  recruits 2015 class                rows   521 | fields ['athleteId', 'committedTo', 'heightInches', 'hometown', 'id', 'name', 'position', 'ranking', 'rating', 'school', 'schoolId', 'sourceId', 'stars', 'weightPounds', 'year']
+                                       hometown: ['city', 'country', 'countyFips', 'latitude', 'longitude', 'state']
+                                       committedTo: ['conference', 'id', 'name']
+  player season stats Duke 2026      rows    12 | fields ['PORPAG', 'assists', 'assistsTurnoverRatio', 'athleteId', 'athleteSourceId', 'blocks', 'conference', 'defensiveRating', 'effectiveFieldGoalPct', 'fieldGoals', 'fouls', 'freeThrowRate', 'freeThrows', 'games', 'minutes', 'name', 'netRating', 'offensiveRating', 'offensiveReboundPct', 'points', 'position', 'rebounds', 'season', 'seasonLabel', 'starts', 'steals', 'team', 'teamId', 'threePointFieldGoals', 'trueShootingPct', 'turnovers', 'twoPointFieldGoals', 'usage', 'winShares']
+                                       fieldGoals: ['attempted', 'made', 'pct']
+                                       twoPointFieldGoals: ['attempted', 'made', 'pct']
+                                       threePointFieldGoals: ['attempted', 'made', 'pct']
+                                       freeThrows: ['attempted', 'made', 'pct']
+                                       rebounds: ['defensive', 'offensive', 'total']
+                                       winShares: ['defensive', 'offensive', 'total', 'totalPer40']
+  team season shooting Duke 2026     rows     1 | fields ['assistedPct', 'attemptsBreakdown', 'conference', 'dunks', 'freeThrowRate', 'freeThrows', 'layups', 'season', 'team', 'teamId', 'threePointJumpers', 'tipIns', 'trackedShots', 'twoPointJumpers']
+                                       dunks: ['assisted', 'assistedPct', 'attempted', 'made', 'pct']
+                                       layups: ['assisted', 'assistedPct', 'attempted', 'made', 'pct']
+                                       tipIns: ['attempted', 'made', 'pct']
+                                       twoPointJumpers: ['assisted', 'assistedPct', 'attempted', 'made', 'pct']
+                                       threePointJumpers: ['assisted', 'assistedPct', 'attempted', 'made', 'pct']
+                                       freeThrows: ['attempted', 'made', 'pct']
+                                       attemptsBreakdown: ['dunks', 'layups', 'threePointJumpers', 'tipIns', 'twoPointJumpers']
+  adjusted ratings 2026              rows   365 | fields ['conference', 'defensiveRating', 'netRating', 'offensiveRating', 'rankings', 'season', 'team', 'teamId']
+                                       rankings: ['defense', 'net', 'offense']
+  adjusted ratings 2015              rows   348 | fields ['conference', 'defensiveRating', 'netRating', 'offensiveRating', 'rankings', 'season', 'team', 'teamId']
+                                       rankings: ['defense', 'net', 'offense']
+  SRS 2026                           rows   365 | fields ['conference', 'rating', 'season', 'team', 'teamId']
+  rankings 2026                      rows  1633 | fields ['conference', 'firstPlaceVotes', 'points', 'pollDate', 'pollType', 'ranking', 'season', 'seasonType', 'team', 'teamId', 'week']
+  venues                             rows   991 | fields ['city', 'country', 'id', 'name', 'sourceId', 'state']
+  media 2026 (1 day)                 rows   142 | fields ['awayConference', 'awayTeam', 'awayTeamId', 'broadcasts', 'conferenceGame', 'gameId', 'gameType', 'homeConference', 'homeTeam', 'homeTeamId', 'neutralSite', 'notes', 'season', 'seasonLabel', 'seasonType', 'startDate', 'startTimeTbd']
+                                       broadcasts[]: ['broadcastName', 'broadcastType']
+                                       broadcasts rows: 152
+  plays one game 2026                rows   491 | fields ['awayScore', 'clock', 'conference', 'gameId', 'gameSourceId', 'gameStartDate', 'gameType', 'homeScore', 'homeWinProbability', 'id', 'isHomeTeam', 'onFloor', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'participants', 'period', 'playText', 'playType', 'scoreValue', 'scoringPlay', 'season', 'seasonType', 'secondsRemaining', 'shootingPlay', 'shotInfo', 'sourceId', 'team', 'teamId', 'teamSeed', 'tournament', 'wallclock']
+                                       onFloor[]: ['id', 'name', 'team']
+                                       participants[]: ['id', 'name']
+                                       shotInfo: ['assisted', 'assistedBy', 'location', 'made', 'range', 'shooter']
+                                       onFloor rows: 4910
+  substitutions one game 2026        rows    81 | fields ['athlete', 'athleteId', 'conference', 'gameId', 'opponent', 'opponentConference', 'opponentId', 'position', 'startDate', 'subIn', 'subOut', 'team', 'teamId']
+                                       subIn: ['opponentPoints', 'period', 'secondsRemaining', 'teamPoints']
+                                       subOut: ['opponentPoints', 'period', 'secondsRemaining', 'teamPoints']
+  lineups one game 2026              rows    30 | fields ['athletes', 'conference', 'defenseRating', 'idHash', 'netRating', 'offenseRating', 'opponentStats', 'pace', 'team', 'teamId', 'teamStats', 'totalSeconds']
+                                       athletes[]: ['id', 'name']
+                                       teamStats: ['assists', 'blocks', 'defensiveRebounds', 'fieldGoals', 'fourFactors', 'freeThrows', 'offensiveRebounds', 'points', 'possessions', 'steals', 'threePointers', 'trueShooting', 'turnovers', 'twoPointers']
+                                       opponentStats: ['assists', 'blocks', 'defensiveRebounds', 'fieldGoals', 'fourFactors', 'freeThrows', 'offensiveRebounds', 'points', 'possessions', 'steals', 'threePointers', 'trueShooting', 'turnovers', 'twoPointers']
+                                       athletes rows: 150
+  plays one game 2015                rows   348 | fields ['awayScore', 'clock', 'conference', 'gameId', 'gameSourceId', 'gameStartDate', 'gameType', 'homeScore', 'homeWinProbability', 'id', 'isHomeTeam', 'onFloor', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'participants', 'period', 'playText', 'playType', 'scoreValue', 'scoringPlay', 'season', 'seasonType', 'secondsRemaining', 'shootingPlay', 'shotInfo', 'sourceId', 'team', 'teamId', 'teamSeed', 'tournament', 'wallclock']
+                                       participants[]: ['id', 'name']
+                                       shotInfo: ['assisted', 'assistedBy', 'location', 'made', 'range', 'shooter']
+                                       participants rows: 339
+  plays by date 2026 (1 day)         rows 65093 | fields ['awayScore', 'clock', 'conference', 'gameId', 'gameSourceId', 'gameStartDate', 'gameType', 'homeScore', 'homeWinProbability', 'id', 'isHomeTeam', 'onFloor', 'opponent', 'opponentConference', 'opponentId', 'opponentSeed', 'participants', 'period', 'playText', 'playType', 'scoreValue', 'scoringPlay', 'season', 'seasonType', 'secondsRemaining', 'shootingPlay', 'shotInfo', 'sourceId', 'team', 'teamId', 'teamSeed', 'tournament', 'wallclock']
+                                       onFloor[]: ['id', 'name', 'team']
+                                       participants[]: ['id', 'name']
+                                       shotInfo: ['assisted', 'assistedBy', 'location', 'made', 'range', 'shooter']
+                                       onFloor rows: 652423
+
+API calls this run: 106 (cache hits 72) | quota remaining 4617
