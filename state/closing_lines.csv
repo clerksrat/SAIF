@@ -83,3 +83,6 @@ snapshot_utc,odds_api_id,commence_time,home_team,away_team,close_spread_home,min
 2026-11-05T00:00:01+00:00,6ee8ad6eb7454d13bebc0806a10cc861,2026-11-05T00:05:00Z,UMass Minutemen,Ball State Cardinals,-2.5,-2.5,-2.5,8,5
 2026-11-05T00:00:01+00:00,7db0ce3fddd5c735e599b1085c9b5cef,2026-11-05T00:10:00Z,Sacramento State Hornets,Toledo Rockets,25.5,25.0,25.5,8,10
 2026-11-05T00:00:01+00:00,e5c8c0aaad6dc26e9ede547783d854d2,2026-11-05T00:30:00Z,Eastern Michigan Eagles,Central Michigan Chippewas,3.0,2.5,3.0,9,30
+2026-11-06T00:00:01+00:00,5af84fe49ccd4f304f9af0dce0a0db56,2026-11-06T00:30:00Z,Florida Atlantic Owls,UTSA Roadrunners,7.0,7.0,7.5,9,30
+2026-11-06T00:30:01+00:00,5af84fe49ccd4f304f9af0dce0a0db56,2026-11-06T00:35:00Z,Florida Atlantic Owls,UTSA Roadrunners,7.0,7.0,7.5,9,5
+2026-11-06T00:30:01+00:00,c93b343bc3151a39a9541c0af3b22123,2026-11-06T01:00:00Z,Southern Mississippi Golden Eagles,James Madison Dukes,13.5,13.0,13.5,9,30
