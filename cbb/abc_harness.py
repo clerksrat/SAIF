@@ -11,10 +11,11 @@ Models (sides and totals, in "points" units: v = -spread for sides, v = total fo
       early season, conference game. C_out targets the final result, C_mkt targets the close.
 
 Samples (same games for every paired comparison):
-  A-dev   seasons A_DEV, every game with a closing line. A1's calibration and sigma fits are
-          leave-one-season-out here, so every A-dev number is out of sample for A1.
-  BC-dev  games with an opener (Feb 2025 - Apr 2026). A1 parameters are fit only on seasons before
-          2025. C is fit with a rolling monthly origin: each test month uses only earlier months.
+  A-dev   seasons 2017-2024, every game with a closing line. A1/A2 calibration and sigma fits use only
+          EARLIER dev seasons (expanding window, and a rolling 3-season variant).
+  A2      A1 machinery on projections with roster-aware priors (roster_prior.py; game-level player
+          box scores only, point-in-time safe).
+  BC-dev  games with an opener (Feb 2025 - Apr 2026). A1/A2 parameters are fit only on 2016-2024. C is fit with a rolling monthly origin: each test month uses only earlier months.
   2026 is development data (examined before); the untouched test is prospective 2027 shadow logging.
 
 Uncertainty (documented assumptions, validated by interval coverage):
@@ -31,9 +32,12 @@ import numpy as np
 import pandas as pd
 
 from ratings import SIDES, TOTALS, load, read, walk_forward
+from roster_prior import RosterPrior, load_players
 
 HERE = Path(__file__).resolve().parent
-A_DEV = [2022, 2023, 2024, 2025]
+A_DEV = list(range(2016, 2025))          # A development seasons (2015 is burn-in for the prior chain)
+A2_SIDES = dict(a_ret=1.0, a_tr=0.7, a_prog=0.85)   # from the 2016-24 MAE grid (development)
+A2_TOTALS = dict(a_ret=1.0, a_tr=0.7, a_prog=0.6)
 FIRST_BC = '2025-02-01'
 BOOT = 1000
 RNG = np.random.default_rng(7)
@@ -51,19 +55,32 @@ def Phi(x):
 
 
 # ------------------------------------------------------------------ data
+def _wf(job):
+    kind, roster = job
+    g = load(set(range(2014, 2027)))
+    p = SIDES if kind == 'side' else TOTALS
+    hook = RosterPrior(load_players(range(2014, 2027)), **(A2_SIDES if kind == 'side' else A2_TOTALS)) if roster else None
+    pred, _ = walk_forward(g, p, seasons=set(range(2015, 2027)), with_var=True, hook=hook)
+    return job, pred
+
+
 def build():
-    g = load(set(range(2021, 2027)))
-    ps, _ = walk_forward(g, SIDES, seasons=set(range(2022, 2027)), with_var=True)
-    pt, _ = walk_forward(g, TOTALS, seasons=set(range(2022, 2027)), with_var=True)
+    from multiprocessing import Pool
+    with Pool(2) as pool:
+        res = dict(pool.map(_wf, [('side', False), ('total', False), ('side', True), ('total', True)]))
+    g = load(set(range(2014, 2027)))
+    ps, pt, ps2, pt2 = res[('side', False)], res[('total', False)], res[('side', True)], res[('total', True)]
     d = ps[['game_id', 'season', 'date', 'loc', 'model_margin', 'model_poss', 'q_margin',
             'home_games_before', 'away_games_before']].merge(
         pt[['game_id', 'model_total', 'q_total', 'model_poss']].rename(columns={'model_poss': 'poss_t'}), on='game_id')
+    d = d.merge(ps2[['game_id', 'model_margin', 'q_margin']].rename(columns={'model_margin': 'a2_margin', 'q_margin': 'a2_qm'}), on='game_id')
+    d = d.merge(pt2[['game_id', 'model_total', 'q_total']].rename(columns={'model_total': 'a2_total', 'q_total': 'a2_qt'}), on='game_id')
     d = d.merge(g[['id', 'status', 'homePoints', 'awayPoints', 'conferenceGame', 'startDate']]
                 .rename(columns={'id': 'game_id'}), on='game_id')
     d = d[d.status == 'final'].copy()
     d['margin'] = d.homePoints - d.awayPoints
     d['total_pts'] = d.homePoints + d.awayPoints
-    l = read('lines', set(range(2022, 2027)))
+    l = read('lines', set(range(2015, 2027)))
     agg = lambda x: x.groupby('game_id').agg(close=('spread', 'median'), open=('spreadOpen', 'median'),
                                              tclose=('overUnder', 'median'), topen=('overUnderOpen', 'median'),
                                              hml=('homeMoneyline', 'median'), aml=('awayMoneyline', 'median'))
@@ -80,46 +97,57 @@ def kind_frame(d, kind, tag=''):
     """Common columns: y, v_open, v_close, pred_A0, q, poss."""
     if kind == 'side':
         k = pd.DataFrame({'y': d.margin, 'v_open': -d['open' + tag], 'v_close': -d['close' + tag],
-                          'pred_A0': d.model_margin, 'q': d.q_margin, 'poss': d.model_poss})
+                          'pred_A0': d.model_margin, 'q': d.q_margin, 'poss': d.model_poss,
+                          'pred_A2raw': d.a2_margin, 'q2': d.a2_qm})
     else:
         k = pd.DataFrame({'y': d.total_pts, 'v_open': d['topen' + tag], 'v_close': d['tclose' + tag],
-                          'pred_A0': d.model_total, 'q': d.q_total, 'poss': d.poss_t})
+                          'pred_A0': d.model_total, 'q': d.q_total, 'poss': d.poss_t,
+                          'pred_A2raw': d.a2_total, 'q2': d.a2_qt})
     for c in ('game_id', 'season', 'date', 'month', 'early', 'conf', 'hml', 'aml'):
         k[c] = d[c].values
     return k
 
 
 # ------------------------------------------------------------------ A1 pieces
-def fit_cal(tr, kind):
-    m = tr.pred_A0.values
+def fit_cal(tr, kind, src='pred_A0'):
+    m = tr[src].values
     X = np.c_[m, m * np.abs(m)] if kind == 'side' else np.c_[np.ones(len(m)), m]
     return np.linalg.lstsq(X, tr.y.values, rcond=None)[0]
 
 
-def apply_cal(df, coef, kind):
-    m = df.pred_A0.values
+def apply_cal(df, coef, kind, src='pred_A0'):
+    m = df[src].values
     return coef[0] * m + coef[1] * m * np.abs(m) if kind == 'side' else coef[0] + coef[1] * m
 
 
-def fit_sigma(tr, pred):
+def fit_sigma(tr, pred, qcol='q'):
     e2 = (tr.y - pred) ** 2
-    X = np.c_[(tr.poss / 100) ** 2 * tr.q, tr.poss / 70]
+    X = np.c_[(tr.poss / 100) ** 2 * tr[qcol], tr.poss / 70]
     from numpy.linalg import lstsq
     coef = lstsq(X, e2, rcond=None)[0]
     return np.clip(coef, 1e-6, None)        # [sigma_e^2, s^2]
 
 
-def sigmas(df, sc):
-    sr = np.sqrt(sc[0] * (df.poss / 100) ** 2 * df.q)
+def sigmas(df, sc, qcol='q'):
+    sr = np.sqrt(sc[0] * (df.poss / 100) ** 2 * df[qcol])
     return sr, np.sqrt(sr ** 2 + sc[1] * df.poss / 70)
 
 
-def add_A1(k, kind, train_mask):
-    coef = fit_cal(k[train_mask], kind)
-    k['pred_A1'] = apply_cal(k, coef, kind)
-    sc = fit_sigma(k[train_mask], k.loc[train_mask, 'pred_A1'])
-    k['sig_r'], k['sig_o'] = sigmas(k, sc)
+VARIANTS = {'A1': ('pred_A0', 'q', 'pred_A1', 'sig_r', 'sig_o'),
+            'A2': ('pred_A2raw', 'q2', 'pred_A2', 'sig_r2', 'sig_o2')}
+
+
+def add_A(k, kind, train_mask, which='A1'):
+    src, qcol, out, sr, so = VARIANTS[which]
+    coef = fit_cal(k[train_mask], kind, src)
+    k[out] = apply_cal(k, coef, kind, src)
+    sc = fit_sigma(k[train_mask], k.loc[train_mask, out], qcol)
+    k[sr], k[so] = sigmas(k, sc, qcol)
     return coef, sc
+
+
+def add_A1(k, kind, train_mask):
+    return add_A(k, kind, train_mask, 'A1')
 
 
 # ------------------------------------------------------------------ C (rolling monthly origin)
@@ -183,7 +211,7 @@ def outcome_rows(k, models):
 
 
 def label(m):
-    return {'v_open': 'B (opener)', 'pred_A0': 'A0 (live)', 'pred_A1': 'A1', 'pred_C': 'C (full)', 'pred_C1': 'C1 (opener + one weight)',
+    return {'v_open': 'B (opener)', 'pred_A0': 'A0 (live)', 'pred_A1': 'A1', 'pred_A2': 'A2 (rosters)', 'pred_C': 'C (full)', 'pred_C1': 'C1 (opener + one weight)',
             'pred_Cmkt': 'C (close-targeted)'}.get(m, m)
 
 
@@ -258,12 +286,13 @@ def calib_rows(k, models):
     yb = (kk.y > kk.v_open).astype(float).values
     say(f'| B (opener, p = 0.5) | {math.log(2):.4f} | 0.2500 | — | — |')
     for m in models:
-        p = np.clip(Phi((kk[m] - kk.v_open) / kk.sig_o), 1e-4, 1 - 1e-4)
+        so = 'sig_o2' if m == 'pred_A2' else 'sig_o'
+        p = np.clip(Phi((kk[m] - kk.v_open) / kk[so]), 1e-4, 1 - 1e-4)
         ll = -np.mean(yb * np.log(p) + (1 - yb) * np.log(1 - p))
         br = np.mean((p - yb) ** 2)
         z = np.log(p / (1 - p))
         slope = logistic_slope(z, yb)
-        cov = [np.mean(np.abs(k.y - k[m]) <= q * k.sig_o) for q in (0.674, 1.282, 1.645)]
+        cov = [np.mean(np.abs(k.y - k[m]) <= q * k[so]) for q in (0.674, 1.282, 1.645)]
         say(f'| {label(m)} | {ll:.4f} | {br:.4f} | {slope:.2f} | {cov[0]:.0%} / {cov[1]:.0%} / {cov[2]:.0%} |')
 
 
@@ -314,25 +343,38 @@ def section(d, kind):
     k = kind_frame(d, kind)
     say(f'\n# {name}\n')
 
-    # A-dev: leave-one-season-out A1, every game with a close
-    a = k[k.season.isin(A_DEV) & k.v_close.notna()].copy()
-    parts = []
-    for s in A_DEV:
-        tmp = a.copy()
-        add_A1(tmp, kind, (tmp.season != s).values)
-        parts.append(tmp[tmp.season == s])
-    a = pd.concat(parts)
-    say(f'## A-dev {A_DEV[0]}–{A_DEV[-1]} ({len(a):,} games, leave-one-season-out A1)\n')
-    a2 = a.assign(v_open=a.v_close)               # no openers here: benchmark is the close
+    # A-dev: rolling-origin calibration (each season fit only on EARLIER dev seasons), every game with a close
+    a_all = k[k.season.isin(A_DEV) & k.v_close.notna()].copy()
+    variants = {}
+    for wname, win in (('expanding', None), ('rolling 3', 3)):
+        parts = []
+        for s_ in A_DEV[1:]:
+            tmp = a_all.copy()
+            prev = [x for x in A_DEV if x < s_]
+            prev = prev if win is None else prev[-win:]
+            mask = tmp.season.isin(prev).values
+            add_A(tmp, kind, mask, 'A1')
+            add_A(tmp, kind, mask, 'A2')
+            parts.append(tmp[tmp.season == s_])
+        variants[wname] = pd.concat(parts)
+    a = variants['expanding']
+    say(f'## A-dev {A_DEV[1]}–{A_DEV[-1]} ({len(a):,} games; calibration fit only on earlier seasons)\n')
     say('Outcome accuracy vs the CLOSE (no openers in these seasons):\n')
-    say('| model | MAE | RMSE |')
-    say('|---|---|---|')
-    for m in ('pred_A0', 'pred_A1'):
-        e = a.y - a[m]
-        say(f'| {label(m)} | {e.abs().mean():.3f} | {np.sqrt((e ** 2).mean()):.3f} |')
-    say(f'| close (market benchmark) | {(a.y - a.v_close).abs().mean():.3f} | {np.sqrt(((a.y - a.v_close) ** 2).mean()):.3f} |')
+    say('| model | MAE | RMSE | MAE early season | MAE later |')
+    say('|---|---|---|---|---|')
+    ea = a.early == 1
+    rows_ = [('pred_A0', 'A0 (live)', a), ('pred_A1', 'A1, expanding window', a), ('pred_A1', 'A1, rolling 3 seasons', variants['rolling 3']),
+             ('pred_A2', 'A2 (rosters), expanding', a), ('pred_A2', 'A2 (rosters), rolling 3', variants['rolling 3'])]
+    for m, lab, frame in rows_:
+        e = frame.y - frame[m]
+        say(f'| {lab} | {e.abs().mean():.3f} | {np.sqrt((e ** 2).mean()):.3f} | {e[ea].abs().mean():.3f} | {e[~ea].abs().mean():.3f} |')
+    e = a.y - a.v_close
+    say(f'| close (market benchmark) | {e.abs().mean():.3f} | {np.sqrt((e ** 2).mean()):.3f} | {e[ea].abs().mean():.3f} | {e[~ea].abs().mean():.3f} |')
+    for m, so in (('pred_A2', 'sig_o2'),):
+        cov2 = [np.mean(np.abs(a.y - a[m]) <= q * a[so]) for q in (0.674, 1.282, 1.645)]
+        say(f'\n- A2 interval coverage (target 50 / 80 / 90%): {cov2[0]:.0%} / {cov2[1]:.0%} / {cov2[2]:.0%}')
     cov = [np.mean(np.abs(a.y - a.pred_A1) <= q * a.sig_o) for q in (0.674, 1.282, 1.645)]
-    say(f'\n- A1 interval coverage (target 50 / 80 / 90%): {cov[0]:.0%} / {cov[1]:.0%} / {cov[2]:.0%}')
+    say(f'- A1 interval coverage (target 50 / 80 / 90%): {cov[0]:.0%} / {cov[1]:.0%} / {cov[2]:.0%}')
     early = a.early == 1
     say(f'- σ_outcome early season (a team < 5 games) {a.sig_o[early].mean():.1f} vs later {a.sig_o[~early].mean():.1f}; '
         f'σ_rating {a.sig_r[early].mean():.1f} vs {a.sig_r[~early].mean():.1f}')
@@ -347,24 +389,29 @@ def section(d, kind):
 
     # BC-dev: games with openers; A1 fit only on seasons before 2025
     bc = k[(k.date.astype(str) >= FIRST_BC) & k.v_open.notna() & k.v_close.notna()].copy()
-    pre = k[k.season.isin([2022, 2023, 2024]) & k.v_close.notna()].copy()
+    pre = k[k.season.isin(A_DEV) & k.v_close.notna()].copy()
     coef = fit_cal(pre, kind)
     bc['pred_A1'] = apply_cal(bc, coef, kind)
     sc = fit_sigma(pre, apply_cal(pre, coef, kind))
     bc['sig_r'], bc['sig_o'] = sigmas(bc, sc)
+    coef2 = fit_cal(pre, kind, 'pred_A2raw')
+    bc['pred_A2'] = apply_cal(bc, coef2, kind, 'pred_A2raw')
+    sc2 = fit_sigma(pre, apply_cal(pre, coef2, kind, 'pred_A2raw'), 'q2')
+    bc['sig_r2'], bc['sig_o2'] = sigmas(bc, sc2, 'q2')
     bc = add_C(bc)
     t = bc.dropna(subset=['pred_C', 'pred_C1'])
     say(f'\n## BC-dev: games with an opener ({len(bc):,}; C scored on {len(t):,} from {t.month.min()} on, rolling monthly origin)\n')
-    say(f'A1 calibration (fit on 2022–24): {np.round(coef, 4).tolist()} | σ_e² {sc[0]:.1f}, s² {sc[1]:.1f}\n')
-    models = ['v_open', 'pred_A0', 'pred_A1', 'pred_C', 'pred_C1']
+    say(f'A1 calibration (fit on {A_DEV[0]}–{A_DEV[-1]}): {np.round(coef, 4).tolist()} | σ_e² {sc[0]:.1f}, s² {sc[1]:.1f}; '
+        f'A2: {np.round(coef2, 4).tolist()}\n')
+    models = ['v_open', 'pred_A0', 'pred_A1', 'pred_A2', 'pred_C', 'pred_C1']
     say('**1. Final outcomes** (identical games)\n')
     outcome_rows(t, models)
     say('\n**2. Closing-line movement**\n')
-    market_rows(t, ['pred_A0', 'pred_A1', 'pred_C', 'pred_C1', 'pred_Cmkt'])
+    market_rows(t, ['pred_A0', 'pred_A1', 'pred_A2', 'pred_C', 'pred_C1', 'pred_Cmkt'])
     say('\n**3. Probability calibration** (cover at the opener; intervals for the final result)\n')
-    calib_rows(t, ['pred_A1', 'pred_C', 'pred_C1'])
+    calib_rows(t, ['pred_A1', 'pred_A2', 'pred_C', 'pred_C1'])
     say(f'\n**4. Betting economics at the opener**, edge ≥ {thr:g} (threshold carried over from earlier work, not re-tuned here), −110\n')
-    econ_rows(t, ['pred_A0', 'pred_A1', 'pred_C', 'pred_C1'], thr)
+    econ_rows(t, ['pred_A0', 'pred_A1', 'pred_A2', 'pred_C', 'pred_C1'], thr)
     say('\n*C weights by test month (C1: share of the model−opener gap kept):* '
         + ', '.join(f'{mo} {((x.pred_C1 - x.v_open) / (x.pred_A1 - x.v_open).replace(0, np.nan)).median():.2f}'
                     for mo, x in t.groupby('month')))

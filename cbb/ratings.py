@@ -112,6 +112,15 @@ class Season:
         self.ct += pent * np.r_[T0, self.tmu0]
         self.games = np.zeros(n)
         self.sol = None
+        self.O0, self.D0 = O0.copy(), D0.copy()          # current prior targets (A2 can move them)
+
+    def set_prior(self, team, O0, D0):
+        """Move one team's efficiency prior target (A unchanged, only the right-hand side)."""
+        i, n, k = self.idx[team], self.n, self.p.k_prior
+        self.c[i] += k * (O0 - self.O0[i])
+        self.c[n + i] += k * (D0 - self.D0[i])
+        self.O0[i], self.D0[i] = O0, D0
+        self.sol = None
 
     def add(self, home, away, hp, ap, poss, minutes, loc):
         if not np.isfinite(poss) or poss <= 0 or not hp > 0 or not ap > 0:   # forfeits / bad rows
@@ -182,16 +191,22 @@ def adjusted(r, side, p):
     return pts
 
 
-def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None, with_var=False):
+def walk_forward(games, p: Params, seasons=None, prior=None, final_through=None, with_var=False, hook=None):
     """Predict every game using only games finished on EARLIER dates. Returns one row per game.
     prior: starting ratings for the first season in `games` (else it starts from scratch).
     final_through: last date whose finals may be learned from (live use: yesterday).
-    with_var: also return q_margin / q_total (see Season.var_terms) -- additive, same projections."""
+    with_var: also return q_margin / q_total (see Season.var_terms) -- additive, same projections.
+    hook: optional object with .start(season, S, prior) and .before(date, S); called at season start
+          and before each date's predictions (A2 roster priors). None = A0 behaviour exactly."""
     out, qs = [], []
     for s, sg in games.groupby('season'):
         teams = sorted(set(sg.homeTeam) | set(sg.awayTeam))
         S = Season(teams, p, prior)
+        if hook is not None:
+            hook.start(s, S, prior)
         for d, dg in sg.groupby('date', sort=True):
+            if hook is not None:
+                hook.before(d, S)
             if seasons is None or s in seasons:
                 Ainv = np.linalg.inv(S.A) if with_var else None
                 for r in dg.itertuples():
