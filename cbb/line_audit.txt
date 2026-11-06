@@ -1,0 +1,18 @@
+Line audit -- CBBD stored lines vs timestamped Odds API quotes (2027 season)
+Odds API: 5 morning feeds, 1787 book-game spreads
+
+1. Whole-number share of home spreads
+   Draft Kings  Odds API   0.0% of   233 | CBBD close   0.0% of   252 | CBBD open   0.0% of   252
+   Bovada       Odds API  39.7% of   229 | CBBD close  46.5% of   198 | CBBD open  25.3% of   198
+   ESPN BET     Odds API    n/a | CBBD close    n/a | CBBD open    n/a
+   all Odds API books:  21.9% of  1787
+
+2. Same game, same book: CBBD minus Odds API morning quote (home spread)
+   Draft Kings  CBBD open  - morning: n=224 | exact 26% | +0.5 0% | -0.5 0% | other 74% | mean +0.65
+   Draft Kings  CBBD close - morning: n=224 | exact 66% | +0.5 0% | -0.5 0% | other 34% | mean -0.00
+   Bovada       CBBD open  - morning: n=176 | exact 35% | +0.5 11% | -0.5 10% | other 45% | mean +0.50
+   Bovada       CBBD close - morning: n=176 | exact 61% | +0.5 9% | -0.5 12% | other 18% | mean +0.03
+   Bovada         when the Odds API number is whole: CBBD open  33.3% of    75 whole; CBBD open - morning: n=75 | exact 27% | +0.5 16% | -0.5 19% | other 39% | mean +0.55
+
+3. CBBD close vs our timestamped pre-tip close (same book)
+   no snapshots yet (snapshot_cbb_close.py starts with the new cron)
