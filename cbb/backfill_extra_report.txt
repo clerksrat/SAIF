@@ -1,0 +1,27 @@
+CBB phase-0 backfill 2026-11-06 17:36Z
+2014: 5995 games {'final': 5948, 'scheduled': 46, 'cancelled': 1} | lines for 5541 games | box rows 11970 | calls so far 8
+2015: 5949 games {'final': 5932, 'scheduled': 16, 'cancelled': 1} | lines for 5508 games | box rows 11896 | calls so far 14
+2016: 5991 games {'final': 5951, 'scheduled': 38, 'cancelled': 2} | lines for 5532 games | box rows 11982 | calls so far 22
+2017: 5982 games {'final': 5964, 'scheduled': 17, 'cancelled': 1} | lines for 5510 games | box rows 11896 | calls so far 28
+2018: 5987 games {'final': 5968, 'scheduled': 17, 'cancelled': 2} | lines for 5518 games | box rows 11974 | calls so far 34
+2019: 6066 games {'final': 6049, 'scheduled': 11, 'cancelled': 6} | lines for 5612 games | box rows 12132 | calls so far 40
+2020: 5856 games {'final': 5767, 'cancelled': 83, 'scheduled': 6} | lines for 5390 games | box rows 11712 | calls so far 46
+TOTAL games 41826 | line rows 94492 (38611 games) | box rows 83562 (96 cols)
+API calls this run: 46 (cache hits 84) | quota remaining 4571
+  players 2014: 117344 player-games, 5733 games, 8190 players | calls so far 17
+  players 2015: 114798 player-games, 5628 games, 8199 players | calls so far 34
+  players 2016: 116416 player-games, 5686 games, 8450 players | calls so far 51
+  players 2017: 114015 player-games, 5565 games, 8381 players | calls so far 68
+  players 2018: 112434 player-games, 5590 games, 8504 players | calls so far 85
+  players 2019: 118910 player-games, 5926 games, 8668 players | calls so far 102
+  players 2020: 111696 player-games, 5600 games, 8740 players | calls so far 119
+  players 2021:  82736 player-games, 4079 games, 6812 players | calls so far 136
+  players 2022: 112894 player-games, 5602 games, 9307 players | calls so far 153
+  players 2023: 117281 player-games, 5825 games, 9516 players | calls so far 170
+  players 2024: 121974 player-games, 6045 games, 9817 players | calls so far 187
+  players 2025: 122680 player-games, 6057 games, 9763 players | calls so far 204
+  players 2026: 121585 player-games, 6008 games, 9837 players | calls so far 221
+  players 2027:   7287 player-games, 302 games, 5831 players | calls so far 222
+  recruits: 6527 across 14 classes, 77% linked to an athleteId
+  rankings: 21369 rows, poll types ['AP Top 25', 'Coaches Poll']
+API calls this run: 248 (cache hits 2) | quota remaining 4330
