@@ -1,0 +1,47 @@
+Opener selection check -- D1-vs-D1 finals
+
+=== 2025: 5764 games | any line 94% | opener 31% ===
+  by month:
+    2024-11           1212 games | line  100% | opener    0%
+    2024-12            944 games | line  100% | opener    0%
+    2025-01           1438 games | line   96% | opener    0%
+    2025-02           1368 games | line   81% | opener   76%
+    2025-03            783 games | line  100% | opener   95%
+    2025-04             19 games | line  100% | opener  100%
+  by tier:
+    high v high       1032 games | line   95% | opener   44%
+    high v other       647 games | line  100% | opener    6%
+    other v other     4085 games | line   93% | opener   32%
+  by spread_size:
+    0-5               2221 games | line  100% | opener   37%
+    5-10              1670 games | line  100% | opener   39%
+    10-20             1140 games | line  100% | opener   28%
+    20+                406 games | line  100% | opener    5%
+  by conf:
+    conference        3646 games | line   91% | opener   46%
+    non-conference    2118 games | line  100% | opener    6%
+  books on games with a line: {'ESPN BET': 5437}
+  with opener vs line-but-no-opener: |close spread| 6.6 vs 9.1; conference games 93% vs 45%; high-major involved 28% vs 31%
+
+=== 2026: 5752 games | any line 100% | opener 100% ===
+  by month:
+    2025-11           1245 games | line  100% | opener   99%
+    2025-12            961 games | line  100% | opener   99%
+    2026-01           1524 games | line  100% | opener  100%
+    2026-02           1372 games | line  100% | opener  100%
+    2026-03            637 games | line  100% | opener   99%
+    2026-04             13 games | line  100% | opener  100%
+  by tier:
+    high v high       1026 games | line  100% | opener  100%
+    high v other       655 games | line  100% | opener   99%
+    other v other     4071 games | line  100% | opener   99%
+  by spread_size:
+    0-5               2360 games | line  100% | opener  100%
+    5-10              1712 games | line  100% | opener   99%
+    10-20             1174 games | line  100% | opener  100%
+    20+                502 games | line  100% | opener  100%
+  by conf:
+    conference        3660 games | line  100% | opener  100%
+    non-conference    2092 games | line  100% | opener   99%
+  books on games with a line: {'Bovada,Draft Kings': 4016, 'Bovada,ESPN BET': 905, 'Draft Kings': 467, 'ESPN BET': 334, 'Bovada,Draft Kings,ESPN BET': 17, 'Bovada': 9}
+  with opener vs line-but-no-opener: |close spread| 8.5 vs 6.0; conference games 64% vs 5%; high-major involved 29% vs 23%

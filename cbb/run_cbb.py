@@ -33,6 +33,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 from saif_pull_all import http_json  # noqa: E402  (also loads .env)
+from snapshot_cbb_close import save_credits  # noqa: E402
 from odds_match import Matcher  # noqa: E402
 from ratings import SIDES, TOTALS, load, load_prior, read, walk_forward  # noqa: E402
 import cbb_page  # noqa: E402
@@ -86,6 +87,7 @@ def odds_lines(teams, today):
     raw = ROOT / 'cbb_data' / 'odds'
     raw.mkdir(parents=True, exist_ok=True)
     (raw / f'{datetime.now(timezone.utc):%Y-%m-%dT%H%MZ}.json').write_text(json.dumps(games))
+    save_credits(headers, 'cbb morning board')
     h = {k.lower(): v for k, v in headers.items()}
     print(f"[odds] {len(games)} NCAAB games | credits remaining {h.get('x-requests-remaining')} "
           f"(this call {h.get('x-requests-last')})")
@@ -167,7 +169,38 @@ def log_entries(board, now):
           f'({len(b) - len(new)} already logged earlier today)')
 
 
-def grade(games, cb):
+def own_closes(teams):
+    """Timestamped closes from snapshot_cbb_close.py, keyed to CBBD names: list of
+    (home, away, tip, snapshot, spread_home, total, minutes_to_tip)."""
+    f = STATE / 'closing_lines.csv'
+    if not f.exists():
+        return []
+    c = pd.read_csv(f)
+    if c.empty:
+        return []
+    m = Matcher(teams)
+    c['tip'] = pd.to_datetime(c.commence_time, utc=True, format='ISO8601')
+    c['snap'] = pd.to_datetime(c.snapshot_utc, utc=True, format='ISO8601')
+    c = c[c.snap < c.tip]
+    c['home'] = c.home_team.map(m.team)
+    c['away'] = c.away_team.map(m.team)
+    c = c.dropna(subset=['home', 'away'])
+    return list(c[['home', 'away', 'tip', 'snap', 'close_spread_home', 'close_total', 'minutes_to_tip']]
+                .itertuples(index=False, name=None))
+
+
+def own_close_for(closes, home, away, tip):
+    best = None
+    for h, a, t, snap, sp, tot, mins in closes:
+        if abs((t - tip).total_seconds()) / 3600 > MAX_TIP_GAP_H:
+            continue
+        sign = 1 if (h, a) == (home, away) else -1 if (h, a) == (away, home) else 0
+        if sign and (best is None or snap > best[0]):
+            best = (snap, sign * sp if pd.notna(sp) else np.nan, tot, mins)
+    return best
+
+
+def grade(games, cb, teams=None):
     if not ENTRIES.exists():
         return pd.DataFrame()
     e = pd.read_csv(ENTRIES)
@@ -189,6 +222,14 @@ def grade(games, cb):
     e['total_pick'] = np.where(ts > 0, 'over', np.where(ts < 0, 'under', ''))
     e['total_result'] = np.sign((e.actual_total - e.entry_total) * ts)
     e['total_clv'] = np.where(ts > 0, e.close_total - e.entry_total, e.entry_total - e.close_total)
+    # Additive: timestamped close from our own pre-tip snapshots (CBBD close above stays the scorecard basis)
+    closes = own_closes(teams) if teams is not None else []
+    own = [own_close_for(closes, r.home, r.away, pd.Timestamp(r.tip_utc)) if closes else None for r in e.itertuples()]
+    e['own_close_spread'] = [o[1] if o else np.nan for o in own]
+    e['own_close_total'] = [o[2] if o else np.nan for o in own]
+    e['own_close_min_before'] = [o[3] if o else np.nan for o in own]
+    e['side_clv_own'] = np.where(side > 0, e.entry_spread - e.own_close_spread, e.own_close_spread - e.entry_spread)
+    e['total_clv_own'] = np.where(ts > 0, e.own_close_total - e.entry_total, e.entry_total - e.own_close_total)
     e.to_csv(GRADED, index=False)
     print(f'[grade] {len(e)} games graded')
     return e
@@ -229,7 +270,7 @@ def main():
     print(f'[board] {len(board)} D1 games today | entry line from Odds API {n_odds}, CBBD '
           f'{int((board.entry_src == "CBBD").sum()) if len(board) else 0}, none {int((board.entry_src == "").sum()) if len(board) else 0}')
     log_entries(board, now)
-    graded = grade(games, cb)
+    graded = grade(games, cb, teams)
     entries = pd.read_csv(ENTRIES) if ENTRIES.exists() else pd.DataFrame()
     if len(entries) and len(board):   # show the LOGGED entry line, not a later rerun's line
         logged = entries.set_index('game_id')

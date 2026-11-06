@@ -235,6 +235,29 @@ def backtest_block(side_play, total_play):
             f'<div class="sc-wrap" style="margin-top:8px">{"".join(cards_)}</div>')
 
 
+def own_close_note(g, side_play, total_play):
+    """One line: CLV vs our own timestamped pre-tip snapshot (additive to the CBBD-close scorecard)."""
+    parts = []
+    if g is not None and 'side_clv_own' in g:
+        for lab, ecol, clv, play in (('sides', 'side_edge', 'side_clv_own', side_play),
+                                     ('totals', 'total_edge', 'total_clv_own', total_play)):
+            c = g[g[ecol].abs() >= play][clv].dropna()
+            if len(c):
+                parts.append(f'{lab} {c.mean():+.2f} on {len(c)} plays (toward {(c > 0).mean()*100:.0f}% / against {(c < 0).mean()*100:.0f}%)')
+    status = ''
+    try:
+        cr = json.loads((ROOT / 'cbb_data' / 'odds' / 'credits.json').read_text())
+        if cr.get('remaining', 1e9) < 150:
+            status = (' <b>Snapshots paused:</b> Odds API credits below the floor that protects the football board '
+                      f'({cr["remaining"]:.0f} left).')
+    except (OSError, ValueError):
+        pass
+    if not parts and not status:
+        return ''
+    body = ('CLV vs our own timestamped pre-tip close: ' + '; '.join(parts) + '.') if parts else ''
+    return f'<p class="legend">{body}{status}</p>'
+
+
 def daily_block(g, side_play, total_play):
     head = '<h2 class="sec">Live results by day</h2>'
     if g is None or not len(g):
@@ -359,6 +382,7 @@ def render(board, graded, entries, today, now, side_play, total_play):
 <div class="warn"><b>No SAIF capital until the gates are met.</b> Every game is logged at this morning&rsquo;s line and graded the next day against its closing line. The test is whether the line moves our way (CLV), not the win&ndash;loss record.</div>
 
 <div class="sc-wrap">{scorecard('Sides', s_side, side_play)}{scorecard('Totals', s_tot, total_play)}</div>
+{own_close_note(g, side_play, total_play)}
 {daily_block(g, side_play, total_play)}
 <p class="legend"><a href="#backtest">Backtest results (2022&ndash;26) &darr;</a></p>
 <details class="about"><summary>Gates, results by edge &amp; recent plays</summary>
