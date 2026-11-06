@@ -41,7 +41,7 @@ MIN_GAP_MIN = 45
 CREDIT_FLOOR = 150
 FIELDS = ['snapshot_utc', 'odds_api_id', 'commence_time', 'home_team', 'away_team', 'minutes_to_tip',
           'close_spread_home', 'close_total', 'n_books', 'dk_spread_home', 'bov_spread_home',
-          'dk_total', 'bov_total']
+          'dk_total', 'bov_total', 'fd_spread_home', 'br_spread_home', 'fd_total', 'br_total']
 
 
 def credits():
@@ -142,8 +142,18 @@ def main():
                      'dk_spread_home': book_point(g, 'draftkings', 'spreads', g['home_team']),
                      'bov_spread_home': book_point(g, 'bovada', 'spreads', g['home_team']),
                      'dk_total': book_point(g, 'draftkings', 'totals', 'Over'),
-                     'bov_total': book_point(g, 'bovada', 'totals', 'Over')})
+                     'bov_total': book_point(g, 'bovada', 'totals', 'Over'),
+                     'fd_spread_home': book_point(g, 'fanduel', 'spreads', g['home_team']),
+                     'br_spread_home': book_point(g, 'betrivers', 'spreads', g['home_team']),
+                     'fd_total': book_point(g, 'fanduel', 'totals', 'Over'),
+                     'br_total': book_point(g, 'betrivers', 'totals', 'Over')})
     OUT.parent.mkdir(exist_ok=True)
+    if OUT.exists():                       # older file without the FanDuel/BetRivers columns: widen it once
+        with OUT.open(encoding='utf-8') as f:
+            header = f.readline().strip().split(',')
+        if header != FIELDS:
+            import pandas as pd
+            pd.read_csv(OUT).reindex(columns=FIELDS).to_csv(OUT, index=False)
     new = not OUT.exists()
     with OUT.open('a', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)

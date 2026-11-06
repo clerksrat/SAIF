@@ -1,0 +1,69 @@
+{
+ "version": "v1",
+ "built": "2026-11-06",
+ "data_through": "2026-04",
+ "kinds": {
+  "side": {
+   "A1_calibration": [
+    0.9075332395046602,
+    0.005034922489745414
+   ],
+   "A1_sigma": {
+    "sigma_e2": 166.33143493423452,
+    "s2": 112.4906261900845
+   },
+   "C1": {
+    "intercept": -0.014457076838997997,
+    "weight": 0.2556873436315942
+   },
+   "prob_recal": {
+    "a": -0.009836335027588548,
+    "b": 0.1784778592714992
+   },
+   "prob_recal_audit": {
+    "train_months": "2025-02..2025-12",
+    "test_months": "2026-01..2026-04",
+    "n_test": 3529,
+    "logloss_raw": 0.6988,
+    "logloss_recal": 0.6936,
+    "logloss_coinflip": 0.6931,
+    "slope_after_recal": 0.761,
+    "recal_fit_on_train": [
+     0.0291,
+     0.1877
+    ]
+   }
+  },
+  "total": {
+   "A1_calibration": [
+    4.123515560458783,
+    0.9771803483866297
+   ],
+   "A1_sigma": {
+    "sigma_e2": 246.3317440079306,
+    "s2": 272.2390392450653
+   },
+   "C1": {
+    "intercept": 0.5795208926224598,
+    "weight": 0.19036220895986697
+   },
+   "prob_recal": {
+    "a": -0.014790282385770027,
+    "b": 0.19256453203705243
+   },
+   "prob_recal_audit": {
+    "train_months": "2025-02..2025-12",
+    "test_months": "2026-01..2026-04",
+    "n_test": 3517,
+    "logloss_raw": 0.6993,
+    "logloss_recal": 0.6928,
+    "logloss_coinflip": 0.6931,
+    "slope_after_recal": 3.204,
+    "recal_fit_on_train": [
+     0.0189,
+     0.1136
+    ]
+   }
+  }
+ }
+}

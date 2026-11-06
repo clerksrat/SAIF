@@ -270,6 +270,11 @@ def main():
     print(f'[board] {len(board)} D1 games today | entry line from Odds API {n_odds}, CBBD '
           f'{int((board.entry_src == "CBBD").sum()) if len(board) else 0}, none {int((board.entry_src == "").sum()) if len(board) else 0}')
     log_entries(board, now)
+    try:                                   # frozen v1 shadow test -- additive; never blocks the live board
+        import shadow
+        shadow.log_shadow(today, now)
+    except Exception as e:  # noqa: BLE001
+        print(f'[shadow v1] skipped: {type(e).__name__}: {e}')
     graded = grade(games, cb, teams)
     entries = pd.read_csv(ENTRIES) if ENTRIES.exists() else pd.DataFrame()
     if len(entries) and len(board):   # show the LOGGED entry line, not a later rerun's line
