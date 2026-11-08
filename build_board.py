@@ -31,6 +31,8 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
+from saif_policy import SHRINK_K, PLAY_MIN, lock_entries
+
 HERE = Path(__file__).resolve().parent
 RATING_ALPHA = 8.0
 e = htmlmod.escape
@@ -226,7 +228,8 @@ def injury_block(inj, team):
 
 # ------------------------------------------------------------------ html
 def edge_class(x):
-    return 'edge-strong' if abs(x) >= 3 else 'edge-mid' if abs(x) >= 1.5 else 'edge-weak'
+    """x = SAIF (shrunk) edge."""
+    return 'edge-strong' if abs(x) >= 1.5 else 'edge-mid' if abs(x) >= PLAY_MIN else 'edge-weak'
 
 
 def contrib_rows(contribs, home, away, max_rows=8):
@@ -249,7 +252,7 @@ def contrib_rows(contribs, home, away, max_rows=8):
 # Everything a reader sees is written as a bet: team + signed number, favorite with a minus.
 # market_spread / *_fair_spread are HOME-relative sportsbook spreads (negative = home favored);
 # *_edge = model margin + market spread (positive = take the home side at the market number).
-MIN_EDGE = 1.5  # below this a model's side shows as "No play"
+# SAIF edge = SHRINK_K x Alpha edge; a play is |SAIF edge| >= PLAY_MIN at the locked entry line (saif_policy.py).
 
 
 def sgn(x):
@@ -265,19 +268,46 @@ def bet_line(spread, home, away):
     return f'{e(home)}&nbsp;{sgn(spread)}' if spread < 0 else f'{e(away)}&nbsp;{sgn(-spread)}'
 
 
-def model_tile(name, edge, fair_spread, r):
-    team = r.home_team if edge > 0 else r.away_team
-    num = r.market_spread if edge > 0 else -r.market_spread
-    pick = (f'<span class="pick {edge_class(edge)}">{e(team)} <span class="nw">{sgn(num)}</span></span>' if abs(edge) >= MIN_EDGE
-            else '<span class="noplay">No play</span>')
-    if abs(edge) >= MIN_EDGE:
-        best = getattr(r, 'best_home_spread' if edge > 0 else 'best_away_spread', np.nan)
-        books = getattr(r, 'best_home_books' if edge > 0 else 'best_away_books', '')
-        if pd.notna(best) and best - num >= .25 and isinstance(books, str) and books:
-            pick += f'<div class="bestbook">Better: <b>{sgn(best)}</b> at {e(books)}</div>'
-    return (f'<div class="mtile"><div class="mlabel">{name}</div>{pick}'
-            f'<div class="msub">Model <b>{bet_line(fair_spread, r.home_team, r.away_team)}</b> '
-            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(edge):.1f}</span></div></div>')
+def fmt_et(ts):
+    t = pd.Timestamp(ts).tz_convert('America/New_York')
+    return f"{t.strftime('%a')} {t.strftime('%I:%M %p').lstrip('0')}"
+
+
+def saif_tile(r):
+    """The pick of record: decided once, at the locked entry line."""
+    locked = pd.notna(getattr(r, 'entry_spread_home', np.nan))
+    if locked:
+        se, home_pick = r.entry_saif_edge, r.entry_saif_edge > 0
+        entry = r.entry_spread_home
+        num = entry if home_pick else -entry
+        team = r.home_team if home_pick else r.away_team
+        if bool(r.entry_play):
+            pick = f'<span class="pick {edge_class(se)}">{e(team)} <span class="nw">{sgn(num)}</span></span>'
+            best = r.entry_best_home if home_pick else r.entry_best_away
+            books = r.entry_best_home_books if home_pick else r.entry_best_away_books
+            if pd.notna(best) and best - num >= .25 and isinstance(books, str) and books:
+                pick += f'<div class="bestbook">Better at entry: <b>{sgn(best)}</b> at {e(books)}</div>'
+        else:
+            pick = '<span class="noplay">No play</span>'
+        now = '' if abs(r.market_spread - entry) < .25 else f' &middot; now {bet_line(r.market_spread, r.home_team, r.away_team)}'
+        sub2 = f'<div class="msub entry">Entry {bet_line(entry, r.home_team, r.away_team)}, locked {fmt_et(r.entry_locked_utc)}{now}</div>'
+    else:
+        se = SHRINK_K * r.independent_edge
+        pick = '<span class="noplay">Awaiting entry line</span>'
+        sub2 = ''
+    return (f'<div class="mtile"><div class="mlabel">SAIF</div>{pick}'
+            f'<div class="msub">Alpha model <b>{bet_line(r.independent_fair_spread, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div>{sub2}</div>')
+
+
+def shadow_tile(r):
+    """Beta: logged and graded, never a play."""
+    se = SHRINK_K * r.beta_edge
+    team = r.home_team if se > 0 else r.away_team
+    return (f'<div class="mtile shadow"><div class="mlabel">Beta &middot; shadow</div>'
+            f'<span class="noplay">Leans {e(team)}</span>'
+            f'<div class="msub">Model <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div></div>')
 
 
 def qb_block(r):
@@ -295,9 +325,10 @@ def qb_block(r):
         out += f'<p class="qbflag {cls}"><b>{e(team)}:</b> {e(tx)}.</p>'
     for side in ('home', 'away'):
         if getattr(r, f'qb_{side}_flag', None) == 'STALE':
-            fav_home = r.independent_edge > 0
+            ref = getattr(r, 'entry_saif_edge', np.nan)
+            fav_home = (ref if pd.notna(ref) else r.independent_edge) > 0
             if fav_home == (side == 'home'):
-                mute = 'NO PLAY &mdash; pick is on the team missing QB1; Alpha/Beta can\'t see it'
+                mute = 'NO PLAY &mdash; pick is on the team missing QB1; the model can\'t see it'
             else:
                 mute = mute or 'Note: shown edge is biased toward the opponent (QB1 absence not in models)'
     return out, mute
@@ -306,7 +337,8 @@ def qb_block(r):
 def build_card(r, inj):
     t = pd.Timestamp(r.kickoff_utc).tz_convert('America/New_York')
     day = t.strftime('%A')
-    ae, be = r.independent_edge, r.beta_edge
+    ae = r.independent_edge
+    se = r.entry_saif_edge if pd.notna(getattr(r, 'entry_saif_edge', np.nan)) else SHRINK_K * ae
     tg = '' if r.tier_gap == 0 else ('<span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else '<span class="tiertag">G5 vs P4</span>')
     neutral = bool(getattr(r, 'neutral_site', False))
     inj_html = ''
@@ -315,7 +347,9 @@ def build_card(r, inj):
         ab, an = injury_block(inj, r.away_team)
         inj_html = f'<details class="injuries"><summary>Injuries &amp; availability ({hn + an} listed)</summary>{hb}{ab}</details>'
     qb_html, qb_mute = qb_block(r)
-    qb_banner = f'<p class="qbflag qb-stale qb-mute">{qb_mute}</p>' if qb_mute.startswith('NO PLAY') else ''
+    ep = getattr(r, 'entry_play', False)
+    is_play = isinstance(ep, (bool, np.bool_)) and bool(ep)
+    qb_banner = f'<p class="qbflag qb-stale qb-mute">{qb_mute}</p>' if is_play and qb_mute.startswith('NO PLAY') else ''
     final = ''
     if pd.notna(getattr(r, 'actual_margin', np.nan)):
         final = f'<span class="finaltag">Final: {e(r.home_team if r.actual_margin > 0 else r.away_team)} by {abs(r.actual_margin):.0f}</span>'
@@ -323,11 +357,11 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{max(abs(ae), abs(be))}" data-time="{t.timestamp()}">
+    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
- {qb_banner}<div class="models">{model_tile('Alpha', ae, r.independent_fair_spread, r)}{model_tile('Beta', be, r.beta_fair_spread, r)}</div>
+ {qb_banner}<div class="models">{saif_tile(r)}{shadow_tile(r)}</div>
 <details class="contrib"><summary>Where the margin comes from</summary>
  <p class="contrib-sub">Alpha</p>{contrib_rows(r.alpha_contribs, r.home_team, r.away_team)}
  <p class="contrib-sub">Beta</p>{contrib_rows(r.beta_contribs, r.home_team, r.away_team)}
@@ -370,6 +404,25 @@ def build_page(wk, week, season, inj):
     return template
 
 
+def attach_entries(wk, state):
+    from saif_policy import load_entries
+    ent = load_entries(state)
+    cols = {'entry_spread_home': 'entry_spread_home', 'locked_utc': 'entry_locked_utc', 'saif_edge': 'entry_saif_edge',
+            'play': 'entry_play', 'pick': 'entry_pick', 'best_home_spread': 'entry_best_home',
+            'best_away_spread': 'entry_best_away', 'best_home_books': 'entry_best_home_books',
+            'best_away_books': 'entry_best_away_books'}
+    wk = wk.drop(columns=[c for c in cols.values() if c in wk], errors='ignore')
+    if not len(ent):
+        for c in cols.values():
+            wk[c] = np.nan
+        return wk
+    ent = ent[['game_id'] + list(cols)].rename(columns=cols)
+    ent['game_id'] = ent['game_id'].astype(int)
+    ent['entry_play'] = ent['entry_play'].astype(str).str.lower().eq('true')
+    wk['game_id'] = wk['game_id'].astype(int)
+    return wk.merge(ent, on='game_id', how='left')
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--week', type=int, required=True)
@@ -401,9 +454,13 @@ def main():
         switched = is_cons(wk['line_provider']) & ~is_cons(wk['prev_provider'])
         wk.loc[switched, 'prev_spread'] = np.nan   # source changed (CFBD -> consensus): start line moves fresh
         wk = wk.drop(columns='prev_provider')
+    _, n_locked = lock_entries(wk, a.week, state)   # pick of record, decided once at the first consensus line
+    wk = attach_entries(wk, state)
     wk.to_pickle(prev_pkl)
     n_logged = append_line_history(wk, a.week, state)
     (out / 'index.html').write_text(build_page(wk, a.week, a.season, inj), encoding='utf-8')
+    n_plays = int(wk['entry_play'].fillna(False).astype(bool).sum())
+    print(f'SAIF entries: {n_locked} newly locked; {n_plays} plays this week (|edge| >= {PLAY_MIN} after x{SHRINK_K} shrink)')
     print(f'Line history: {n_logged} new line snapshots logged -> {state / "line_history.csv"}')
     print(f'Week {a.week}: {len(wk)} games scored -> {out / "index.html"} (injuries: {"yes" if inj else "none"})')
 

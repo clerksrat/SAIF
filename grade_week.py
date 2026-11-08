@@ -188,6 +188,9 @@ def main():
 
     cmap = conf_map()
     closes = load_closes(state)
+    from saif_policy import load_entries
+    ent = load_entries(state)
+    ent = {int(x['game_id']): x for x in ent.to_dict('records')} if len(ent) else {}
     rows = []
     for _, r in board.iterrows():
         gid = int(r['game_id'])
@@ -220,6 +223,28 @@ def main():
             row[f'{tag}_pick'], row[f'{tag}_result'], row[f'{tag}_units'] = pick, res, units
             row[f'{tag}_bucket'] = bucket(r[col])
             row[f'{tag}_clv'] = clv_points(pick, spread, close)
+        # SAIF pick of record: decided once at the locked entry line (saif_policy.py)
+        en = ent.get(gid)
+        row.update({k: None for k in ('saif_locked_utc', 'saif_entry_spread_home', 'saif_edge', 'saif_play', 'saif_pick',
+                                      'saif_void_qb', 'saif_result', 'saif_units', 'saif_clv', 'saif_move',
+                                      'entry_model_side', 'entry_move_model', 'entry_clv_model')})
+        if en is not None:
+            entry = float(en['entry_spread_home'])
+            side = 'home' if float(en['raw_edge']) > 0 else 'away'
+            play = str(en['play']).lower() == 'true'
+            row.update({'saif_locked_utc': en['locked_utc'], 'saif_entry_spread_home': entry,
+                        'saif_edge': en['saif_edge'], 'saif_play': play,
+                        # research, every locked game: did the line move toward the model's side after entry?
+                        'entry_model_side': side, 'entry_move_model': clv_points(side, entry, spread),
+                        'entry_clv_model': clv_points(side, entry, close)})
+            if play:
+                void = (side == 'home' and hf == 'STALE') or (side == 'away' and af == 'STALE')
+                row['saif_pick'], row['saif_void_qb'] = side, bool(void)
+                if not void:
+                    _, res, units = grade_side(1 if side == 'home' else -1, actual + entry)
+                    row['saif_result'], row['saif_units'] = res, units
+                    row['saif_clv'] = clv_points(side, entry, close)
+                    row['saif_move'] = clv_points(side, entry, spread)
         row['alpha_err'] = abs(actual - r['independent_margin'])
         row['beta_err'] = abs(actual - r['beta_margin'])
         row['market_err'] = abs(actual - (-spread))
@@ -248,6 +273,26 @@ def main():
         if s['clv_games']:
             print(f"        CLV {s['avg_clv']:+.2f} pts avg, beat the close {s['beat_close_pct']}% "
                   f"({s['clv_games']} games with a closing snapshot)")
+    sp = df[df['saif_result'].isin(['W', 'L', 'P'])] if 'saif_result' in df else df.iloc[0:0]
+    if len(sp):
+        s = summarize(df, 'saif', None)
+        s['mae'] = None
+        s['week'] = a.week
+        c = sp['saif_clv'].dropna()
+        s['clv_games'] = len(c)
+        s['avg_clv'] = round(c.mean(), 2) if len(c) else None
+        s['beat_close_pct'] = round((c > 0).mean() * 100, 1) if len(c) else None
+        s['avg_move'] = round(sp['saif_move'].dropna().mean(), 2)
+        summ.append(s)
+        print(f"  SAIF  plays {s['W']}-{s['L']}-{s['P']}  flat -110: {s['units_flat_110']:+.2f}u  "
+              f"entry->board move {s['avg_move']:+.2f} pts" + (f"  CLV {s['avg_clv']:+.2f} ({s['beat_close_pct']}% beat close)" if s['clv_games'] else ''))
+    else:
+        print('  SAIF  no graded plays this week (no locked entries, or none qualified)')
+    mv = df['entry_move_model'].dropna() if 'entry_move_model' in df else []
+    if len(mv):
+        nz = mv[mv != 0]
+        print(f"  Entry-line research ({len(mv)} locked games): line moved toward the model {f'{(nz > 0).mean():.0%} of {len(nz)} moves' if len(nz) else '(no moves)'}, "
+              f"avg {mv.mean():+.2f} pts to the board line" + (f", {df['entry_clv_model'].dropna().mean():+.2f} to the close" if df['entry_clv_model'].notna().any() else ''))
     if 'alpha_qb_mute' in df:
         print('\n  QB1 flag check (STALE = pick on team missing QB1):')
         for tag in ('alpha', 'beta'):

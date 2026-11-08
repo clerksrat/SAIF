@@ -9,6 +9,7 @@ Weekly CFB research board: frozen **Alpha** ridge-10 model and **Beta** (Alpha +
     ./run_week.sh 7 --push          # pull, score, build docs/, commit + push
 
 On the Pi, `bash install_cron.sh` sets the schedule (times ET):
+- **Sun 21:00** `./run_week.sh auto --push`: first look at next week's lines; SAIF entries lock here
 - **Mon 9:00** `./run_week.sh monday --push`: pull, grade last week, update `docs/live.json`, build + publish the board
 - **Tue–Fri 9:00, Sat 8:00** `./run_week.sh auto --push`: injuries + odds (+ a 2–5 call CFBD refresh), rebuild + publish
 - **Every 30 min, 11:00–23:30** `snapshot_close.py`: closing-line snapshot for CLV; only calls The Odds API (1 credit, spreads only) when a game kicks off within 35 min
@@ -28,6 +29,12 @@ Logs: `logs/run.log`, `logs/close.log`.
 
 ## Publishing
 Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public repos; private repos need a paid plan.)
+
+## SAIF play policy (from Week 11, `saif_policy.py`)
+- Board edge = 0.15 x Alpha's gap to the line (shrunk). A play = shrunk edge >= 1.0 at the entry line, flat 1 unit.
+- Entry = the first consensus (Odds API) line the board sees for a game; locked once in `state/cfb_entries.csv` with a timestamp and best-book numbers. Never re-decided.
+- A play on a team later flagged STALE (QB1 out) is void. Beta is a shadow model: shown and graded, never a play.
+- `grade_week.py` grades SAIF plays at the entry number (`saif_*` columns, `saif` row in summary.csv) and logs, for every locked game, whether the line moved toward the model after entry (`entry_move_model`, `entry_clv_model`).
 
 ## Notes
 - CFBD cache: prior seasons are pulled once and kept forever. For 2026 only the schedule and not-yet-final weeks are refetched (a finished week's stats are kept once pulled 24h after its last kickoff), and features are built only through the board week. A normal run is 2–5 CFBD calls (was ~41). To force a full refresh (e.g. offseason stat corrections), delete `cfb_fullseason_data_2026/raw/`.

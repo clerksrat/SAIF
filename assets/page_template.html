@@ -72,6 +72,8 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .msub b{color:var(--ink-soft);font-weight:500;white-space:nowrap}
 .nw{white-space:nowrap}
 .msub .edge{display:inline}
+.msub.entry{margin-top:3px;opacity:.8}
+.mtile.shadow{opacity:.6}
 .game details{margin-top:12px;border-top:1px solid var(--rule);padding-top:8px}
 .game details p{font-size:13px;color:var(--ink-soft)}
 .contrib-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:12px 0 4px;font-weight:600}
@@ -162,12 +164,12 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
   </div>
 </header>
 
-<div class="warn"><b>Research models, not a proven edge.</b> Injuries are not in either model &mdash; open a game&rsquo;s injury list before you bet it.</div>
+<div class="warn"><b>Research model, not a proven edge.</b> Edges are shrunk to 15% of the raw model gap and plays are locked at the first consensus line of the week. Injuries are not in the model &mdash; open a game&rsquo;s injury list before you bet it.</div>
 
 <section class="plays" id="plays" hidden aria-labelledby="playsTitle">
   <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s plays</h3><span class="plays-count" id="playsCount"></span></div>
   <p class="plays-sofar" id="playsSoFar" hidden></p>
-  <p class="plays-note">Games where Alpha <b>and</b> Beta take the same side, each with an edge of 1.5+ points, in kickoff order. They aren&rsquo;t ranked: so far bigger edges haven&rsquo;t won more often &mdash; see <a href="performance.html">Model performance</a>. Tap a play to jump to its game.</p>
+  <p class="plays-note">SAIF plays: games where the shrunk edge was 1.0+ points at the locked entry line (the first consensus line of the week), in kickoff order. Flat 1 unit each, graded at the entry number. Tap a play to jump to its game.</p>
   <ol class="plays-list" id="playsList"></ol>
   <button type="button" class="plays-more" id="playsMore" hidden></button>
   <p class="plays-muted" id="playsMuted" hidden></p>
@@ -180,20 +182,21 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <p>Both models predict home scoring margin from football data alone, with no market inputs. The market spread enters only afterward, to measure the difference. Opponent-adjusted ratings refit on all completed 2026 FBS-vs-FBS games through Week {{THROUGH_WEEK}}. Only {{N_TIER}} of this week&rsquo;s games carry a nonzero tier_gap (flagged on the card) &mdash; everywhere else Alpha and Beta differ only by ordinary refit noise.</p>
 <p><b>Track record.</b> Alpha went 364&ndash;370&ndash;18 ATS (49.6%) in the 2025 retrospective test. Average margin error: 12.97 points versus 11.89 for the market. Live 2026 results are on the Model performance page.</p>
 <p>Alpha inputs: net PPA, success rate, explosiveness, points per opportunity, havoc, turnover margin, neutral site, rest difference, and two opponent-rating features (offense and defense differences), blended with a four-game prior weight against 2025 team profiles. Beta is a full joint refit of Alpha&rsquo;s 10 features plus one signed tier_gap feature &mdash; not Alpha plus a fixed correction, so even tier_gap=0 games can show small differences.</p>
+<p><b>SAIF policy (from Week 11).</b> Through Week 9 the model&rsquo;s raw edge carried only about 15% real information about the final margin, and its one positive signal was the line moving toward it early in the week. So the board shows a shrunk edge (0.15 &times; the Alpha gap to the line), a play needs 1.0+ shrunk points (about 6.7 raw), and each game is decided once, at the first consensus line we see, which is timestamped and locked. Beta is kept as a shadow: logged and graded, never a play.</p>
 <p>&ldquo;Where the margin comes from&rdquo; is the same linear math the model already uses &mdash; each feature&rsquo;s standardized value times its fitted coefficient &mdash; broken apart per feature. Neither model sees market lines, totals, or moneylines. 2025 has been examined repeatedly, so it is not a pristine holdout.</p>
 <div class="tablewrap">{{BUCKETS}}</div>
 </details>
 
-<p class="legend"><b>Line</b> = market spread, favorite shown with &minus;. <b>Pick</b> = the side each model would bet, at that market number (solid = edge 3+ pts, outline = 1.5&ndash;3). Edges under 1.5 pts show as <b>No play</b>.</p>
+<p class="legend"><b>Line</b> = current market spread, favorite shown with &minus;. <b>SAIF</b> = the pick of record at the locked entry number (solid = shrunk edge 1.5+, outline = 1.0&ndash;1.5). Shrunk edges under 1.0 show as <b>No play</b>. <b>Beta</b> is a shadow model, shown for comparison only.</p>
 <p class="legend linesnote">{{LINES_NOTE}}</p>
 <p id="preview" class="legend">All {{N_GAMES}} games with a posted market spread are listed below. Filters need JavaScript.</p>
 
 <div class="filters" id="filters">
 <div class="f-search"><label for="search">Team search</label><input id="search" placeholder="Cincinnati, Cincy, Purdue&hellip;" type="search" autocomplete="off"></div>
 <div class="f-sort"><label for="sort">Sort</label><select id="sort"><option value="time">Kickoff time</option><option value="edge">Largest edge</option></select></div>
-<div class="f-plays"><label for="minimum">Show</label><select id="minimum"><option value="0">All games</option><option value="1.5">Plays only (1.5+)</option><option value="3">Edge 3+</option><option value="6">Edge 6+</option><option value="10">Edge 10+</option></select></div>
+<div class="f-plays"><label for="minimum">Show</label><select id="minimum"><option value="0">All games</option><option value="1">Plays only (1.0+)</option><option value="0.5">Edge 0.5+</option><option value="1.5">Edge 1.5+</option><option value="2">Edge 2+</option></select></div>
 <div class="f-more"><label for="day">Game day &middot; ET</label><select id="day"><option value="">All days</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
-<div class="f-more"><label for="side">Alpha pick</label><select id="side"><option value="">Either side</option><option value="home">Home team</option><option value="away">Away team</option></select></div>
+<div class="f-more"><label for="side">Model side</label><select id="side"><option value="">Either side</option><option value="home">Home team</option><option value="away">Away team</option></select></div>
 <div class="f-more"><label>&nbsp;</label><button id="reset" type="button">Reset</button></div>
 <button class="f-toggle" id="ftoggle" type="button" aria-expanded="false">More filters</button>
 </div>
@@ -208,7 +211,7 @@ const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(de
 $('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
 render();$('preview').hidden=true;
 // ---------- top plays + live final scores ----------
-const TOP = 5, MIN = 1.5;
+const TOP = 5;
 const norm = s => (s || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 const esc = s => s.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const tile = (c, i) => c.querySelectorAll('.mtile')[i];
@@ -222,18 +225,18 @@ function graded(pick) {        // W/L/P record over cards, using the result on t
   cards.forEach(c => { const t = pick(c); const r = t && t.dataset.res; if (r === 'W') w++; else if (r === 'L') l++; else if (r === 'P') p++; });
   return { w, l, p, units: w * 100 / 110 - l };
 }
-// A play for this box = Alpha and Beta both pick the same side at the same number (each needs edge 1.5+).
-const agreed = c => { const a = pickOf(tile(c, 0)), b = pickOf(tile(c, 1)); return a && b && a === b ? a : null; };
+// A play for this box = the SAIF tile has a locked pick (shrunk edge 1.0+ at the entry line).
+const agreed = c => pickOf(tile(c, 0));
 
 function buildPlays() {
-  let plays = [], muted = 0, solo = 0;
+  let plays = [], muted = 0;
   cards.forEach(c => {
     if (c.dataset.done === '1') return;
     const pick = agreed(c);
-    if (!pick) { if (pickOf(tile(c, 0)) || pickOf(tile(c, 1))) solo++; return; }
+    if (!pick) return;
     if (c.querySelector('.qb-mute')) { muted++; return; }
     const a = tile(c, 0);
-    plays.push({ card: c, pick, ea: edgeOf(a), eb: edgeOf(tile(c, 1)),
+    plays.push({ card: c, pick, ea: edgeOf(a),
       match: norm(c.querySelector('h2').textContent),
       when: norm((c.querySelector('.meta span') || {}).textContent || '').replace(/\s*ET$/, ''),
       better: a.querySelector('.bestbook') ? norm(a.querySelector('.bestbook').textContent) : '' });
@@ -242,19 +245,18 @@ function buildPlays() {
   const open = $('playsMore').dataset.open === '1';
   $('playsList').innerHTML = plays.map((p, i) => `<li${i >= TOP && !open ? ' hidden' : ''}><button type="button" class="play" data-target="${p.card.id}">
       <span class="bet">${esc(p.pick)}</span><span class="when">${esc(p.when)}</span>
-      <span class="sub">${esc(p.match)} &middot; edge ${p.ea.toFixed(1)} Alpha / ${p.eb.toFixed(1)} Beta${p.better ? `<br><span class="bestnote">${esc(p.better)}</span>` : ''}</span></button></li>`).join('');
+      <span class="sub">${esc(p.match)} &middot; SAIF edge ${p.ea.toFixed(1)}${p.better ? `<br><span class="bestnote">${esc(p.better)}</span>` : ''}</span></button></li>`).join('');
   $('playsCount').textContent = plays.length ? plays.length + ' play' + (plays.length === 1 ? '' : 's') + ' left this week' : 'No plays left this week';
   const more = $('playsMore');
   more.hidden = plays.length <= TOP;
   more.textContent = open ? 'Show next ' + TOP + ' only' : 'Show all ' + plays.length + ' plays';
   const notes = [];
-  if (solo) notes.push(`${solo} game${solo === 1 ? '' : 's'} where only one model has a play — on the board below.`);
-  if (muted) notes.push(`${muted} agreed play${muted === 1 ? '' : 's'} left off: the pick is on a team missing its starting QB, which the models can’t see.`);
+  if (muted) notes.push(`${muted} play${muted === 1 ? '' : 's'} void: the pick is on a team missing its starting QB, which the models can’t see.`);
   const m = $('playsMuted'); m.hidden = !notes.length; m.textContent = notes.join(' ');
-  const G = graded(c => agreed(c) ? tile(c, 0) : null), A = graded(c => tile(c, 0)), B = graded(c => tile(c, 1)), sf = $('playsSoFar');
+  const G = graded(c => c.querySelector('.qb-mute') ? null : tile(c, 0)), sf = $('playsSoFar');
   const fmt = r => `${r.w}–${r.l}${r.p ? '–' + r.p : ''} (<span class="${r.units >= 0 ? 'pos' : 'neg'}">${r.units >= 0 ? '+' : '−'}${Math.abs(r.units).toFixed(1)}u</span>)`;
-  sf.hidden = !(A.w + A.l + A.p + B.w + B.l + B.p);
-  sf.innerHTML = `<b>Graded so far this week</b> &middot; These plays ${fmt(G)} &middot; all Alpha plays ${fmt(A)} &middot; all Beta plays ${fmt(B)}`;
+  sf.hidden = !(G.w + G.l + G.p);
+  sf.innerHTML = `<b>Graded so far this week</b> &middot; SAIF plays ${fmt(G)}`;
   $('plays').hidden = !plays.length && sf.hidden;
 }
 $('playsMore').onclick = () => { const more = $('playsMore'); more.dataset.open = more.dataset.open === '1' ? '0' : '1'; buildPlays(); };

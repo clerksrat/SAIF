@@ -182,6 +182,22 @@ def main():
             bench[name] = add(bench.get(name, {}), t)
     live['benchmarks'] = {n: bench[n] for n in BENCH_ROWS if n in bench}
 
+    # SAIF pick of record (saif_policy.py, from Week 11): plays at the locked entry line, QB1-void excluded
+    saif_weeks = {}
+    for f in files:
+        df = pd.read_csv(f)
+        if 'saif_result' in df and df['saif_result'].isin(['W', 'L', 'P']).any():
+            d = df[df['saif_result'].isin(['W', 'L', 'P'])]
+            t = tally(d['saif_result'])
+            t['avg_clv'] = round(float(d['saif_clv'].dropna().mean()), 2) if d['saif_clv'].notna().any() else None
+            saif_weeks[str(int(re.search(r'week(\d+)_graded', f).group(1)))] = t
+    if saif_weeks:
+        tot = {}
+        for t in saif_weeks.values():
+            tot = add(tot, t)
+        live['saif'] = {'overall': tot, 'by_week': saif_weeks}
+        print(f"SAIF plays      {tot['wins']}-{tot['losses']}-{tot['pushes']}  {tot['units']:+.2f}u  (weeks {sorted(int(w) for w in saif_weeks)})")
+
     live['weeks_graded'] = sorted(set(base_weeks) | {int(w) for w in live['models']['Verified']['detail']})
     wk = live['weeks_graded']
     span = f"{wk[0]}&ndash;{wk[-1]}" if len(wk) > 1 else str(wk[0])
