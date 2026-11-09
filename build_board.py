@@ -304,17 +304,21 @@ def saif_tile(r):
 
 
 def shadow_tile(r):
-    """Beta and Gamma: logged and graded, never a play."""
+    """Gamma (headline) and Beta: logged and graded, never a play."""
     se = SHRINK_K * r.beta_edge
-    team = r.home_team if se > 0 else r.away_team
+    beta = (f'<div class="msub">Beta <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div>')
     gm = getattr(r, 'gamma_margin', np.nan)
-    gline = (f'<div class="msub">Gamma <b>{bet_line(-gm, r.home_team, r.away_team)}</b> '
-             f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(SHRINK_K * (gm + r.market_spread)):.1f}</span></div>'
-             if pd.notna(gm) else '')
-    return (f'<div class="mtile shadow"><div class="mlabel">Shadow models</div>'
-            f'<span class="noplay">Beta leans {e(team)}</span>'
-            f'<div class="msub">Beta <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
-            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div>{gline}</div>')
+    if pd.isna(gm):
+        return (f'<div class="mtile shadow"><div class="mlabel">Gamma &middot; shadow</div>'
+                f'<span class="noplay">No Gamma number</span>{beta}</div>')
+    ge = gm + r.market_spread                    # >0: Gamma likes the home side at the current line
+    team = r.home_team if ge > 0 else r.away_team
+    num = r.market_spread if ge > 0 else -r.market_spread
+    return (f'<div class="mtile shadow gamma"><div class="mlabel">Gamma &middot; shadow</div>'
+            f'<span class="gpick">{e(team)} <span class="nw">{sgn(num)}</span></span>'
+            f'<div class="msub">Model <b>{bet_line(-gm, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(SHRINK_K * ge):.1f}</span></div>{beta}</div>')
 
 
 def qb_news_after_entry(r):

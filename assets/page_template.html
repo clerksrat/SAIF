@@ -73,7 +73,9 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 .nw{white-space:nowrap}
 .msub .edge{display:inline}
 .msub.entry{margin-top:3px;opacity:.8}
-.mtile.shadow{opacity:.6}
+.mtile.shadow{opacity:.75}
+.mtile.gamma{opacity:1}
+.gpick{display:inline-block;font-weight:700;padding:2px 0}
 .game details{margin-top:12px;border-top:1px solid var(--rule);padding-top:8px}
 .game details p{font-size:13px;color:var(--ink-soft)}
 .contrib-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:12px 0 4px;font-weight:600}
@@ -187,7 +189,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <div class="tablewrap">{{BUCKETS}}</div>
 </details>
 
-<p class="legend"><b>Line</b> = current market spread, favorite shown with &minus;. <b>SAIF</b> = the pick of record at the locked entry number (solid = shrunk edge 1.5+, outline = 1.0&ndash;1.5). Shrunk edges under 1.0 show as <b>No play</b>. <b>Beta</b> is a shadow model, shown for comparison only.</p>
+<p class="legend"><b>Line</b> = current market spread, favorite shown with &minus;. <b>SAIF</b> = the pick of record at the locked entry number (solid = shrunk edge 1.5+, outline = 1.0&ndash;1.5). Shrunk edges under 1.0 show as <b>No play</b>. <b>Gamma</b> (newer model trained on 2016&ndash;2025 CFBD data) and <b>Beta</b> are shadow models: shown and tracked, never a play.</p>
 <p class="legend linesnote">{{LINES_NOTE}}</p>
 <p id="preview" class="legend">All {{N_GAMES}} games with a posted market spread are listed below. Filters need JavaScript.</p>
 
