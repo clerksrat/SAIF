@@ -1,68 +1,68 @@
-game_id,home_team,away_team,gamma_margin,built_utc,source
-401871100,South Alabama,Troy,2.992,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856882,Arkansas,South Carolina,-9.718,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856864,Arizona,Utah,-1.776,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401860915,San Diego State,Utah State,-7.277,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858526,UCLA,Illinois,17.481,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856860,Colorado,Houston,-7.334,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401861967,UConn,James Madison,-5.452,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401871060,Delaware,Florida International,0.453,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862824,South Florida,Memphis,-2.551,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856883,Georgia,Missouri,17.144,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401864537,Hawai'i,North Dakota State,-8.174,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856859,Iowa State,Cincinnati,0.448,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401860914,Boise State,Oregon State,10.846,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858518,Indiana,USC,10.064,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858294,Notre Dame,Boston College,26.187,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856884,Kentucky,Florida,4.408,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401870752,Western Kentucky,Jacksonville State,-8.736,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856885,LSU,Texas,6.585,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858520,Maryland,Wisconsin,-11.089,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858521,Michigan State,Washington,-2.509,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858300,NC State,Syracuse,-0.261,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858298,North Carolina,Louisville,-2.403,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858525,Rutgers,Nebraska,-16.116,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401864539,New Mexico,UNLV,15.993,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866459,Bowling Green,Kent State,9.625,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866460,Miami (OH),Ohio,-0.838,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858522,Ohio State,Northwestern,13.625,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856863,Oklahoma State,Texas Tech,1.492,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856887,Oklahoma,Ole Miss,-0.498,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862826,Tulsa,Florida Atlantic,9.555,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858524,Penn State,Minnesota,12.736,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862829,Temple,UAB,1.17,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858293,Pittsburgh,Florida State,4.695,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858297,Clemson,Georgia Tech,9.292,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856889,Vanderbilt,Alabama,-20.248,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862828,Rice,Tulane,2.381,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856888,Texas A&M,Tennessee,-1.386,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856858,BYU,Baylor,4.038,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858295,Virginia,California,11.204,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858299,Virginia Tech,Stanford,19.76,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401860917,Washington State,Colorado State,3.809,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401869928,Marshall,App State,0.253,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856861,West Virginia,Kansas,-4.208,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401869937,Coastal Carolina,Arkansas State,0.015,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401860916,Texas State,Fresno State,7.481,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856886,Mississippi State,Auburn,3.174,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401864538,Air Force,San José State,8.232,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866458,Akron,Western Michigan,-10.659,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866461,Ball State,Buffalo,1.015,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856857,UCF,Arizona State,1.943,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866462,Central Michigan,Sacramento State,10.823,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401869952,Georgia State,Georgia Southern,1.239,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858519,Iowa,Purdue,18.676,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401871061,Liberty,Middle Tennessee,28.286,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401871099,Louisiana Tech,Southern Miss,18.047,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858296,Miami,Duke,13.54,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862825,Charlotte,East Carolina,-13.198,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401869969,UL Monroe,Louisiana,-12.241,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401864536,Northern Illinois,Nevada,-5.157,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858523,Oregon,Michigan,5.518,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401870769,Sam Houston,Kennesaw State,-5.515,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401858301,SMU,Wake Forest,-1.999,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401870796,Missouri State,New Mexico State,-2.717,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401856862,TCU,Kansas State,8.466,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401862827,UTSA,North Texas,-3.134,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401864540,UTEP,Wyoming,-14.637,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
-401866463,Toledo,Massachusetts,13.453,2026-11-09T01:40:00+00:00,Patreon week 11 file (fallback until the API build runs)
+game_id,home_team,away_team,gamma_margin,built_utc
+401866459,Bowling Green,Kent State,9.252636408769185,2026-11-09T02:27:31+00:00
+401866458,Akron,Western Michigan,-10.695212998643433,2026-11-09T02:27:31+00:00
+401866460,Miami (OH),Ohio,-0.6882860707851473,2026-11-09T02:27:31+00:00
+401866463,Toledo,Massachusetts,13.5801041022082,2026-11-09T02:27:31+00:00
+401866462,Central Michigan,Sacramento State,10.310410470496386,2026-11-09T02:27:31+00:00
+401866461,Ball State,Buffalo,1.0719003124284652,2026-11-09T02:27:31+00:00
+401862824,South Florida,Memphis,-1.8068811926199904,2026-11-09T02:27:31+00:00
+401869969,UL Monroe,Louisiana,-12.54853649698867,2026-11-09T02:27:31+00:00
+401858293,Pittsburgh,Florida State,5.317983382198689,2026-11-09T02:27:31+00:00
+401858526,UCLA,Illinois,17.761478592515324,2026-11-09T02:27:31+00:00
+401856860,Colorado,Houston,-7.464420494476373,2026-11-09T02:27:31+00:00
+401856885,LSU,Texas,6.942064333275722,2026-11-09T02:27:31+00:00
+401856863,Oklahoma State,Texas Tech,1.2418675600090279,2026-11-09T02:27:31+00:00
+401856861,West Virginia,Kansas,-4.116603603285698,2026-11-09T02:27:31+00:00
+401858298,North Carolina,Louisville,-3.0873113190011945,2026-11-09T02:27:31+00:00
+401856888,Texas A&M,Tennessee,-0.9253298478961711,2026-11-09T02:27:31+00:00
+401856862,TCU,Kansas State,8.100736564354408,2026-11-09T02:27:31+00:00
+401856887,Oklahoma,Ole Miss,-0.7216566771556887,2026-11-09T02:27:31+00:00
+401856859,Iowa State,Cincinnati,0.6343402597434067,2026-11-09T02:27:31+00:00
+401856858,BYU,Baylor,4.559079969919324,2026-11-09T02:27:31+00:00
+401856883,Georgia,Missouri,17.494857493687583,2026-11-09T02:27:31+00:00
+401856884,Kentucky,Florida,4.668937617198425,2026-11-09T02:27:31+00:00
+401858299,Virginia Tech,Stanford,20.058599147353426,2026-11-09T02:27:31+00:00
+401856857,UCF,Arizona State,1.8870669948477106,2026-11-09T02:27:31+00:00
+401856864,Arizona,Utah,-2.441737208211055,2026-11-09T02:27:31+00:00
+401858301,SMU,Wake Forest,-2.032907073846997,2026-11-09T02:27:31+00:00
+401858300,NC State,Syracuse,-0.22556799704573116,2026-11-09T02:27:31+00:00
+401858520,Maryland,Wisconsin,-10.713870445951606,2026-11-09T02:27:31+00:00
+401856886,Mississippi State,Auburn,3.4449532613767757,2026-11-09T02:27:31+00:00
+401858522,Ohio State,Northwestern,13.560491130816326,2026-11-09T02:27:31+00:00
+401858296,Miami,Duke,13.450075306575277,2026-11-09T02:27:31+00:00
+401861967,UConn,James Madison,-5.849135163002362,2026-11-09T02:27:31+00:00
+401858297,Clemson,Georgia Tech,9.48572334211287,2026-11-09T02:27:31+00:00
+401858525,Rutgers,Nebraska,-16.375240842710244,2026-11-09T02:27:31+00:00
+401856889,Vanderbilt,Alabama,-20.330065684307858,2026-11-09T02:27:31+00:00
+401869937,Coastal Carolina,Arkansas State,-0.15091621638511343,2026-11-09T02:27:31+00:00
+401862829,Temple,UAB,1.4950362849344578,2026-11-09T02:27:31+00:00
+401862825,Charlotte,East Carolina,-13.904386127409829,2026-11-09T02:27:31+00:00
+401870769,Sam Houston,Kennesaw State,-5.388092649926078,2026-11-09T02:27:31+00:00
+401862828,Rice,Tulane,3.266350896969791,2026-11-09T02:27:31+00:00
+401870796,Missouri State,New Mexico State,-2.816135035634543,2026-11-09T02:27:31+00:00
+401871060,Delaware,Florida International,0.34027538290660253,2026-11-09T02:27:31+00:00
+401858295,Virginia,California,11.661781232624785,2026-11-09T02:27:31+00:00
+401869952,Georgia State,Georgia Southern,0.7333906369565732,2026-11-09T02:27:31+00:00
+401862826,Tulsa,Florida Atlantic,9.621349857322315,2026-11-09T02:27:31+00:00
+401858294,Notre Dame,Boston College,26.647289388214414,2026-11-09T02:27:31+00:00
+401871061,Liberty,Middle Tennessee,28.45669286232382,2026-11-09T02:27:31+00:00
+401870752,Western Kentucky,Jacksonville State,-8.595238556680906,2026-11-09T02:27:31+00:00
+401864536,Northern Illinois,Nevada,-5.086674055764714,2026-11-09T02:27:31+00:00
+401858523,Oregon,Michigan,5.449644127668285,2026-11-09T02:27:31+00:00
+401858518,Indiana,USC,10.377269010723817,2026-11-09T02:27:31+00:00
+401860916,Texas State,Fresno State,8.103542071964931,2026-11-09T02:27:31+00:00
+401858521,Michigan State,Washington,-2.4116406958740604,2026-11-09T02:27:31+00:00
+401871099,Louisiana Tech,Southern Miss,18.679244331889876,2026-11-09T02:27:31+00:00
+401860914,Boise State,Oregon State,11.56555481081314,2026-11-09T02:27:31+00:00
+401869928,Marshall,App State,0.6125666478481846,2026-11-09T02:27:31+00:00
+401871100,South Alabama,Troy,2.627168218808186,2026-11-09T02:27:31+00:00
+401864538,Air Force,San José State,9.18643172282689,2026-11-09T02:27:31+00:00
+401858524,Penn State,Minnesota,12.040726437464432,2026-11-09T02:27:31+00:00
+401864539,New Mexico,UNLV,16.907093900111057,2026-11-09T02:27:31+00:00
+401858519,Iowa,Purdue,18.87716213886134,2026-11-09T02:27:31+00:00
+401856882,Arkansas,South Carolina,-9.2189790619175,2026-11-09T02:27:31+00:00
+401862827,UTSA,North Texas,-3.2312045259557842,2026-11-09T02:27:31+00:00
+401860915,San Diego State,Utah State,-6.797205050913243,2026-11-09T02:27:31+00:00
+401864540,UTEP,Wyoming,-14.313325668872164,2026-11-09T02:27:31+00:00
+401860917,Washington State,Colorado State,4.504481223064776,2026-11-09T02:27:31+00:00
+401864537,Hawai'i,North Dakota State,-8.227141061846666,2026-11-09T02:27:31+00:00
