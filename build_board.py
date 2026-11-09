@@ -172,10 +172,7 @@ def score_week(data_dir, season, week):
     wk['independent_edge'] = wk['independent_margin'] + wk['market_spread']
     wk['beta_fair_spread'] = -wk['beta_margin']
     wk['beta_edge'] = wk['beta_margin'] + wk['market_spread']
-    wk = wk[wk.market_spread.notna()].copy()
-    if wk.empty:
-        raise SystemExit(f'Week {week}: none of the games in {data_dir.name} have a market line yet. '
-                         f'Run saif_pull_all.py first (this data folder may be from an older pull).')
+    # games without a CFBD line are kept here: main() fills lines from The Odds API, then drops what is still missing
     wk['kickoff_utc'] = pd.to_datetime(wk['kickoff_utc'], utc=True)
     return wk.sort_values('kickoff_utc').reset_index(drop=True)
 
@@ -455,6 +452,10 @@ def main():
     wk = score_week(data_dir, a.season, a.week)
     from odds_lines import apply_odds_lines
     wk = apply_odds_lines(wk, data_dir)   # Odds API consensus where available, CFBD otherwise
+    wk = wk[wk.market_spread.notna()].copy().reset_index(drop=True)
+    if wk.empty:
+        raise SystemExit(f'Week {a.week}: no game has a line from CFBD or The Odds API yet. '
+                         f'Run saif_pull_all.py first (this data folder may be from an older pull).')
     names = sorted(set(wk.home_team) | set(wk.away_team))
     inj = load_injuries(data_dir, names)
     from qb_flags import flag_board
