@@ -30,7 +30,7 @@ ALIASES = {
     "Hawai'i": ['hawaii'], 'Southern California': ['usc'],
     'Central Florida': ['ucf'], 'Kennesaw State': ['kennesaw st'],
 }
-MAX_KICKOFF_GAP_H = 6
+MAX_KICKOFF_GAP_H = 36   # same two teams never meet twice in 36h; wide enough for TBD kickoff placeholders
 
 
 def norm(s):
