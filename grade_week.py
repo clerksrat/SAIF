@@ -223,28 +223,53 @@ def main():
             row[f'{tag}_pick'], row[f'{tag}_result'], row[f'{tag}_units'] = pick, res, units
             row[f'{tag}_bucket'] = bucket(r[col])
             row[f'{tag}_clv'] = clv_points(pick, spread, close)
-        # SAIF pick of record: decided once at the locked entry line (saif_policy.py)
+        # SAIF pick of record: decided once at the locked entry (saif_policy.py). QB news after entry
+        # does NOT void the bet (no hindsight); it is flagged in saif_qb_news.
         en = ent.get(gid)
-        row.update({k: None for k in ('saif_locked_utc', 'saif_entry_spread_home', 'saif_edge', 'saif_play', 'saif_pick',
-                                      'saif_void_qb', 'saif_result', 'saif_units', 'saif_clv', 'saif_move',
+        row.update({k: None for k in ('saif_locked_utc', 'saif_entry_spread_home', 'saif_edge', 'saif_qualifies',
+                                      'saif_skip_reason', 'saif_play', 'saif_pick', 'saif_ticket_book',
+                                      'saif_ticket_point', 'saif_ticket_price', 'saif_result', 'saif_units',
+                                      'saif_clv', 'saif_move', 'saif_qb_news', 'saif_skip_result',
                                       'entry_model_side', 'entry_move_model', 'entry_clv_model')})
         if en is not None:
             entry = float(en['entry_spread_home'])
             side = 'home' if float(en['raw_edge']) > 0 else 'away'
-            play = str(en['play']).lower() == 'true'
+            truthy = lambda v: str(v).lower() == 'true'
+            play, qual = truthy(en['play']), truthy(en.get('qualifies', en['play']))
             row.update({'saif_locked_utc': en['locked_utc'], 'saif_entry_spread_home': entry,
-                        'saif_edge': en['saif_edge'], 'saif_play': play,
+                        'saif_edge': en['saif_edge'], 'saif_qualifies': qual, 'saif_play': play,
+                        'saif_skip_reason': en.get('skip_reason') if isinstance(en.get('skip_reason'), str) else '',
                         # research, every locked game: did the line move toward the model's side after entry?
                         'entry_model_side': side, 'entry_move_model': clv_points(side, entry, spread),
                         'entry_clv_model': clv_points(side, entry, close)})
+            margin_side = actual if side == 'home' else -actual
+            if qual and not play:   # audit trail: what a skipped candidate would have done at consensus
+                c = margin_side + (entry if side == 'home' else -entry)
+                row['saif_skip_result'] = 'W' if c > 0 else 'L' if c < 0 else 'P'
             if play:
-                void = (side == 'home' and hf == 'STALE') or (side == 'away' and af == 'STALE')
-                row['saif_pick'], row['saif_void_qb'] = side, bool(void)
-                if not void:
-                    _, res, units = grade_side(1 if side == 'home' else -1, actual + entry)
-                    row['saif_result'], row['saif_units'] = res, units
-                    row['saif_clv'] = clv_points(side, entry, close)
-                    row['saif_move'] = clv_points(side, entry, spread)
+                tp = en.get('ticket_point')
+                has_ticket = tp is not None and not (isinstance(tp, float) and math.isnan(tp))
+                point = float(tp) if has_ticket else (entry if side == 'home' else -entry)
+                price = en.get('ticket_price') if has_ticket else -110
+                try:
+                    price = float(price)
+                except (TypeError, ValueError):
+                    price = -110.0
+                if isinstance(price, float) and math.isnan(price):
+                    price = -110.0
+                win_pay = price / 100 if price > 0 else 100 / -price
+                c = margin_side + point
+                res = 'W' if c > 0 else 'L' if c < 0 else 'P'
+                row.update({'saif_pick': side, 'saif_result': res,
+                            'saif_units': win_pay if res == 'W' else -1.0 if res == 'L' else 0.0,
+                            'saif_ticket_book': en.get('ticket_book') if has_ticket else 'consensus (no exec quote)',
+                            'saif_ticket_point': point, 'saif_ticket_price': price})
+                if close is not None:
+                    row['saif_clv'] = round(point - (close if side == 'home' else -close), 2)
+                row['saif_move'] = round(point - (spread if side == 'home' else -spread), 2)
+                flag_now = hf if side == 'home' else af
+                flag_then = en.get(f'qb_{side}_flag_at_entry')
+                row['saif_qb_news'] = bool(flag_now == 'STALE' and flag_then != 'STALE')
         row['alpha_err'] = abs(actual - r['independent_margin'])
         row['beta_err'] = abs(actual - r['beta_margin'])
         row['market_err'] = abs(actual - (-spread))
@@ -283,11 +308,16 @@ def main():
         s['avg_clv'] = round(c.mean(), 2) if len(c) else None
         s['beat_close_pct'] = round((c > 0).mean() * 100, 1) if len(c) else None
         s['avg_move'] = round(sp['saif_move'].dropna().mean(), 2)
+        s['qb_news_after_entry'] = int(sp['saif_qb_news'].fillna(False).astype(bool).sum())
         summ.append(s)
-        print(f"  SAIF  plays {s['W']}-{s['L']}-{s['P']}  flat -110: {s['units_flat_110']:+.2f}u  "
+        print(f"  SAIF  plays {s['W']}-{s['L']}-{s['P']}  at ticket prices: {s['units_flat_110']:+.2f}u  "
               f"entry->board move {s['avg_move']:+.2f} pts" + (f"  CLV {s['avg_clv']:+.2f} ({s['beat_close_pct']}% beat close)" if s['clv_games'] else ''))
     else:
         print('  SAIF  no graded plays this week (no locked entries, or none qualified)')
+    sk = df[df['saif_skip_result'].notna()] if 'saif_skip_result' in df else df.iloc[0:0]
+    if len(sk):
+        print(f"  SAIF  skipped at entry (QB1 out): {len(sk)} -- would have gone "
+              f"{(sk.saif_skip_result=='W').sum()}-{(sk.saif_skip_result=='L').sum()}-{(sk.saif_skip_result=='P').sum()}")
     mv = df['entry_move_model'].dropna() if 'entry_move_model' in df else []
     if len(mv):
         nz = mv[mv != 0]

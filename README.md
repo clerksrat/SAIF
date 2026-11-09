@@ -33,8 +33,10 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 ## SAIF play policy (from Week 11, `saif_policy.py`)
 - Board edge = 0.15 x Alpha's gap to the line (shrunk). A play = shrunk edge >= 1.0 at the entry line, flat 1 unit.
 - Entry = the first consensus (Odds API) line the board sees for a game; locked once in `state/cfb_entries.csv` with a timestamp and best-book numbers. Never re-decided.
-- A play on a team later flagged STALE (QB1 out) is void. Beta is a shadow model: shown and graded, never a play.
-- `grade_week.py` grades SAIF plays at the entry number (`saif_*` columns, `saif` row in summary.csv) and logs, for every locked game, whether the line moved toward the model after entry (`entry_move_model`, `entry_clv_model`).
+- Ticket = best number for the pick side at FanDuel / DraftKings / BetRivers in the same pull (tie-break on price); graded at that number and price. No quote there -> consensus at -110, flagged.
+- QB1 is judged only with what was known at entry: a pick on a team already flagged STALE is skipped (logged with what it would have done). QB news after entry does not void the bet; it is flagged (`saif_qb_news`).
+- Beta is a shadow model: shown and graded, never a play.
+- `grade_week.py` grades SAIF plays at the locked ticket (`saif_*` columns, `saif` row in summary.csv) and logs, for every locked game, whether the line moved toward the model after entry (`entry_move_model`, `entry_clv_model`).
 
 ## Notes
 - CFBD cache: prior seasons are pulled once and kept forever. For 2026 only the schedule and not-yet-final weeks are refetched (a finished week's stats are kept once pulled 24h after its last kickoff), and features are built only through the board week. A normal run is 2–5 CFBD calls (was ~41). To force a full refresh (e.g. offseason stat corrections), delete `cfb_fullseason_data_2026/raw/`.

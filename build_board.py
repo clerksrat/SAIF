@@ -281,12 +281,19 @@ def saif_tile(r):
         entry = r.entry_spread_home
         num = entry if home_pick else -entry
         team = r.home_team if home_pick else r.away_team
+        tp = getattr(r, 'entry_ticket_point', np.nan)
         if bool(r.entry_play):
-            pick = f'<span class="pick {edge_class(se)}">{e(team)} <span class="nw">{sgn(num)}</span></span>'
-            best = r.entry_best_home if home_pick else r.entry_best_away
-            books = r.entry_best_home_books if home_pick else r.entry_best_away_books
-            if pd.notna(best) and best - num >= .25 and isinstance(books, str) and books:
-                pick += f'<div class="bestbook">Better at entry: <b>{sgn(best)}</b> at {e(books)}</div>'
+            has_t = pd.notna(tp)
+            shown = float(tp) if has_t else num     # the ticket: our book's number for the pick side
+            pick = f'<span class="pick {edge_class(se)}">{e(team)} <span class="nw">{sgn(shown)}</span></span>'
+            if has_t:
+                pr = r.entry_ticket_price
+                prs = '' if pd.isna(pr) else (f' ({int(pr):+d})' if abs(pr) >= 100 else '')
+                pick += f'<div class="bestbook">Ticket: {e(str(r.entry_ticket_book))}{prs}</div>'
+            else:
+                pick += '<div class="bestbook">No FanDuel/DraftKings/BetRivers quote at entry: consensus, -110</div>'
+        elif isinstance(getattr(r, 'entry_skip', ''), str) and r.entry_skip:
+            pick = f'<span class="noplay">Skipped: {e(r.entry_skip)}</span>'
         else:
             pick = '<span class="noplay">No play</span>'
         now = '' if abs(r.market_spread - entry) < .25 else f' &middot; now {bet_line(r.market_spread, r.home_team, r.away_team)}'
@@ -308,6 +315,17 @@ def shadow_tile(r):
             f'<span class="noplay">Leans {e(team)}</span>'
             f'<div class="msub">Model <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
             f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div></div>')
+
+
+def qb_news_after_entry(r):
+    """QB1 ruled out AFTER the entry locked, on the side we picked: the bet stands (no hindsight voids)."""
+    ep = getattr(r, 'entry_play', False)
+    if not (isinstance(ep, (bool, np.bool_)) and bool(ep)):
+        return False
+    side = 'home' if r.entry_saif_edge > 0 else 'away'
+    now = getattr(r, f'qb_{side}_flag', None)
+    then = getattr(r, f'entry_qb_{side}_at_entry', None)
+    return now == 'STALE' and then != 'STALE'
 
 
 def qb_block(r):
@@ -347,9 +365,8 @@ def build_card(r, inj):
         ab, an = injury_block(inj, r.away_team)
         inj_html = f'<details class="injuries"><summary>Injuries &amp; availability ({hn + an} listed)</summary>{hb}{ab}</details>'
     qb_html, qb_mute = qb_block(r)
-    ep = getattr(r, 'entry_play', False)
-    is_play = isinstance(ep, (bool, np.bool_)) and bool(ep)
-    qb_banner = f'<p class="qbflag qb-stale qb-mute">{qb_mute}</p>' if is_play and qb_mute.startswith('NO PLAY') else ''
+    qb_banner = ('<p class="qbflag qb-stale">News after entry: QB1 now out on our side. The bet stands as entered '
+                 '(graded at the locked ticket); the model cannot see QB changes.</p>') if qb_news_after_entry(r) else ''
     final = ''
     if pd.notna(getattr(r, 'actual_margin', np.nan)):
         final = f'<span class="finaltag">Final: {e(r.home_team if r.actual_margin > 0 else r.away_team)} by {abs(r.actual_margin):.0f}</span>'
@@ -410,13 +427,15 @@ def attach_entries(wk, state):
     cols = {'entry_spread_home': 'entry_spread_home', 'locked_utc': 'entry_locked_utc', 'saif_edge': 'entry_saif_edge',
             'play': 'entry_play', 'pick': 'entry_pick', 'best_home_spread': 'entry_best_home',
             'best_away_spread': 'entry_best_away', 'best_home_books': 'entry_best_home_books',
-            'best_away_books': 'entry_best_away_books'}
+            'best_away_books': 'entry_best_away_books', 'skip_reason': 'entry_skip', 'ticket_book': 'entry_ticket_book',
+            'ticket_point': 'entry_ticket_point', 'ticket_price': 'entry_ticket_price',
+            'qb_home_flag_at_entry': 'entry_qb_home_at_entry', 'qb_away_flag_at_entry': 'entry_qb_away_at_entry'}
     wk = wk.drop(columns=[c for c in cols.values() if c in wk], errors='ignore')
     if not len(ent):
         for c in cols.values():
             wk[c] = np.nan
         return wk
-    ent = ent[['game_id'] + list(cols)].rename(columns=cols)
+    ent = ent.reindex(columns=['game_id'] + list(cols)).rename(columns=cols)
     ent['game_id'] = ent['game_id'].astype(int)
     ent['entry_play'] = ent['entry_play'].astype(str).str.lower().eq('true')
     wk['game_id'] = wk['game_id'].astype(int)

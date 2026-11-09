@@ -65,18 +65,25 @@ def odds_games(data_dir):
     out = []
     for g in raw.get('data', []):
         home = g.get('home_team')
-        pts, books = [], []
+        pts, books, quotes = [], [], []
         for bk in g.get('bookmakers', []):
             for m in bk.get('markets', []):
                 if m.get('key') != 'spreads':
                     continue
+                q = {'book': bk.get('title') or bk.get('key') or '?', 'last_update': m.get('last_update') or bk.get('last_update')}
                 for o in m.get('outcomes', []):
-                    if o.get('name') == home and o.get('point') is not None:
+                    if o.get('point') is None:
+                        continue
+                    side = 'home' if o.get('name') == home else 'away'
+                    q[f'{side}_point'], q[f'{side}_price'] = float(o['point']), o.get('price')
+                    if side == 'home':
                         pts.append(float(o['point']))
-                        books.append(bk.get('title') or bk.get('key') or '?')
+                        books.append(q['book'])
+                if 'home_point' in q:
+                    quotes.append(q)
         if pts:
             out.append({'home': home, 'away': g.get('away_team'), 'time': pd.Timestamp(g['commence_time']),
-                        'pts': pts, 'books': books})
+                        'pts': pts, 'books': books, 'quotes': quotes})
     return out, raw.get('retrieved_at_utc')
 
 
@@ -89,6 +96,7 @@ def apply_odds_lines(wk, data_dir):
     wk['best_home_books'] = ''
     wk['best_away_books'] = ''
     wk['lines_asof'] = asof
+    wk['book_quotes'] = ''
     if not games:
         print('[lines] no Odds API data found -- using CFBD lines for every game')
         return wk
@@ -120,6 +128,11 @@ def apply_odds_lines(wk, data_dir):
         wk.at[i, 'best_home_books'] = book_list([b for p, b in zip(pts, g['books']) if p == max(pts)])
         wk.at[i, 'best_away_books'] = book_list([b for p, b in zip(pts, g['books']) if p == min(pts)])
         wk.at[i, 'odds_n_books'] = len(pts)
+        qs = g['quotes'] if sign == 1 else [  # feed listed the game reversed: swap to our home/away
+            {'book': q['book'], 'last_update': q.get('last_update'), 'home_point': q.get('away_point'),
+             'home_price': q.get('away_price'), 'away_point': q.get('home_point'), 'away_price': q.get('home_price')}
+            for q in g['quotes']]
+        wk.at[i, 'book_quotes'] = json.dumps(qs)
         wk.at[i, 'line_provider'] = f'Consensus ({len(pts)} books)'
         matched += 1
     wk['independent_edge'] = wk['independent_margin'] + wk['market_spread']

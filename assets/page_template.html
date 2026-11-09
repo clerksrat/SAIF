@@ -169,7 +169,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <section class="plays" id="plays" hidden aria-labelledby="playsTitle">
   <div class="plays-head"><h3 id="playsTitle">This week&rsquo;s plays</h3><span class="plays-count" id="playsCount"></span></div>
   <p class="plays-sofar" id="playsSoFar" hidden></p>
-  <p class="plays-note">SAIF plays: games where the shrunk edge was 1.0+ points at the locked entry line (the first consensus line of the week), in kickoff order. Flat 1 unit each, graded at the entry number. Tap a play to jump to its game.</p>
+  <p class="plays-note">SAIF plays: games where the shrunk edge was 1.0+ points at the locked entry line (the first consensus line of the week), in kickoff order. Flat 1 unit each, graded at the locked ticket (best number at FanDuel, DraftKings or BetRivers at entry). QB news after entry does not cancel a bet. Tap a play to jump to its game.</p>
   <ol class="plays-list" id="playsList"></ol>
   <button type="button" class="plays-more" id="playsMore" hidden></button>
   <p class="plays-muted" id="playsMuted" hidden></p>
@@ -182,7 +182,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <p>Both models predict home scoring margin from football data alone, with no market inputs. The market spread enters only afterward, to measure the difference. Opponent-adjusted ratings refit on all completed 2026 FBS-vs-FBS games through Week {{THROUGH_WEEK}}. Only {{N_TIER}} of this week&rsquo;s games carry a nonzero tier_gap (flagged on the card) &mdash; everywhere else Alpha and Beta differ only by ordinary refit noise.</p>
 <p><b>Track record.</b> Alpha went 364&ndash;370&ndash;18 ATS (49.6%) in the 2025 retrospective test. Average margin error: 12.97 points versus 11.89 for the market. Live 2026 results are on the Model performance page.</p>
 <p>Alpha inputs: net PPA, success rate, explosiveness, points per opportunity, havoc, turnover margin, neutral site, rest difference, and two opponent-rating features (offense and defense differences), blended with a four-game prior weight against 2025 team profiles. Beta is a full joint refit of Alpha&rsquo;s 10 features plus one signed tier_gap feature &mdash; not Alpha plus a fixed correction, so even tier_gap=0 games can show small differences.</p>
-<p><b>SAIF policy (from Week 11).</b> Through Week 9 the model&rsquo;s raw edge carried only about 15% real information about the final margin, and its one positive signal was the line moving toward it early in the week. So the board shows a shrunk edge (0.15 &times; the Alpha gap to the line), a play needs 1.0+ shrunk points (about 6.7 raw), and each game is decided once, at the first consensus line we see, which is timestamped and locked. Beta is kept as a shadow: logged and graded, never a play.</p>
+<p><b>SAIF policy (from Week 11).</b> Through Week 9 the model&rsquo;s raw edge carried only about 15% real information about the final margin, and its one positive signal was the line moving toward it early in the week. So the board shows a shrunk edge (0.15 &times; the Alpha gap to the line), a play needs 1.0+ shrunk points (about 6.7 raw), and each game is decided once, at the first consensus line we see, which is timestamped and locked. A pick on a team already missing its starting QB at entry is skipped; later QB news does not cancel a locked bet. Beta is kept as a shadow: logged and graded, never a play.</p>
 <p>&ldquo;Where the margin comes from&rdquo; is the same linear math the model already uses &mdash; each feature&rsquo;s standardized value times its fitted coefficient &mdash; broken apart per feature. Neither model sees market lines, totals, or moneylines. 2025 has been examined repeatedly, so it is not a pristine holdout.</p>
 <div class="tablewrap">{{BUCKETS}}</div>
 </details>
@@ -234,7 +234,7 @@ function buildPlays() {
     if (c.dataset.done === '1') return;
     const pick = agreed(c);
     if (!pick) return;
-    if (c.querySelector('.qb-mute')) { muted++; return; }
+    
     const a = tile(c, 0);
     plays.push({ card: c, pick, ea: edgeOf(a),
       match: norm(c.querySelector('h2').textContent),
@@ -251,9 +251,8 @@ function buildPlays() {
   more.hidden = plays.length <= TOP;
   more.textContent = open ? 'Show next ' + TOP + ' only' : 'Show all ' + plays.length + ' plays';
   const notes = [];
-  if (muted) notes.push(`${muted} play${muted === 1 ? '' : 's'} void: the pick is on a team missing its starting QB, which the models can’t see.`);
   const m = $('playsMuted'); m.hidden = !notes.length; m.textContent = notes.join(' ');
-  const G = graded(c => c.querySelector('.qb-mute') ? null : tile(c, 0)), sf = $('playsSoFar');
+  const G = graded(c => tile(c, 0)), sf = $('playsSoFar');
   const fmt = r => `${r.w}–${r.l}${r.p ? '–' + r.p : ''} (<span class="${r.units >= 0 ? 'pos' : 'neg'}">${r.units >= 0 ? '+' : '−'}${Math.abs(r.units).toFixed(1)}u</span>)`;
   sf.hidden = !(G.w + G.l + G.p);
   sf.innerHTML = `<b>Graded so far this week</b> &middot; SAIF plays ${fmt(G)}`;
