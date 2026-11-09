@@ -12,3 +12,7 @@ cfb_expanded_data/
 cbb_data/
 cbb/data/backtest_predictions.csv.gz
 cbb/__pycache__/
+
+# CFBD Model Training Pack / Patreon weekly files: personal-use license, never commit
+cfbd_pack/
+training_data*.csv
