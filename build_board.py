@@ -282,16 +282,15 @@ def saif_tile(r):
         num = entry if home_pick else -entry
         team = r.home_team if home_pick else r.away_team
         tp = getattr(r, 'entry_ticket_point', np.nan)
-        if bool(r.entry_play):
-            has_t = pd.notna(tp)
-            shown = float(tp) if has_t else num     # the ticket: our book's number for the pick side
-            pick = f'<span class="pick {edge_class(se)}">{e(team)} <span class="nw">{sgn(shown)}</span></span>'
-            if has_t:
-                pr = r.entry_ticket_price
-                prs = '' if pd.isna(pr) else (f' ({int(pr):+d})' if abs(pr) >= 100 else '')
-                pick += f'<div class="bestbook">Ticket: {e(str(r.entry_ticket_book))}{prs}</div>'
-            else:
-                pick += '<div class="bestbook">No FanDuel/DraftKings/BetRivers quote at entry: consensus, -110</div>'
+        if bool(r.entry_play) and pd.notna(tp):
+            # the paper ticket: an observed FanDuel/DraftKings/BetRivers quote for the pick side
+            pick = f'<span class="pick {edge_class(se)}">{e(team)} <span class="nw">{sgn(float(tp))}</span></span>'
+            pr = r.entry_ticket_price
+            prs = '' if pd.isna(pr) else f' ({int(pr):+d})'
+            pick += f'<div class="bestbook">Ticket: {e(str(r.entry_ticket_book))}{prs}</div>'
+        elif bool(r.entry_play):
+            pick = (f'<span class="noplay">Signal only: {e(team)} {sgn(num)}</span>'
+                    '<div class="bestbook">No fresh FanDuel/DraftKings/BetRivers quote in the price band at entry</div>')
         elif isinstance(getattr(r, 'entry_skip', ''), str) and r.entry_skip:
             pick = f'<span class="noplay">Skipped: {e(r.entry_skip)}</span>'
         else:

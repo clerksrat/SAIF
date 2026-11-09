@@ -33,7 +33,9 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 ## SAIF play policy (from Week 11, `saif_policy.py`)
 - Board edge = 0.15 x Alpha's gap to the line (shrunk). A play = shrunk edge >= 1.0 at the entry line, flat 1 unit.
 - Entry = the first consensus (Odds API) line the board sees for a game; locked once in `state/cfb_entries.csv` with a timestamp and best-book numbers. Never re-decided.
-- Ticket = best number for the pick side at FanDuel / DraftKings / BetRivers in the same pull (tie-break on price); graded at that number and price. No quote there -> consensus at -110, flagged.
+- Three result sets, never mixed: consensus benchmark (every signal play at the consensus entry number, -110; not executable), paper tickets (an observed FanDuel / DraftKings / BetRivers quote: fresh <= 90 min at the pull, price within -125..+115, best number then best price), and placed bets (fill `placed_book/point/price` in `state/cfb_entries.csv` by hand). A signal with no qualifying quote is "no executable entry" and stays out of executable results and CLV.
+- Both gaps are logged: model vs the consensus line (`consensus_raw_gap`) and model vs the ticket number (`ticket_raw_gap`).
+- `snapshot_close.py` also writes every book's closing quote (both sides, point and price, book timestamp) to `state/closing_quotes.csv`. Alternate lines at the ticket's exact number are not captured.
 - QB1 is judged only with what was known at entry: a pick on a team already flagged STALE is skipped (logged with what it would have done). QB news after entry does not void the bet; it is flagged (`saif_qb_news`).
 - Beta is a shadow model: shown and graded, never a play.
 - `grade_week.py` grades SAIF plays at the locked ticket (`saif_*` columns, `saif` row in summary.csv) and logs, for every locked game, whether the line moved toward the model after entry (`entry_move_model`, `entry_clv_model`).

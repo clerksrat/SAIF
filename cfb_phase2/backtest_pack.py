@@ -167,6 +167,26 @@ def main():
                            'line_MAE': np.abs(g_.line - g_.h).mean(), 'slope_vs_close': b_, 'se': se_})
     per_season = pd.DataFrame(per_season)
 
+    # ---- chronological (expanding window): train on seasons before s, test s -----------------
+    chron, allp = [], []
+    for s_ in sorted(d.season.unique())[2:]:
+        trn_, tst_ = d.season < s_, d.season == s_
+        p_ = pd.Series(Ridge(lam_s).fit(X[trn_][stat_cols], d.h[trn_]).predict(X[tst_][stat_cols]), index=d.index[tst_])
+        g_ = d[tst_]
+        b_, se_ = slope(p_, g_.line, g_.h, g_.week.astype(str))
+        chron.append({'test_season': s_, 'train': f'seasons before {s_} (no 2020)', 'n': int(tst_.sum()), 'slope_vs_close': b_, 'se': se_})
+        allp.append(p_)
+    P = pd.concat(allp)
+    gP = d.loc[P.index]
+    grpP = gP.season.astype(str) + '-' + gP.week.astype(str)
+    chron_pool = slope(P, gP.line, gP.h, grpP)
+    fitk = gP.season <= 2023
+    k_chron, k_chron_se = slope(P[fitk], gP.line[fitk], gP.h[fitk], grpP[fitk])
+    ev = ~fitk
+    k_eval = {f'k={kk:.3f}': float((((gP.line[ev] + kk * (P[ev] - gP.line[ev])) - gP.h[ev]) ** 2).mean())
+              for kk in (0.0, k_chron)}
+    chron = pd.DataFrame(chron)
+
     # ---- final fit on 2016-2024, test 2025 once ---------------------------------------------
     trn = d.season <= 2024
     tst = d.season == 2025
@@ -234,10 +254,18 @@ def main():
         f'Ridge lambda (tuned on 2024): STATS {lam_s}, RESID {lam_r}. Validation MAE by lambda (STATS, RESID): '
         + ', '.join(f'{k}: {v[0]:.2f}/{v[1]:.2f}' for k, v in tune.items()),
         f'BLEND weight w = out-of-season slope of (h - line) on (STATS - line) = {w:.3f} (se {w_se:.3f}).', '',
-        'Benchmark in 2016-25 = CLOSING line (hardest, not bettable). Benchmark in 2026 = CFBD opening line.',
+        'Benchmark in 2016-25 = CLOSING line (hardest, not bettable). Benchmark in 2026 = CFBD opening line: the opener',
+        'listed in the Patreon weekly file (provider and timestamp not given; untimed). It is NOT the first quote our system',
+        'observed (mean |diff| 0.72 pts vs our first logged line, identical 35% of games).',
+        'Slopes are diagnostics measured on the evaluated games themselves; se = block bootstrap over game-weeks (unreliable with 4 weeks).',
+        'LOSO uses future seasons in training; the chronological table below does not.',
         'dMSE_vs_mkt < 0 means better than the market; se is over game-week blocks. ATS columns: games where |model - line| >= threshold.', '',
         '## 2016-2024, leave one season out', fmt(res_dev), '',
         '## STATS by season (out of season), slope vs the closing line', fmt(per_season), '',
+        '## Chronological expanding window (train on earlier seasons only), slope vs the closing line', fmt(chron),
+        f'Pooled 2018-2025 (n={len(P)}): slope {chron_pool[0]:.3f} (se {chron_pool[1]:.3f}). '
+        f'k fitted on 2018-23 = {k_chron:.3f} (se {k_chron_se:.3f}); evaluated on 2024-25 MSE: '
+        + ', '.join(f'{k}: {v:.2f}' for k, v in k_eval.items()), '',
         '## 2025 held-out test (fit on 2016-2024)', fmt(res_test), '',
         '## 2026 weeks 6-9 (fit on 2016-2025), graded vs the CFBD opener', fmt(res_26), '',
         '## 2026: did the line move from the opener toward the model by our Saturday board line?', fmt(mv), '',

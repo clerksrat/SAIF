@@ -223,50 +223,61 @@ def main():
             row[f'{tag}_pick'], row[f'{tag}_result'], row[f'{tag}_units'] = pick, res, units
             row[f'{tag}_bucket'] = bucket(r[col])
             row[f'{tag}_clv'] = clv_points(pick, spread, close)
-        # SAIF pick of record: decided once at the locked entry (saif_policy.py). QB news after entry
-        # does NOT void the bet (no hindsight); it is flagged in saif_qb_news.
+        # SAIF (saif_policy.py). Three result sets, never mixed:
+        #   saif_cons_*   consensus benchmark: every signal play at the consensus entry number, -110
+        #   saif_*        paper tickets: observed executable quote (book/number/price) -- excluded when
+        #                 there was no executable entry
+        #   saif_placed_* bets actually placed (filled by hand in cfb_entries.csv)
+        # QB news after entry never voids anything; it is flagged in saif_qb_news.
         en = ent.get(gid)
-        row.update({k: None for k in ('saif_locked_utc', 'saif_entry_spread_home', 'saif_edge', 'saif_qualifies',
-                                      'saif_skip_reason', 'saif_play', 'saif_pick', 'saif_ticket_book',
-                                      'saif_ticket_point', 'saif_ticket_price', 'saif_result', 'saif_units',
-                                      'saif_clv', 'saif_move', 'saif_qb_news', 'saif_skip_result',
-                                      'entry_model_side', 'entry_move_model', 'entry_clv_model')})
+        keys = ('saif_locked_utc', 'saif_entry_spread_home', 'saif_edge', 'saif_qualifies', 'saif_skip_reason',
+                'saif_play', 'saif_exec_status', 'saif_pick', 'saif_cons_result', 'saif_cons_units', 'saif_cons_clv',
+                'saif_ticket_book', 'saif_ticket_point', 'saif_ticket_price', 'saif_ticket_raw_gap',
+                'saif_result', 'saif_units', 'saif_clv', 'saif_move',
+                'saif_placed_book', 'saif_placed_point', 'saif_placed_price', 'saif_placed_result', 'saif_placed_units',
+                'saif_qb_news', 'saif_skip_result', 'entry_model_side', 'entry_move_model', 'entry_clv_model')
+        row.update({k: None for k in keys})
         if en is not None:
             entry = float(en['entry_spread_home'])
             side = 'home' if float(en['raw_edge']) > 0 else 'away'
             truthy = lambda v: str(v).lower() == 'true'
+            num = lambda v: None if v is None or (isinstance(v, float) and math.isnan(v)) or v == '' else float(v)
             play, qual = truthy(en['play']), truthy(en.get('qualifies', en['play']))
             row.update({'saif_locked_utc': en['locked_utc'], 'saif_entry_spread_home': entry,
                         'saif_edge': en['saif_edge'], 'saif_qualifies': qual, 'saif_play': play,
+                        'saif_exec_status': en.get('exec_status') if isinstance(en.get('exec_status'), str) else '',
                         'saif_skip_reason': en.get('skip_reason') if isinstance(en.get('skip_reason'), str) else '',
                         # research, every locked game: did the line move toward the model's side after entry?
                         'entry_model_side': side, 'entry_move_model': clv_points(side, entry, spread),
                         'entry_clv_model': clv_points(side, entry, close)})
             margin_side = actual if side == 'home' else -actual
-            if qual and not play:   # audit trail: what a skipped candidate would have done at consensus
-                c = margin_side + (entry if side == 'home' else -entry)
-                row['saif_skip_result'] = 'W' if c > 0 else 'L' if c < 0 else 'P'
-            if play:
-                tp = en.get('ticket_point')
-                has_ticket = tp is not None and not (isinstance(tp, float) and math.isnan(tp))
-                point = float(tp) if has_ticket else (entry if side == 'home' else -entry)
-                price = en.get('ticket_price') if has_ticket else -110
-                try:
-                    price = float(price)
-                except (TypeError, ValueError):
-                    price = -110.0
-                if isinstance(price, float) and math.isnan(price):
-                    price = -110.0
-                win_pay = price / 100 if price > 0 else 100 / -price
+            side_num = lambda home_spread: home_spread if side == 'home' else -home_spread
+
+            def settle(point, price):
                 c = margin_side + point
                 res = 'W' if c > 0 else 'L' if c < 0 else 'P'
-                row.update({'saif_pick': side, 'saif_result': res,
-                            'saif_units': win_pay if res == 'W' else -1.0 if res == 'L' else 0.0,
-                            'saif_ticket_book': en.get('ticket_book') if has_ticket else 'consensus (no exec quote)',
-                            'saif_ticket_point': point, 'saif_ticket_price': price})
+                pay = price / 100 if price > 0 else 100 / -price
+                return res, (pay if res == 'W' else -1.0 if res == 'L' else 0.0)
+
+            if qual and not play:   # audit trail: what a skipped candidate would have done at consensus
+                row['saif_skip_result'] = settle(side_num(entry), -110)[0]
+            if play:
+                row['saif_pick'] = side
+                row['saif_cons_result'], row['saif_cons_units'] = settle(side_num(entry), -110)
                 if close is not None:
-                    row['saif_clv'] = round(point - (close if side == 'home' else -close), 2)
-                row['saif_move'] = round(point - (spread if side == 'home' else -spread), 2)
+                    row['saif_cons_clv'] = round(side_num(entry) - side_num(close), 2)
+                tp, tpr = num(en.get('ticket_point')), num(en.get('ticket_price'))
+                if tp is not None and tpr is not None:
+                    row.update({'saif_ticket_book': en.get('ticket_book'), 'saif_ticket_point': tp,
+                                'saif_ticket_price': tpr, 'saif_ticket_raw_gap': num(en.get('ticket_raw_gap'))})
+                    row['saif_result'], row['saif_units'] = settle(tp, tpr)
+                    if close is not None:
+                        row['saif_clv'] = round(tp - side_num(close), 2)
+                    row['saif_move'] = round(tp - side_num(spread), 2)
+                pp, ppr = num(en.get('placed_point')), num(en.get('placed_price'))
+                if pp is not None and ppr is not None:
+                    row.update({'saif_placed_book': en.get('placed_book'), 'saif_placed_point': pp, 'saif_placed_price': ppr})
+                    row['saif_placed_result'], row['saif_placed_units'] = settle(pp, ppr)
                 flag_now = hf if side == 'home' else af
                 flag_then = en.get(f'qb_{side}_flag_at_entry')
                 row['saif_qb_news'] = bool(flag_now == 'STALE' and flag_then != 'STALE')
@@ -298,22 +309,27 @@ def main():
         if s['clv_games']:
             print(f"        CLV {s['avg_clv']:+.2f} pts avg, beat the close {s['beat_close_pct']}% "
                   f"({s['clv_games']} games with a closing snapshot)")
-    sp = df[df['saif_result'].isin(['W', 'L', 'P'])] if 'saif_result' in df else df.iloc[0:0]
-    if len(sp):
-        s = summarize(df, 'saif', None)
+    for tag, label in (('saif_cons', 'SAIF consensus benchmark (-110, not executable)'),
+                       ('saif', 'SAIF paper tickets (observed quotes)'), ('saif_placed', 'SAIF placed bets')):
+        if f'{tag}_result' not in df or not df[f'{tag}_result'].isin(['W', 'L', 'P']).any():
+            continue
+        sp = df[df[f'{tag}_result'].isin(['W', 'L', 'P'])]
+        s = summarize(df, tag, None)
         s['mae'] = None
         s['week'] = a.week
-        c = sp['saif_clv'].dropna()
+        clv_col = {'saif_cons': 'saif_cons_clv', 'saif': 'saif_clv'}.get(tag)
+        c = sp[clv_col].dropna() if clv_col else pd.Series(dtype=float)
         s['clv_games'] = len(c)
         s['avg_clv'] = round(c.mean(), 2) if len(c) else None
         s['beat_close_pct'] = round((c > 0).mean() * 100, 1) if len(c) else None
-        s['avg_move'] = round(sp['saif_move'].dropna().mean(), 2)
         s['qb_news_after_entry'] = int(sp['saif_qb_news'].fillna(False).astype(bool).sum())
         summ.append(s)
-        print(f"  SAIF  plays {s['W']}-{s['L']}-{s['P']}  at ticket prices: {s['units_flat_110']:+.2f}u  "
-              f"entry->board move {s['avg_move']:+.2f} pts" + (f"  CLV {s['avg_clv']:+.2f} ({s['beat_close_pct']}% beat close)" if s['clv_games'] else ''))
-    else:
-        print('  SAIF  no graded plays this week (no locked entries, or none qualified)')
+        print(f"  {label}: {s['W']}-{s['L']}-{s['P']}  {s['units_flat_110']:+.2f}u"
+              + (f"  CLV {s['avg_clv']:+.2f} pts ({s['beat_close_pct']}% beat close, n={s['clv_games']})" if s['clv_games'] else ''))
+    if 'saif_exec_status' in df:
+        ne = int((df['saif_exec_status'] == 'no executable entry').sum())
+        if ne:
+            print(f'  SAIF  {ne} signal play(s) had no executable quote: consensus benchmark only')
     sk = df[df['saif_skip_result'].notna()] if 'saif_skip_result' in df else df.iloc[0:0]
     if len(sk):
         print(f"  SAIF  skipped at entry (QB1 out): {len(sk)} -- would have gone "

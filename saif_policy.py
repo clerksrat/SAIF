@@ -7,9 +7,15 @@ Why (claude/SAIF-Model-Diagnostics.md, revisit 2026-11-08; ChatGPT review 2026-1
               It is an experimental qualification rule, not a demonstrated edge.
   * Signal:   decided once, at the first consensus (Odds API) line the board sees (>= MIN_BOOKS books). Locked in
               state/cfb_entries.csv with a timestamp. Never re-decided.
-  * Ticket:   what we would actually bet: the best number for the pick side among EXEC_BOOKS at
-              that same pull, tie-broken by price. Graded at that book's number and price.
-              No EXEC_BOOKS quote -> graded at the consensus number, -110, flagged.
+  * Ticket:   the observed quote we would bet (a PAPER ticket unless placed): among EXEC_BOOKS quotes
+              in the same pull that are fresh (<= QUOTE_MAX_AGE_MIN old at the pull) and priced inside
+              [PRICE_MIN, PRICE_MAX], take the best number for the pick side, then the best price.
+              No such quote -> 'no executable entry': kept as a signal, graded only in the consensus
+              benchmark, excluded from executable results and CLV.
+  * Placed:   placed_book / placed_point / placed_price are filled by hand for bets actually placed;
+              graded separately.
+  * Three result sets, never mixed: consensus benchmark (signal at consensus, -110), paper tickets,
+              placed bets.
   * QB1:      judged ONLY with what was known at entry. A pick on a team flagged STALE (QB1 out)
               at entry is skipped. QB news after entry does not void the bet -- it is flagged.
   * Beta:     shadow only -- logged and graded, never a play.
@@ -20,11 +26,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-POLICY_VERSION = 'p1.1-2026-11-08'
+POLICY_VERSION = 'p1.2-2026-11-08'
 SHRINK_K = 0.15
 PLAY_MIN = 1.0          # shrunk points; equals a raw Alpha edge of ~6.7
 UNIT = 1.0              # flat stake per play
 EXEC_BOOKS = ('FanDuel', 'DraftKings', 'BetRivers')
+PRICE_MIN, PRICE_MAX = -125, 115   # acceptable American price band for a ticket (frozen)
+QUOTE_MAX_AGE_MIN = 90             # a book's quote must be at most this old at the pull
 MIN_BOOKS = 3           # consensus must cover at least this many books before an entry locks
 ENTRIES_FILE = 'cfb_entries.csv'
 
@@ -33,8 +41,9 @@ ENTRY_COLS = ['game_id', 'week', 'home_team', 'away_team', 'kickoff_utc', 'locke
               'best_away_spread', 'best_away_books', 'alpha_margin', 'beta_margin',
               'raw_edge', 'saif_edge', 'beta_saif_edge', 'qualifies', 'skip_reason', 'play', 'pick',
               'qb_home_flag_at_entry', 'qb_away_flag_at_entry',
-              'ticket_book', 'ticket_point', 'ticket_price', 'ticket_quote_utc', 'exec_quotes',
-              'policy_version']
+              'exec_status', 'ticket_book', 'ticket_point', 'ticket_price', 'ticket_quote_utc',
+              'consensus_raw_gap', 'ticket_raw_gap', 'ticket_saif_gap', 'exec_quotes',
+              'placed_book', 'placed_point', 'placed_price', 'policy_version']
 
 
 def saif_edge(raw_edge):
@@ -56,26 +65,38 @@ def load_entries(state_dir):
     return pd.read_csv(f)
 
 
-def pick_ticket(quotes_json, side):
-    """Best executable quote for `side` among EXEC_BOOKS: highest point for that side, then best price.
-    Points are written from the bettor's side (e.g. +7.5 / -3.0)."""
+def pick_ticket(quotes_json, side, asof=None):
+    """Best acceptable executable quote for `side` (points from the bettor's side, e.g. +7.5 / -3.0).
+    Returns (ticket or None, text of every EXEC_BOOKS quote seen with its timestamp and why it was excluded)."""
     try:
         qs = json.loads(quotes_json) if isinstance(quotes_json, str) and quotes_json else []
     except ValueError:
         qs = []
-    cands = []
+    asof = pd.Timestamp(asof) if asof is not None and not (isinstance(asof, float) and np.isnan(asof)) else None
+    cands, seen = [], []
     for q in qs:
         if q.get('book') not in EXEC_BOOKS or q.get(f'{side}_point') is None:
             continue
-        price = q.get(f'{side}_price')
-        dec = american_to_decimal(price) if price is not None else np.nan
-        cands.append((float(q[f'{side}_point']), dec if not np.isnan(dec) else 0, q['book'], price, q.get('last_update')))
-    exec_list = '; '.join(f'{b} {pt:+.1f} ({pr})' for pt, _, b, pr, _ in cands)
+        pt, price, ts = float(q[f'{side}_point']), q.get(f'{side}_price'), q.get('last_update')
+        why = ''
+        try:
+            pr = float(price)
+        except (TypeError, ValueError):
+            pr, why = np.nan, 'no price'
+        if not why and not (PRICE_MIN <= pr <= -100 or 100 <= pr <= PRICE_MAX):
+            why = 'price outside band'
+        if not why and asof is not None and ts:
+            age = (asof - pd.Timestamp(ts)).total_seconds() / 60
+            if age > QUOTE_MAX_AGE_MIN:
+                why = f'stale ({age:.0f} min)'
+        seen.append(f"{q['book']} {pt:+.1f} ({price}) @{ts}" + (f' [{why}]' if why else ''))
+        if not why:
+            cands.append((pt, american_to_decimal(pr), q['book'], pr, ts))
     if not cands:
-        return None, exec_list
+        return None, '; '.join(seen)
     cands.sort(key=lambda c: (c[0], c[1]), reverse=True)
     pt, _, book, price, ts = cands[0]
-    return {'ticket_book': book, 'ticket_point': pt, 'ticket_price': price, 'ticket_quote_utc': ts}, exec_list
+    return {'ticket_book': book, 'ticket_point': pt, 'ticket_price': price, 'ticket_quote_utc': ts}, '; '.join(seen)
 
 
 def american_to_decimal(a):
@@ -111,10 +132,9 @@ def lock_entries(wk, week, state_dir, now=None):
         skip = ''
         if qualifies and ((side == 'home' and hf == 'STALE') or (side == 'away' and af == 'STALE')):
             skip = 'QB1 out at entry (model cannot see it)'
-        ticket, exec_list = pick_ticket(getattr(r, 'book_quotes', ''), side)
-        if qualifies and not skip and ticket is None:
-            ticket = {}   # graded at consensus, -110; exec_quotes empty shows why
-        play = qualifies and not skip
+        ticket, exec_list = pick_ticket(getattr(r, 'book_quotes', ''), side, getattr(r, 'lines_asof', None))
+        play = qualifies and not skip       # the SIGNAL; executability is exec_status
+        model_side = float(r.independent_margin) if side == 'home' else -float(r.independent_margin)
         row = {
             'game_id': gid, 'week': week, 'home_team': r.home_team, 'away_team': r.away_team,
             'kickoff_utc': pd.Timestamp(r.kickoff_utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -132,9 +152,13 @@ def lock_entries(wk, week, state_dir, now=None):
             'qualifies': bool(qualifies), 'skip_reason': skip, 'play': bool(play), 'pick': side if qualifies else '',
             'qb_home_flag_at_entry': hf, 'qb_away_flag_at_entry': af,
             'exec_quotes': exec_list, 'policy_version': POLICY_VERSION,
+            'consensus_raw_gap': round(abs(raw), 3),
+            'exec_status': ('paper ticket' if ticket else 'no executable entry') if play else '',
         }
         if play and ticket:
             row.update(ticket)
+            row['ticket_raw_gap'] = round(model_side + ticket['ticket_point'], 3)   # model vs the ticket number
+            row['ticket_saif_gap'] = round(SHRINK_K * row['ticket_raw_gap'], 3)
         new.append(row)
     if new:
         add = pd.DataFrame(new).reindex(columns=ENTRY_COLS)

@@ -4,7 +4,11 @@ Data: 4777 regular-season games with a closing spread (2016-19, 2021-25); 2026 w
 Ridge lambda (tuned on 2024): STATS 3000, RESID 100000. Validation MAE by lambda (STATS, RESID): 10: 12.35/12.01, 100: 12.34/12.01, 300: 12.31/12.01, 1000: 12.26/12.00, 3000: 12.21/11.97, 10000: 12.31/11.95, 30000: 12.85/11.94, 100000: 13.85/11.93
 BLEND weight w = out-of-season slope of (h - line) on (STATS - line) = 0.077 (se 0.055).
 
-Benchmark in 2016-25 = CLOSING line (hardest, not bettable). Benchmark in 2026 = CFBD opening line.
+Benchmark in 2016-25 = CLOSING line (hardest, not bettable). Benchmark in 2026 = CFBD opening line: the opener
+listed in the Patreon weekly file (provider and timestamp not given; untimed). It is NOT the first quote our system
+observed (mean |diff| 0.72 pts vs our first logged line, identical 35% of games).
+Slopes are diagnostics measured on the evaluated games themselves; se = block bootstrap over game-weeks (unreliable with 4 weeks).
+LOSO uses future seasons in training; the chronological table below does not.
 dMSE_vs_mkt < 0 means better than the market; se is over game-week blocks. ATS columns: games where |model - line| >= threshold.
 
 ## 2016-2024, leave one season out
@@ -27,6 +31,18 @@ dMSE_vs_mkt < 0 means better than the market; se is over game-week blocks. ATS c
 | 2022.000 | 524.000 |      12.307 |     12.069 |            0.329 | 0.157 |
 | 2023.000 | 534.000 |      12.720 |     12.363 |            0.060 | 0.114 |
 | 2024.000 | 558.000 |      12.214 |     11.920 |            0.272 | 0.102 |
+
+## Chronological expanding window (train on earlier seasons only), slope vs the closing line
+|   test_season | train                         |   n |   slope_vs_close |    se |
+|--------------:|:------------------------------|----:|-----------------:|------:|
+|          2018 | seasons before 2018 (no 2020) | 493 |           -0.039 | 0.058 |
+|          2019 | seasons before 2019 (no 2020) | 545 |           -0.060 | 0.096 |
+|          2021 | seasons before 2021 (no 2020) | 527 |           -0.014 | 0.111 |
+|          2022 | seasons before 2022 (no 2020) | 524 |            0.320 | 0.153 |
+|          2023 | seasons before 2023 (no 2020) | 534 |            0.060 | 0.113 |
+|          2024 | seasons before 2024 (no 2020) | 558 |            0.272 | 0.102 |
+|          2025 | seasons before 2025 (no 2020) | 567 |           -0.034 | 0.135 |
+Pooled 2018-2025 (n=3748): slope 0.049 (se 0.043). k fitted on 2018-23 = 0.031 (se 0.049); evaluated on 2024-25 MSE: k=0.000: 225.78, k=0.031: 225.66
 
 ## 2025 held-out test (fit on 2016-2024)
 | sample    | model   |   n |    MAE |   RMSE |   dMSE_vs_mkt |   dMSE_se |   slope |   slope_se | ATS_t1                        | ATS_t2                        | ATS_t3                      |
