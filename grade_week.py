@@ -235,7 +235,9 @@ def main():
                 'saif_ticket_book', 'saif_ticket_point', 'saif_ticket_price', 'saif_ticket_raw_gap',
                 'saif_result', 'saif_units', 'saif_clv', 'saif_move',
                 'saif_placed_book', 'saif_placed_point', 'saif_placed_price', 'saif_placed_result', 'saif_placed_units',
-                'saif_qb_news', 'saif_skip_result', 'entry_model_side', 'entry_move_model', 'entry_clv_model')
+                'saif_qb_news', 'saif_skip_result', 'entry_model_side', 'entry_move_model', 'entry_clv_model',
+                'gamma_margin', 'gamma_side', 'gamma_cons_result', 'gamma_cons_units', 'gamma_err',
+                'entry_move_gamma', 'entry_clv_gamma')
         row.update({k: None for k in keys})
         if en is not None:
             entry = float(en['entry_spread_home'])
@@ -250,6 +252,15 @@ def main():
                         # research, every locked game: did the line move toward the model's side after entry?
                         'entry_model_side': side, 'entry_move_model': clv_points(side, entry, spread),
                         'entry_clv_model': clv_points(side, entry, close)})
+            gmg = en.get('gamma_margin')
+            if gmg is not None and not (isinstance(gmg, float) and math.isnan(gmg)) and gmg != '':
+                gmg = float(gmg)
+                gside = 'home' if gmg + entry > 0 else 'away'
+                gc = (actual + entry) if gside == 'home' else -(actual + entry)
+                gres = 'W' if gc > 0 else 'L' if gc < 0 else 'P'
+                row.update({'gamma_margin': gmg, 'gamma_side': gside, 'gamma_err': abs(actual - gmg),
+                            'gamma_cons_result': gres, 'gamma_cons_units': WIN_PAYOUT if gres == 'W' else -1.0 if gres == 'L' else 0.0,
+                            'entry_move_gamma': clv_points(gside, entry, spread), 'entry_clv_gamma': clv_points(gside, entry, close)})
             margin_side = actual if side == 'home' else -actual
             side_num = lambda home_spread: home_spread if side == 'home' else -home_spread
 
@@ -326,6 +337,11 @@ def main():
         summ.append(s)
         print(f"  {label}: {s['W']}-{s['L']}-{s['P']}  {s['units_flat_110']:+.2f}u"
               + (f"  CLV {s['avg_clv']:+.2f} pts ({s['beat_close_pct']}% beat close, n={s['clv_games']})" if s['clv_games'] else ''))
+    if 'gamma_err' in df and df['gamma_err'].notna().any():
+        gg = df[df['gamma_err'].notna()]
+        same = gg['entry_move_model'].notna()
+        print(f"  GAMMA shadow ({len(gg)} locked games): MAE {gg.gamma_err.mean():.2f} vs Alpha {gg.alpha_err.mean():.2f} on the same games; "
+              f"avg move toward Gamma after entry {gg.entry_move_gamma.mean():+.2f} pts vs Alpha {gg.loc[same, 'entry_move_model'].mean():+.2f}")
     if 'saif_exec_status' in df:
         ne = int((df['saif_exec_status'] == 'no executable entry').sum())
         if ne:

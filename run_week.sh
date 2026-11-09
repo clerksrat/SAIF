@@ -31,6 +31,7 @@ if [ "$MODE" = "monday" ]; then
   fi
 fi
 
+python3 cfb_phase2/gamma.py build --week "$WEEK" || echo "WARNING: Gamma shadow build failed -- board builds without it"
 python3 build_board.py --week "$WEEK"
 
 if [ "${2:-}" = "--push" ]; then

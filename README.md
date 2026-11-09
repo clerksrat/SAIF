@@ -40,6 +40,14 @@ Settings → Pages → Deploy from branch → `main` / `/docs`. (Free for public
 - Beta is a shadow model: shown and graded, never a play.
 - `grade_week.py` grades SAIF plays at the locked ticket (`saif_*` columns, `saif` row in summary.csv) and logs, for every locked game, whether the line moved toward the model after entry (`entry_move_model`, `entry_clv_model`).
 
+## Gamma shadow model (from Week 11, `cfb_phase2/gamma.py`)
+- Gamma = ridge on pregame CFBD features, trained on the CFBD Model Training Pack 2016-2025 and frozen in `cfb_phase2/gamma_frozen_v1.json`. Phase 2 results: `cfb_phase2/report.md`.
+- Every `run_week.sh` run rebuilds its features from the API (~5 calls: /games, /ratings/elo, /talent, /wepa/team/season, /stats/season/advanced) into `state/gamma/week<N>_features.csv` and scores to `state/gamma/week<N>_scored.csv`. Failure is non-fatal.
+- Shadow only: the board shows it, entries record `gamma_margin` / `gamma_raw_gap` at lock, `grade_week.py` grades it at the consensus entry line and prints its MAE and line movement next to Alpha's.
+- Check the API build against the Patreon weekly file: `python cfb_phase2/gamma.py validate --built state/gamma/week11_features.csv --patreon <training_data_2026_week11.csv>`.
+- Historical openers (one-off, ~9 calls): `python cfb_phase2/gamma.py openers --years 2016-2025` -> `cfb_phase2/data/cfbd_lines_openers.csv.gz`.
+- The pack and Patreon files are personal-use licensed and never committed.
+
 ## Notes
 - CFBD cache: prior seasons are pulled once and kept forever. For 2026 only the schedule and not-yet-final weeks are refetched (a finished week's stats are kept once pulled 24h after its last kickoff), and features are built only through the board week. A normal run is 2–5 CFBD calls (was ~41). To force a full refresh (e.g. offseason stat corrections), delete `cfb_fullseason_data_2026/raw/`.
 - Lines: the board uses The Odds API consensus across US books (`odds_lines.py`), falling back to CFBD per game; cards show the best number available.

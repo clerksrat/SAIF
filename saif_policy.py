@@ -18,7 +18,7 @@ Why (claude/SAIF-Model-Diagnostics.md, revisit 2026-11-08; ChatGPT review 2026-1
               placed bets.
   * QB1:      judged ONLY with what was known at entry. A pick on a team flagged STALE (QB1 out)
               at entry is skipped. QB news after entry does not void the bet -- it is flagged.
-  * Beta:     shadow only -- logged and graded, never a play.
+  * Beta, Gamma: shadow only -- logged and graded, never a play. Gamma = cfb_phase2/gamma_frozen_v1.json.
 """
 import json
 from pathlib import Path
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-POLICY_VERSION = 'p1.2-2026-11-08'
+POLICY_VERSION = 'p1.3-2026-11-08'
 SHRINK_K = 0.15
 PLAY_MIN = 1.0          # shrunk points; equals a raw Alpha edge of ~6.7
 UNIT = 1.0              # flat stake per play
@@ -43,7 +43,8 @@ ENTRY_COLS = ['game_id', 'week', 'home_team', 'away_team', 'kickoff_utc', 'locke
               'qb_home_flag_at_entry', 'qb_away_flag_at_entry',
               'exec_status', 'ticket_book', 'ticket_point', 'ticket_price', 'ticket_quote_utc',
               'consensus_raw_gap', 'ticket_raw_gap', 'ticket_saif_gap', 'exec_quotes',
-              'placed_book', 'placed_point', 'placed_price', 'policy_version']
+              'placed_book', 'placed_point', 'placed_price',
+              'gamma_margin', 'gamma_raw_gap', 'gamma_built_utc', 'policy_version']
 
 
 def saif_edge(raw_edge):
@@ -153,6 +154,10 @@ def lock_entries(wk, week, state_dir, now=None):
             'qb_home_flag_at_entry': hf, 'qb_away_flag_at_entry': af,
             'exec_quotes': exec_list, 'policy_version': POLICY_VERSION,
             'consensus_raw_gap': round(abs(raw), 3),
+            # Gamma shadow (never a play): its margin and gap to the same consensus entry line
+            'gamma_margin': round(float(r.gamma_margin), 3) if pd.notna(getattr(r, 'gamma_margin', np.nan)) else np.nan,
+            'gamma_raw_gap': round(float(r.gamma_margin) + float(r.market_spread), 3) if pd.notna(getattr(r, 'gamma_margin', np.nan)) else np.nan,
+            'gamma_built_utc': getattr(r, 'gamma_built_utc', None),
             'exec_status': ('paper ticket' if ticket else 'no executable entry') if play else '',
         }
         if play and ticket:

@@ -307,13 +307,17 @@ def saif_tile(r):
 
 
 def shadow_tile(r):
-    """Beta: logged and graded, never a play."""
+    """Beta and Gamma: logged and graded, never a play."""
     se = SHRINK_K * r.beta_edge
     team = r.home_team if se > 0 else r.away_team
-    return (f'<div class="mtile shadow"><div class="mlabel">Beta &middot; shadow</div>'
-            f'<span class="noplay">Leans {e(team)}</span>'
-            f'<div class="msub">Model <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
-            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div></div>')
+    gm = getattr(r, 'gamma_margin', np.nan)
+    gline = (f'<div class="msub">Gamma <b>{bet_line(-gm, r.home_team, r.away_team)}</b> '
+             f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(SHRINK_K * (gm + r.market_spread)):.1f}</span></div>'
+             if pd.notna(gm) else '')
+    return (f'<div class="mtile shadow"><div class="mlabel">Shadow models</div>'
+            f'<span class="noplay">Beta leans {e(team)}</span>'
+            f'<div class="msub">Beta <b>{bet_line(r.beta_fair_spread, r.home_team, r.away_team)}</b> '
+            f'<span class="edge nw"><span class="dot">&middot; </span>Edge {abs(se):.1f}</span></div>{gline}</div>')
 
 
 def qb_news_after_entry(r):
@@ -472,6 +476,13 @@ def main():
         switched = is_cons(wk['line_provider']) & ~is_cons(wk['prev_provider'])
         wk.loc[switched, 'prev_spread'] = np.nan   # source changed (CFBD -> consensus): start line moves fresh
         wk = wk.drop(columns='prev_provider')
+    gf = state / 'gamma' / f'week{a.week}_scored.csv'      # Gamma shadow (cfb_phase2/gamma.py), optional
+    wk = wk.drop(columns=['gamma_margin', 'gamma_built_utc'], errors='ignore')
+    if gf.exists():
+        g = pd.read_csv(gf)[['game_id', 'gamma_margin', 'built_utc']].rename(columns={'built_utc': 'gamma_built_utc'})
+        wk = wk.merge(g.astype({'game_id': int}), on='game_id', how='left')
+    else:
+        wk['gamma_margin'], wk['gamma_built_utc'] = np.nan, None
     _, n_locked = lock_entries(wk, a.week, state)   # pick of record, decided once at the first consensus line
     wk = attach_entries(wk, state)
     wk.to_pickle(prev_pkl)
