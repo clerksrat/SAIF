@@ -33,6 +33,7 @@ UNIT = 1.0              # flat stake per play
 EXEC_BOOKS = ('FanDuel', 'DraftKings', 'BetRivers')
 PRICE_MIN, PRICE_MAX = -125, 115   # acceptable American price band for a ticket (frozen)
 QUOTE_MAX_AGE_MIN = 90             # a book's quote must be at most this old at the pull
+TRACKED_BANDS = {'band_1p5_3': (1.5, 3.0)}   # paper-only strategies on |raw Alpha edge| at the entry line (added 2026-11-12)
 MIN_BOOKS = 3           # consensus must cover at least this many books before an entry locks
 ENTRIES_FILE = 'cfb_entries.csv'
 

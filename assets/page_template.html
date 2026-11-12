@@ -196,7 +196,7 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 <div class="filters" id="filters">
 <div class="f-search"><label for="search">Team search</label><input id="search" placeholder="Cincinnati, Cincy, Purdue&hellip;" type="search" autocomplete="off"></div>
 <div class="f-sort"><label for="sort">Sort</label><select id="sort"><option value="time">Kickoff time</option><option value="edge">Largest edge</option></select></div>
-<div class="f-plays"><label for="minimum">Show</label><select id="minimum"><option value="0">All games</option><option value="1">Plays only (1.0+)</option><option value="0.5">Edge 0.5+</option><option value="1.5">Edge 1.5+</option><option value="2">Edge 2+</option></select></div>
+<div class="f-plays"><label for="minimum">Show</label><select id="minimum"><option value="all">All games</option><option value="saif">SAIF plays (raw edge 6.7+)</option><option value="b15">Tracked band: raw 1.5&ndash;3</option><option value="b3">Raw edge 3&ndash;6.7</option><option value="b0">Raw edge under 1.5</option></select></div>
 <div class="f-more"><label for="day">Game day &middot; ET</label><select id="day"><option value="">All days</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
 <div class="f-more"><label for="side">Model side</label><select id="side"><option value="">Either side</option><option value="home">Home team</option><option value="away">Away team</option></select></div>
 <div class="f-more"><label>&nbsp;</label><button id="reset" type="button">Reset</button></div>
@@ -205,11 +205,12 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
 
 <p id="count" role="status" aria-live="polite">{{N_GAMES}} of {{N_GAMES}} games shown</p>
 <div id="cards" class="grid" data-season="{{SEASON}}" data-week="{{WEEK}}">{{CARDS}}</div>
-<p id="empty" hidden>No matching games. Lower the minimum or reset filters.</p>
+<p id="empty" hidden>No matching games. Pick another band or reset filters.</p>
 </main><script>
 const $=id=>document.getElementById(id),cards=Array.from(document.querySelectorAll('article.game'));
-function render(){let query=$('search').value.trim().toLowerCase().replace(/cincy/g,'cincinnati'),n=0;cards.sort((a,b)=>Number(a.dataset.done)-Number(b.dataset.done)||($('sort').value==='edge'?Number(b.dataset.edge)-Number(a.dataset.edge)||Number(a.dataset.time)-Number(b.dataset.time):Number(a.dataset.time)-Number(b.dataset.time)));cards.forEach(c=>{let d=c.dataset,show=d.search.includes(query)&&(!$('day').value||d.day===$('day').value)&&Number(d.edge)>=Number($('minimum').value)&&(!$('side').value||d.side===$('side').value);c.hidden=!show;if(show)n++;$('cards').append(c)});$('count').textContent=n+' of '+cards.length+' games shown';$('empty').hidden=n>0}
-const defaults={search:'',day:'',minimum:'0',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
+const BANDS={all:[0,1e9],saif:[1/0.15,1e9],b15:[1.5,3],b3:[3,1/0.15],b0:[0,1.5]};function inBand(x,k){const b=BANDS[k]||BANDS.all;return x>=b[0]&&x<b[1]}
+function render(){let query=$('search').value.trim().toLowerCase().replace(/cincy/g,'cincinnati'),n=0;cards.sort((a,b)=>Number(a.dataset.done)-Number(b.dataset.done)||($('sort').value==='edge'?Number(b.dataset.edge)-Number(a.dataset.edge)||Number(a.dataset.time)-Number(b.dataset.time):Number(a.dataset.time)-Number(b.dataset.time)));cards.forEach(c=>{let d=c.dataset,show=d.search.includes(query)&&(!$('day').value||d.day===$('day').value)&&inBand(Number(d.raw),$('minimum').value)&&(!$('side').value||d.side===$('side').value);c.hidden=!show;if(show)n++;$('cards').append(c)});$('count').textContent=n+' of '+cards.length+' games shown';$('empty').hidden=n>0}
+const defaults={search:'',day:'',minimum:'all',side:'',sort:'time'};Object.keys(defaults).forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,v])=>$(id).value=v);render()});
 $('ftoggle').addEventListener('click',e=>{const f=$('filters'),on=f.classList.toggle('expanded');e.target.setAttribute('aria-expanded',on);e.target.textContent=on?'Fewer filters':'More filters'});
 render();$('preview').hidden=true;
 // ---------- top plays + live final scores ----------

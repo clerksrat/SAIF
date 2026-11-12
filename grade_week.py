@@ -237,7 +237,8 @@ def main():
                 'saif_placed_book', 'saif_placed_point', 'saif_placed_price', 'saif_placed_result', 'saif_placed_units',
                 'saif_qb_news', 'saif_skip_result', 'entry_model_side', 'entry_move_model', 'entry_clv_model',
                 'gamma_margin', 'gamma_side', 'gamma_cons_result', 'gamma_cons_units', 'gamma_err',
-                'entry_move_gamma', 'entry_clv_gamma')
+                'entry_move_gamma', 'entry_clv_gamma',
+                'band_1p5_3_side', 'band_1p5_3_result', 'band_1p5_3_units', 'band_1p5_3_clv')
         row.update({k: None for k in keys})
         if en is not None:
             entry = float(en['entry_spread_home'])
@@ -261,6 +262,15 @@ def main():
                 row.update({'gamma_margin': gmg, 'gamma_side': gside, 'gamma_err': abs(actual - gmg),
                             'gamma_cons_result': gres, 'gamma_cons_units': WIN_PAYOUT if gres == 'W' else -1.0 if gres == 'L' else 0.0,
                             'entry_move_gamma': clv_points(gside, entry, spread), 'entry_clv_gamma': clv_points(gside, entry, close)})
+            # tracked paper band (saif_policy.TRACKED_BANDS): consensus entry number, -110
+            from saif_policy import TRACKED_BANDS
+            blo, bhi = TRACKED_BANDS['band_1p5_3']
+            if blo <= abs(float(en['raw_edge'])) < bhi:
+                bc = (actual + entry) if side == 'home' else -(actual + entry)
+                bres = 'W' if bc > 0 else 'L' if bc < 0 else 'P'
+                row.update({'band_1p5_3_side': side, 'band_1p5_3_result': bres,
+                            'band_1p5_3_units': WIN_PAYOUT if bres == 'W' else -1.0 if bres == 'L' else 0.0,
+                            'band_1p5_3_clv': clv_points(side, entry, close)})
             margin_side = actual if side == 'home' else -actual
             side_num = lambda home_spread: home_spread if side == 'home' else -home_spread
 
@@ -320,7 +330,8 @@ def main():
         if s['clv_games']:
             print(f"        CLV {s['avg_clv']:+.2f} pts avg, beat the close {s['beat_close_pct']}% "
                   f"({s['clv_games']} games with a closing snapshot)")
-    for tag, label in (('saif_cons', 'SAIF consensus benchmark (-110, not executable)'),
+    for tag, label in (('band_1p5_3', 'Tracked band raw 1.5-3 (paper, consensus entry, -110)'),
+                       ('saif_cons', 'SAIF consensus benchmark (-110, not executable)'),
                        ('saif', 'SAIF paper tickets (observed quotes)'), ('saif_placed', 'SAIF placed bets')):
         if f'{tag}_result' not in df or not df[f'{tag}_result'].isin(['W', 'L', 'P']).any():
             continue
@@ -328,12 +339,12 @@ def main():
         s = summarize(df, tag, None)
         s['mae'] = None
         s['week'] = a.week
-        clv_col = {'saif_cons': 'saif_cons_clv', 'saif': 'saif_clv'}.get(tag)
+        clv_col = {'saif_cons': 'saif_cons_clv', 'saif': 'saif_clv', 'band_1p5_3': 'band_1p5_3_clv'}.get(tag)
         c = sp[clv_col].dropna() if clv_col else pd.Series(dtype=float)
         s['clv_games'] = len(c)
         s['avg_clv'] = round(c.mean(), 2) if len(c) else None
         s['beat_close_pct'] = round((c > 0).mean() * 100, 1) if len(c) else None
-        s['qb_news_after_entry'] = int(sp['saif_qb_news'].fillna(False).astype(bool).sum())
+        s['qb_news_after_entry'] = int(sp['saif_qb_news'].fillna(False).astype(bool).sum()) if tag != 'band_1p5_3' else None
         summ.append(s)
         print(f"  {label}: {s['W']}-{s['L']}-{s['P']}  {s['units_flat_110']:+.2f}u"
               + (f"  CLV {s['avg_clv']:+.2f} pts ({s['beat_close_pct']}% beat close, n={s['clv_games']})" if s['clv_games'] else ''))

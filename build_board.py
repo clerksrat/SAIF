@@ -31,7 +31,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from saif_policy import SHRINK_K, PLAY_MIN, lock_entries
+from saif_policy import SHRINK_K, PLAY_MIN, TRACKED_BANDS, lock_entries
 
 HERE = Path(__file__).resolve().parent
 RATING_ALPHA = 8.0
@@ -291,7 +291,13 @@ def saif_tile(r):
         elif isinstance(getattr(r, 'entry_skip', ''), str) and r.entry_skip:
             pick = f'<span class="noplay">Skipped: {e(r.entry_skip)}</span>'
         else:
-            pick = '<span class="noplay">No play</span>'
+            lo, hi = TRACKED_BANDS['band_1p5_3']
+            raw_at_entry = getattr(r, 'entry_raw_edge', se / SHRINK_K)
+            if lo <= abs(raw_at_entry) < hi:
+                pick = (f'<span class="noplay">No play</span>'
+                        f'<div class="bestbook">Tracked band 1.5&ndash;3 (paper): <b>{e(team)} {sgn(num)}</b></div>')
+            else:
+                pick = '<span class="noplay">No play</span>'
         now = '' if abs(r.market_spread - entry) < .25 else f' &middot; now {bet_line(r.market_spread, r.home_team, r.away_team)}'
         sub2 = f'<div class="msub entry">Entry {bet_line(entry, r.home_team, r.away_team)}, locked {fmt_et(r.entry_locked_utc)}{now}</div>'
     else:
@@ -361,6 +367,8 @@ def build_card(r, inj):
     day = t.strftime('%A')
     ae = r.independent_edge
     se = r.entry_saif_edge if pd.notna(getattr(r, 'entry_saif_edge', np.nan)) else SHRINK_K * ae
+    rae = getattr(r, 'entry_raw_edge', np.nan)
+    raw_abs = abs(rae) if pd.notna(rae) else abs(se) / SHRINK_K   # |raw Alpha edge| at the entry line (or current, before lock)
     tg = '' if r.tier_gap == 0 else ('<span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else '<span class="tiertag">G5 vs P4</span>')
     neutral = bool(getattr(r, 'neutral_site', False))
     inj_html = ''
@@ -378,7 +386,7 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-time="{t.timestamp()}">
+    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-raw="{raw_abs:.2f}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
@@ -433,7 +441,7 @@ def attach_entries(wk, state):
             'best_away_spread': 'entry_best_away', 'best_home_books': 'entry_best_home_books',
             'best_away_books': 'entry_best_away_books', 'skip_reason': 'entry_skip', 'ticket_book': 'entry_ticket_book',
             'ticket_point': 'entry_ticket_point', 'ticket_price': 'entry_ticket_price',
-            'qb_home_flag_at_entry': 'entry_qb_home_at_entry', 'qb_away_flag_at_entry': 'entry_qb_away_at_entry'}
+            'raw_edge': 'entry_raw_edge', 'qb_home_flag_at_entry': 'entry_qb_home_at_entry', 'qb_away_flag_at_entry': 'entry_qb_away_at_entry'}
     wk = wk.drop(columns=[c for c in cols.values() if c in wk], errors='ignore')
     if not len(ent):
         for c in cols.values():
