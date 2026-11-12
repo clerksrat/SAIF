@@ -34,6 +34,17 @@ EXEC_BOOKS = ('FanDuel', 'DraftKings', 'BetRivers')
 PRICE_MIN, PRICE_MAX = -125, 115   # acceptable American price band for a ticket (frozen)
 QUOTE_MAX_AGE_MIN = 90             # a book's quote must be at most this old at the pull
 TRACKED_BANDS = {'band_1p5_3': (1.5, 3.0)}   # paper-only strategies on |raw Alpha edge| at the entry line (added 2026-11-12)
+P4_CONFS = {'ACC', 'Big Ten', 'Big 12', 'SEC'}
+
+
+def is_p4_conf_game(home_conf, away_conf):
+    """Both teams in the same Power 4 conference (paper strategy band_1p5_3_p4conf, added 2026-11-12)."""
+    return isinstance(home_conf, str) and home_conf == away_conf and home_conf in P4_CONFS
+
+
+def in_band(raw_edge, key='band_1p5_3'):
+    lo, hi = TRACKED_BANDS[key]
+    return lo <= abs(raw_edge) < hi
 MIN_BOOKS = 3           # consensus must cover at least this many books before an entry locks
 ENTRIES_FILE = 'cfb_entries.csv'
 
@@ -45,7 +56,7 @@ ENTRY_COLS = ['game_id', 'week', 'home_team', 'away_team', 'kickoff_utc', 'locke
               'exec_status', 'ticket_book', 'ticket_point', 'ticket_price', 'ticket_quote_utc',
               'consensus_raw_gap', 'ticket_raw_gap', 'ticket_saif_gap', 'exec_quotes',
               'placed_book', 'placed_point', 'placed_price',
-              'gamma_margin', 'gamma_raw_gap', 'gamma_built_utc', 'policy_version']
+              'gamma_margin', 'gamma_raw_gap', 'gamma_built_utc', 'home_conf', 'away_conf', 'policy_version']
 
 
 def saif_edge(raw_edge):
@@ -159,6 +170,7 @@ def lock_entries(wk, week, state_dir, now=None):
             'gamma_margin': round(float(r.gamma_margin), 3) if pd.notna(getattr(r, 'gamma_margin', np.nan)) else np.nan,
             'gamma_raw_gap': round(float(r.gamma_margin) + float(r.market_spread), 3) if pd.notna(getattr(r, 'gamma_margin', np.nan)) else np.nan,
             'gamma_built_utc': getattr(r, 'gamma_built_utc', None),
+            'home_conf': getattr(r, 'home_conference', None), 'away_conf': getattr(r, 'away_conference', None),
             'exec_status': ('paper ticket' if ticket else 'no executable entry') if play else '',
         }
         if play and ticket:

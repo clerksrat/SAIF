@@ -31,7 +31,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from saif_policy import SHRINK_K, PLAY_MIN, TRACKED_BANDS, lock_entries
+from saif_policy import SHRINK_K, PLAY_MIN, TRACKED_BANDS, is_p4_conf_game, lock_entries
 
 HERE = Path(__file__).resolve().parent
 RATING_ALPHA = 8.0
@@ -294,8 +294,10 @@ def saif_tile(r):
             lo, hi = TRACKED_BANDS['band_1p5_3']
             raw_at_entry = getattr(r, 'entry_raw_edge', se / SHRINK_K)
             if lo <= abs(raw_at_entry) < hi:
+                p4 = is_p4_conf_game(getattr(r, 'home_conference', None), getattr(r, 'away_conference', None))
+                label = 'Tracked band 1.5&ndash;3 &middot; P4 conference (paper)' if p4 else 'Tracked band 1.5&ndash;3 (paper)'
                 pick = (f'<span class="noplay">No play</span>'
-                        f'<div class="bestbook">Tracked band 1.5&ndash;3 (paper): <b>{e(team)} {sgn(num)}</b></div>')
+                        f'<div class="bestbook">{label}: <b>{e(team)} {sgn(num)}</b></div>')
             else:
                 pick = '<span class="noplay">No play</span>'
         now = '' if abs(r.market_spread - entry) < .25 else f' &middot; now {bet_line(r.market_spread, r.home_team, r.away_team)}'
@@ -386,7 +388,7 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-raw="{raw_abs:.2f}" data-time="{t.timestamp()}">
+    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-raw="{raw_abs:.2f}" data-p4c="{1 if is_p4_conf_game(getattr(r, 'home_conference', None), getattr(r, 'away_conference', None)) else 0}" data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>
@@ -431,6 +433,20 @@ def build_page(wk, week, season, inj):
     for k, v in repl.items():
         template = template.replace(k, v)
     return template
+
+
+def attach_conferences(wk, state, week):
+    """Current-season conferences from the Gamma features file (CFBD /games); last season's map as a fallback."""
+    wk = wk.drop(columns=['home_conference', 'away_conference'], errors='ignore')
+    f = state / 'gamma' / f'week{week}_features.csv'
+    if f.exists():
+        c = pd.read_csv(f, usecols=['id', 'home_conference', 'away_conference']).rename(columns={'id': 'game_id'})
+        return wk.merge(c.astype({'game_id': int}), on='game_id', how='left')
+    from grade_week import conf_map
+    m = conf_map()
+    wk['home_conference'] = wk.home_team.map(m)
+    wk['away_conference'] = wk.away_team.map(m)
+    return wk
 
 
 def attach_entries(wk, state):
@@ -489,6 +505,7 @@ def main():
         switched = is_cons(wk['line_provider']) & ~is_cons(wk['prev_provider'])
         wk.loc[switched, 'prev_spread'] = np.nan   # source changed (CFBD -> consensus): start line moves fresh
         wk = wk.drop(columns='prev_provider')
+    wk = attach_conferences(wk, state, a.week)
     gf = state / 'gamma' / f'week{a.week}_scored.csv'      # Gamma shadow (cfb_phase2/gamma.py), optional
     wk = wk.drop(columns=['gamma_margin', 'gamma_built_utc'], errors='ignore')
     if gf.exists():
