@@ -242,9 +242,9 @@ def publish():
         return
     subprocess.run(['git', 'commit', '-q', '-m', f'CBB dry board {datetime.now(timezone.utc):%Y-%m-%dT%H:%MZ}'],
                    cwd=ROOT, check=True)
-    subprocess.run(['git', 'pull', '--rebase', '--autostash', '-q'], cwd=ROOT, check=False)
-    subprocess.run(['git', 'push', '-q'], cwd=ROOT, check=True)
-    print('Published.')
+    r = subprocess.run([str(ROOT / 'publish.sh')], cwd=ROOT)
+    if r.returncode:
+        raise SystemExit('publish failed -- see message above')
 
 
 def main():
@@ -258,7 +258,7 @@ def main():
     today = datetime.strptime(a.date, '%Y-%m-%d').date() if a.date else now.astimezone(ET).date()
     print(f'=== CBB dry run {now.astimezone(ET):%a %Y-%m-%d %H:%M %Z} | board date {today} ===')
     if a.push:
-        subprocess.run(['git', 'pull', '--rebase', '--autostash', '-q'], cwd=ROOT, check=False)
+        subprocess.run([str(ROOT / 'publish.sh'), 'sync'], cwd=ROOT, check=False)
     if not a.skip_pull:
         pull_cbbd()
     todays, games = project(today)

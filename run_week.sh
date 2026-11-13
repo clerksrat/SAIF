@@ -15,7 +15,7 @@ else
 fi
 [ -f .env ] && set -a && . ./.env && set +a      # CFBD_API_KEY, SPORTSDATAIO_API_KEY, ODDS_API_KEY
 if [ "${2:-}" = "--push" ]; then                  # build with the latest template/scripts from GitHub
-  git pull --rebase --autostash -q || echo "WARNING: git pull failed; building with the local copy"
+  ./publish.sh sync || echo "WARNING: git pull failed; building with the local copy"
 fi
 echo "=== $(date '+%a %Y-%m-%d %H:%M %Z')  mode=$MODE  week=$WEEK ==="
 
@@ -38,7 +38,6 @@ if [ "${2:-}" = "--push" ]; then
   git add docs state
   git diff --cached --quiet && { echo "No changes to publish."; exit 0; }
   git commit -q -m "Week $WEEK $MODE $(date -u +%Y-%m-%dT%H:%MZ)"
-  git pull --rebase --autostash -q && git push -q
-  echo "Published."
+  ./publish.sh || exit 1
 fi
 echo "Built docs/index.html for week $WEEK"

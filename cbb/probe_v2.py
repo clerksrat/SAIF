@@ -216,8 +216,7 @@ def main():
     if a.push:
         subprocess.run(['git', 'add', str(REPORT), str(JSON_OUT)], cwd=ROOT, check=True)
         subprocess.run(['git', 'commit', '-q', '-m', 'CBB probe v2 report'], cwd=ROOT, check=False)
-        subprocess.run(['git', 'pull', '--rebase', '--autostash', '-q'], cwd=ROOT, check=False)
-        subprocess.run(['git', 'push', '-q'], cwd=ROOT, check=True)
+        subprocess.run([str(ROOT / 'publish.sh')], cwd=ROOT, check=True)
         print('Pushed probe v2 report')
 
 

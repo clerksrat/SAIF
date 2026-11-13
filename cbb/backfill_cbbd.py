@@ -200,8 +200,7 @@ def main():
     if a.push:
         subprocess.run(['git', 'add', str(OUT), str(REPORT)], cwd=ROOT, check=True)
         subprocess.run(['git', 'commit', '-q', '-m', 'CBB backfill data'], cwd=ROOT, check=False)
-        subprocess.run(['git', 'pull', '--rebase', '--autostash', '-q'], cwd=ROOT, check=False)
-        subprocess.run(['git', 'push', '-q'], cwd=ROOT, check=True)
+        subprocess.run([str(ROOT / 'publish.sh')], cwd=ROOT, check=True)
         print('Pushed cbb/data and cbb/backfill_report.txt')
 
 
