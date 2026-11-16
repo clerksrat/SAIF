@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Install (or replace) the SAIF schedule on the Pi. Run from inside the repo:  bash install_cron.sh
-#   Sun 21:00      auto: first consensus lines for next week -> SAIF entries lock (saif_policy.py)
+#   Sun 17:00, 21:00  auto: first consensus lines for next week -> SAIF entries lock at first sight (saif_policy.py)
 #   Mon 9:00       monday mode: pull, grade last week, update performance, build + publish board
 #   Tue-Fri 9:00   daily: injuries + odds (+ light CFBD refresh), rebuild + publish board
+#   Mon-Fri 18:00  evening rebuild: more line snapshots for movement/CLV research
 #   Sat 8:00       daily, earlier for noon kickoffs
 #   every 30 min 11:00-23:30   closing-line snapshot (only calls the API when a game kicks off within 35 min)
 #   daily 10:15    college basketball dry run (cbb/run_cbb.py): entry lines, grading, docs/cbb.html
@@ -16,7 +17,8 @@ chmod +x run_week.sh
 BASE="cd $PWD && . .venv/bin/activate"
 ( crontab -l 2>/dev/null | grep -v -e 'run_week.sh' -e 'snapshot_close.py' -e 'run_cbb.py' -e 'snapshot_cbb_close.py' -e '^CRON_TZ=' || true ;
   echo "CRON_TZ=America/New_York"
-  echo "0 21 * * 0 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"
+  echo "0 17,21 * * 0 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"
+  echo "0 18 * * 1-5 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"
   echo "0 9 * * 1 $BASE && ./run_week.sh monday --push >> logs/run.log 2>&1"
   echo "0 9 * * 2-5 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"
   echo "0 8 * * 6 $BASE && ./run_week.sh auto --push >> logs/run.log 2>&1"

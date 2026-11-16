@@ -9,7 +9,8 @@ Weekly CFB research board: frozen **Alpha** ridge-10 model and **Beta** (Alpha +
     ./run_week.sh 7 --push          # pull, score, build docs/, commit + push
 
 On the Pi, `bash install_cron.sh` sets the schedule (times ET):
-- **Sun 21:00** `./run_week.sh auto --push`: first look at next week's lines; SAIF entries lock here
+- **Sun 17:00 and 21:00** `./run_week.sh auto --push`: first looks at next week's lines; SAIF entries lock at the first consensus line seen
+- **Mon-Fri 18:00** `./run_week.sh auto --push`: evening rebuild, extra line snapshots
 - **Mon 9:00** `./run_week.sh monday --push`: pull, grade last week, update `docs/live.json`, build + publish the board
 - **Tue–Fri 9:00, Sat 8:00** `./run_week.sh auto --push`: injuries + odds (+ a 2–5 call CFBD refresh), rebuild + publish
 - **Every 30 min, 11:00–23:30** `snapshot_close.py`: closing-line snapshot for CLV; only calls The Odds API (1 credit, spreads only) when a game kicks off within 35 min
