@@ -150,13 +150,13 @@ class Client:
         if not self.key:
             self.key=getpass.getpass('CFBD API key (hidden; not saved): ').strip()
             if not self.key:raise RuntimeError('No API key supplied.')
-        for attempt in range(5):
+        for attempt in range(7):
             request = Request(BASE + endpoint + '?' + urlencode(params),
                               headers={'Authorization': 'Bearer ' + self.key,
                                        'Accept': 'application/json'})
             try:
                 self.calls += 1
-                with urlopen(request, timeout=45) as response:
+                with urlopen(request, timeout=120) as response:
                     data = json.load(response)
             except HTTPError as error:
                 status = error.code
@@ -164,15 +164,15 @@ class Client:
                 if status in (401, 403):
                     raise RuntimeError(f'HTTP {status} for {endpoint}: check key and endpoint access.') from None
                 if status == 429 or status >= 500:
-                    if attempt < 4:
-                        time.sleep(min(2 ** attempt, 16))
+                    if attempt < 6:
+                        time.sleep(min(2 ** attempt, 60))
                         continue
                     raise RuntimeError(f'HTTP {status} for {endpoint}; rerun later to resume.') from None
                 raise RuntimeError(f'HTTP {status} for {endpoint}; request stopped.') from None
             except (URLError, TimeoutError, ConnectionError):
-                if attempt == 4:
+                if attempt == 6:
                     raise RuntimeError(f'Connection failed for {endpoint}; cached progress is safe.') from None
-                time.sleep(min(2 ** attempt, 16))
+                time.sleep(min(2 ** attempt, 60))
                 continue
             if not isinstance(data, list):
                 raise ValueError(f'Unexpected response shape for {endpoint}; expected a list.')
