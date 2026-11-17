@@ -294,7 +294,15 @@ def main():
 
     out = HERE / f'cfb_fullseason_data_{a.season}'
     if not a.skip_cfbd:
-        run_cfbd(out, a.season, a.week)
+        for attempt in (1, 2, 3):  # CFBD timeouts are usually transient; cached progress carries over
+            try:
+                run_cfbd(out, a.season, a.week)
+                break
+            except RuntimeError as e:
+                print(f'[cfbd] attempt {attempt}/3 FAILED: {e}', flush=True)
+                if attempt == 3:
+                    raise
+                time.sleep(90)
     out.mkdir(parents=True, exist_ok=True)
     for label, skip, fn in (('injuries', a.skip_injuries, lambda: run_injuries(out)),
                             ('qb box scores', a.skip_cfbd, lambda: run_qb_box(out, a.season)),
