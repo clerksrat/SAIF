@@ -264,3 +264,6 @@ snapshot_utc,odds_api_id,commence_time,home_team,away_team,close_spread_home,min
 2026-11-17T22:30:01+00:00,0d8cfafd3da8fead51df5ec2e33e9382,2026-11-17T23:00:00Z,Western Michigan Broncos,Eastern Michigan Eagles,-17.0,-17.5,-16.5,9,30
 2026-11-17T23:30:01+00:00,5840d479fc52ad2b83d7feb802d4dd23,2026-11-18T00:00:00Z,Ohio Bobcats,Ball State Cardinals,-10.0,-10.5,-10.0,9,30
 2026-11-17T23:30:01+00:00,792875fa96ecdf75559454c19c011768,2026-11-18T00:00:00Z,Kent State Golden Flashes,Miami (OH) RedHawks,9.5,9.0,9.5,9,30
+2026-11-18T23:30:01+00:00,ef5f5ac74b2228e8521c289fdbc6af93,2026-11-19T00:00:00Z,UMass Minutemen,Akron Zips,-3.0,-3.5,-3.0,8,30
+2026-11-19T00:00:01+00:00,ef5f5ac74b2228e8521c289fdbc6af93,2026-11-19T00:05:00Z,UMass Minutemen,Akron Zips,-3.0,-3.5,-3.0,7,5
+2026-11-19T00:00:01+00:00,10cec4ab386b12694dd3cee93d870b47,2026-11-19T00:30:00Z,Buffalo Bulls,Central Michigan Chippewas,-2.5,-3.0,-2.5,9,30
