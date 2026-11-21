@@ -31,7 +31,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from saif_policy import SHRINK_K, PLAY_MIN, TRACKED_BANDS, is_p4_conf_game, lock_entries
+from saif_policy import SHRINK_K, PLAY_MIN, TRACKED_BANDS, is_p4_conf_game, gamma_pick, lock_entries
 
 HERE = Path(__file__).resolve().parent
 RATING_ALPHA = 8.0
@@ -369,6 +369,15 @@ def build_card(r, inj):
     day = t.strftime('%A')
     ae = r.independent_edge
     se = r.entry_saif_edge if pd.notna(getattr(r, 'entry_saif_edge', np.nan)) else SHRINK_K * ae
+    gm_ = getattr(r, 'gamma_margin', np.nan)
+    gq = (getattr(r, 'qb_home_flag', None) if pd.notna(gm_) and gm_ + r.market_spread > 0 else getattr(r, 'qb_away_flag', None))
+    gtier, ggap, gmove = gamma_pick(gm_, r.market_spread, ae, getattr(r, 'entry_spread_home', np.nan), gq)
+    gattr = ''
+    if gtier:
+        gteam = r.home_team if ggap > 0 else r.away_team
+        gnum = r.market_spread if ggap > 0 else -r.market_spread
+        gattr = (f' data-gtier="{gtier}" data-gpick="{e(gteam)} {sgn(gnum)}" data-gedge="{abs(ggap):.1f}"'
+                 f' data-gmove="{gmove:+.1f}"')
     rae = getattr(r, 'entry_raw_edge', np.nan)
     raw_abs = abs(rae) if pd.notna(rae) else abs(se) / SHRINK_K   # |raw Alpha edge| at the entry line (or current, before lock)
     tg = '' if r.tier_gap == 0 else ('<span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else '<span class="tiertag">G5 vs P4</span>')
@@ -388,7 +397,7 @@ def build_card(r, inj):
     moved = (f' <span class="movetag">(was {bet_line(prev, r.home_team, r.away_team)})</span>'
              if pd.notna(prev) and abs(prev - r.market_spread) >= .25 else '')
     when = f"{t.strftime('%a, %b')} {t.day} &middot; {t.strftime('%I:%M %p').lstrip('0')} ET"
-    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-raw="{raw_abs:.2f}" data-p4c="{1 if is_p4_conf_game(getattr(r, 'home_conference', None), getattr(r, 'away_conference', None)) else 0}" data-time="{t.timestamp()}">
+    return f'''<article class="game{' done' if final else ''}" data-done="{1 if final else 0}" data-search="{e((r.home_team + ' ' + r.away_team).lower())}" data-day="{day}" data-side="{'home' if ae > 0 else 'away'}" data-edge="{abs(se):.2f}" data-raw="{raw_abs:.2f}" data-p4c="{1 if is_p4_conf_game(getattr(r, 'home_conference', None), getattr(r, 'away_conference', None)) else 0}"{gattr} data-time="{t.timestamp()}">
  <div class="meta"><span>{when}</span>{' <span>Neutral site</span>' if neutral else ''}{tg}{final}</div>
  <h2>{e(r.away_team)} <small>{'vs.' if neutral else 'at'}</small> {e(r.home_team)}</h2>
  <p class="line"><span class="lbl">Line</span> <b>{bet_line(r.market_spread, r.home_team, r.away_team)}</b>{moved}</p>

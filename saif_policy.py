@@ -36,6 +36,27 @@ QUOTE_MAX_AGE_MIN = 90             # a book's quote must be at most this old at 
 TRACKED_BANDS = {'band_1p5_3': (1.5, 3.0)}   # paper-only strategies on |raw Alpha edge| at the entry line (added 2026-11-12)
 P4_CONFS = {'ACC', 'Big Ten', 'Big 12', 'SEC'}
 
+# Gamma picks (paper / small stakes, added 2026-11-21). Judged at the CURRENT board line.
+GAMMA_PICK_MIN = 4.0      # |Gamma margin - market| in raw points
+GAMMA_MOVE_PASS = -2.0    # line moved this far against Gamma since entry -> pass (market likely knows something)
+GAMMA_MOVE_TIER2 = -0.5   # moved more than this against Gamma -> tier 2
+
+
+def gamma_pick(gamma_margin, market_spread, alpha_edge, entry_spread, qb_flag_pick_side):
+    """Returns (tier, raw gap, move toward Gamma since entry) or (None, ...). tier 1 = play of the day, 2 = playable."""
+    if gamma_margin is None or market_spread is None or gamma_margin != gamma_margin or market_spread != market_spread:
+        return None, None, None
+    gap = gamma_margin + market_spread                     # >0: Gamma likes home at the current number
+    move = 0.0
+    if entry_spread is not None and entry_spread == entry_spread:
+        move = (1 if gap > 0 else -1) * (entry_spread - market_spread)   # + = line moved toward Gamma's side
+    if abs(gap) < GAMMA_PICK_MIN or (alpha_edge > 0) != (gap > 0):
+        return None, gap, move
+    if qb_flag_pick_side == 'STALE' or move <= GAMMA_MOVE_PASS:
+        return None, gap, move
+    tier = 2 if (qb_flag_pick_side in ('PRICED', 'WATCH') or move < GAMMA_MOVE_TIER2) else 1
+    return tier, gap, move
+
 
 def is_p4_conf_game(home_conf, away_conf):
     """Both teams in the same Power 4 conference (paper strategy band_1p5_3_p4conf, added 2026-11-12)."""
