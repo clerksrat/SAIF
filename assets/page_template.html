@@ -184,6 +184,11 @@ h2 small{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:400;c
   <p class="plays-note">Paper / small stakes (about &frac14; unit). Gamma edge 4+ points at the <b>current</b> line, Alpha on the same side, no QB1 out on our side, and the line not moved 2+ points against Gamma since entry. <b>Play of the day</b> = line steady or moving our way and no QB question; <b>playable</b> = QB already priced/questionable or the line drifting against us. Gamma loses to the closing line historically; the bet is that early lines move its way.</p>
   <ol class="plays-list" id="gplaysList"></ol>
 </section>
+<section class="plays gplays" id="bplays" hidden aria-labelledby="bplaysTitle">
+  <div class="plays-head"><h3 id="bplaysTitle">Tracked band: Alpha edge 1.5&ndash;3</h3><span class="plays-count" id="bplaysCount"></span></div>
+  <p class="plays-note">Paper strategy, graded every Monday at the locked entry number, &minus;110. <b>P4 conf</b> = both teams in the same Power 4 conference (the version that held up best in 2018&ndash;25 history). Started Week 11 at 5&ndash;14 (P4 conference 2&ndash;5). Not a fund play until the end-of-season review.</p>
+  <ol class="plays-list" id="bplaysList"></ol>
+</section>
 <details class="about"><summary>About the models, data &amp; caveats</summary>
 {{INJ_NOTE}}
 <p><b>Alpha &middot; football_adjusted_no_margin_10</b> &mdash; frozen ridge-10 fit, 2022&ndash;2024. Exact reproduction of the live model; coefficients loaded from the saved fitted_model.json, not re-estimated.</p>
@@ -290,6 +295,26 @@ function buildGamma() {
   $('gplays').hidden = !gp.length;
 }
 buildGamma();
+function buildBand() {
+  const bp = [];
+  cards.forEach(c => { if (c.dataset.done === '1' || !c.dataset.bpick) return;
+    bp.push({ card: c, pick: c.dataset.bpick, now: c.dataset.bnow, p4: c.dataset.p4c === '1', ga: c.dataset.bga === '1',
+      match: norm(c.querySelector('h2').textContent), when: norm((c.querySelector('.meta span') || {}).textContent || '').replace(/\s*ET$/, '') }); });
+  bp.sort((x, y) => (y.p4 - x.p4) || (Number(x.card.dataset.time) - Number(y.card.dataset.time)));
+  $('bplaysList').innerHTML = bp.map(p => `<li><button type="button" class="play" data-target="${p.card.id}">
+      <span class="bet">${esc(p.pick)}</span><span class="when">${esc(p.when)}</span>
+      <span class="sub">${p.p4 ? '<span class="tier">P4 conf</span> &middot; ' : ''}${esc(p.match)} &middot; now ${esc(p.now)}${p.ga ? ' &middot; Gamma agrees' : ''}</span></button></li>`).join('');
+  $('bplaysCount').textContent = bp.length ? bp.length + ' left (' + bp.filter(p => p.p4).length + ' P4 conf)' : '';
+  $('bplays').hidden = !bp.length;
+}
+buildBand();
+$('bplaysList').addEventListener('click', e => {
+  const b = e.target.closest('.play'); if (!b) return;
+  const c = document.getElementById(b.dataset.target);
+  Object.keys(defaults).forEach(id => $(id).value = defaults[id]); render();
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
+});
 $('gplaysList').addEventListener('click', e => {
   const b = e.target.closest('.play'); if (!b) return;
   const c = document.getElementById(b.dataset.target);

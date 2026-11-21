@@ -380,6 +380,15 @@ def build_card(r, inj):
                  f' data-gmove="{gmove:+.1f}"')
     rae = getattr(r, 'entry_raw_edge', np.nan)
     raw_abs = abs(rae) if pd.notna(rae) else abs(se) / SHRINK_K   # |raw Alpha edge| at the entry line (or current, before lock)
+    blo, bhi = TRACKED_BANDS['band_1p5_3']
+    if pd.notna(rae) and blo <= abs(rae) < bhi and pd.notna(getattr(r, 'entry_spread_home', np.nan)):
+        bh = rae > 0
+        bteam = r.home_team if bh else r.away_team
+        bent = r.entry_spread_home if bh else -r.entry_spread_home
+        bnow = r.market_spread if bh else -r.market_spread
+        gmb = getattr(r, 'gamma_margin', np.nan)
+        bga = '1' if pd.notna(gmb) and ((gmb + r.market_spread > 0) == bh) else '0'
+        gattr += (f' data-bpick="{e(bteam)} {sgn(bent)}" data-bnow="{sgn(bnow)}" data-bga="{bga}"')
     tg = '' if r.tier_gap == 0 else ('<span class="tiertag">P4 vs G5</span>' if r.tier_gap == 1 else '<span class="tiertag">G5 vs P4</span>')
     neutral = bool(getattr(r, 'neutral_site', False))
     inj_html = ''
