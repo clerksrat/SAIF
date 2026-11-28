@@ -1803,3 +1803,37 @@ logged_utc,week,game_id,away_team,home_team,kickoff_utc,market_spread,market_tot
 2026-11-27T23:03:21Z,13,401856757,Auburn,Alabama,2026-11-29 00:30:00+00:00,-14.5,49.5,Consensus (9 books)
 2026-11-27T23:03:21Z,13,401856873,Arizona State,Arizona,2026-11-29 02:00:00+00:00,-9.5,53.5,Consensus (9 books)
 2026-11-27T23:03:21Z,13,401856874,Baylor,Houston,2026-11-29 02:30:00+00:00,-3.5,56.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401862838,Temple,Memphis,2026-11-27 20:30:00+00:00,-19.0,66.0,Bovada
+2026-11-28T13:08:00Z,13,401856759,Florida,Florida State,2026-11-27 20:30:00+00:00,6.5,54.5,Bovada
+2026-11-28T13:08:00Z,13,401864549,North Dakota State,San José State,2026-11-27 20:30:00+00:00,9.5,41.5,Bovada
+2026-11-28T13:08:00Z,13,401864546,Air Force,New Mexico,2026-11-27 21:30:00+00:00,-7.5,42.5,Bovada
+2026-11-28T13:08:00Z,13,401856756,Texas,Texas A&M,2026-11-28 00:30:00+00:00,10.0,41.5,Bovada
+2026-11-28T13:08:00Z,13,401858544,Minnesota,Wisconsin,2026-11-28 00:30:00+00:00,-9.0,36.5,Bovada
+2026-11-28T13:08:00Z,13,401856880,West Virginia,Utah,2026-11-28 02:00:00+00:00,-24.5,65.0,Bovada
+2026-11-28T13:08:00Z,13,401858540,Michigan,Ohio State,2026-11-28 17:00:00+00:00,-10.0,37.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858314,Notre Dame,Syracuse,2026-11-28 17:00:00+00:00,25.5,53.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401861969,UConn,Wyoming,2026-11-28 17:00:00+00:00,3.5,44.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858313,NC State,North Carolina,2026-11-28 17:00:00+00:00,-5.5,53.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858311,Boston College,Miami,2026-11-28 17:00:00+00:00,-24.5,55.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401869954,Louisiana Tech,Georgia Southern,2026-11-28 17:00:00+00:00,-1.5,52.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858537,Illinois,Northwestern,2026-11-28 17:30:00+00:00,-3.5,49.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856758,LSU,Arkansas,2026-11-28 17:45:00+00:00,14.5,50.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401871103,Southern Miss,Old Dominion,2026-11-28 18:00:00+00:00,-5.5,49.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401871102,Marshall,UL Monroe,2026-11-28 18:00:00+00:00,6.5,51.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401862837,Florida Atlantic,East Carolina,2026-11-28 18:00:00+00:00,-1.5,58.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856878,Kansas State,Iowa State,2026-11-28 19:00:00+00:00,-4.5,52.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401862841,Army,Rice,2026-11-28 19:00:00+00:00,5.0,46.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856764,South Carolina,Clemson,2026-11-28 20:00:00+00:00,6.5,42.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858317,Virginia,Virginia Tech,2026-11-28 20:00:00+00:00,-2.5,50.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856760,Georgia Tech,Georgia,2026-11-28 20:30:00+00:00,-35.5,55.5,Consensus (8 books)
+2026-11-28T13:08:00Z,13,401866475,Massachusetts,Bowling Green,2026-11-28 20:30:00+00:00,-3.0,41.0,Consensus (8 books)
+2026-11-28T13:08:00Z,13,401856876,Cincinnati,BYU,2026-11-28 20:30:00+00:00,-17.0,55.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401862839,Tulane,South Florida,2026-11-28 20:30:00+00:00,-7.0,44.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858542,Michigan State,Rutgers,2026-11-28 21:15:00+00:00,2.5,46.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401860926,Boise State,Colorado State,2026-11-28 23:00:00+00:00,21.5,77.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401860929,San Diego State,Washington State,2026-11-28 23:30:00+00:00,-3.0,46.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858538,Purdue,Indiana,2026-11-29 00:00:00+00:00,-24.0,52.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401858541,Washington,Oregon,2026-11-29 00:30:00+00:00,-13.5,51.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856757,Auburn,Alabama,2026-11-29 00:30:00+00:00,-14.5,51.0,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401860928,Texas State,Utah State,2026-11-29 02:30:00+00:00,7.0,52.5,Consensus (9 books)
+2026-11-28T13:08:00Z,13,401856874,Baylor,Houston,2026-11-29 02:30:00+00:00,-3.5,55.5,Consensus (9 books)
